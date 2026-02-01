@@ -2,64 +2,63 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <title>Конструктор Копилки</title>
     <style>
-        :root { --accent: #ffcc00; --bg: #0f0f0f; --panel: #1e1e1e; --text: #e0e0e0; }
-        body { background: #050505; color: var(--text); font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        :root { --accent: #ffcc00; --bg: #111; --panel: #1e1e1e; }
+        body { background: #000; color: #eee; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Левая панель настроек */
-        .sidebar { width: 340px; background: var(--panel); padding: 20px; overflow-y: auto; border-right: 1px solid #333; box-shadow: 10px 0 20px rgba(0,0,0,0.5); z-index: 10; }
-        h2 { color: var(--accent); font-size: 16px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 20px 0; display: flex; align-items: center; gap: 8px; }
+        /* Стили левой панели */
+        .sidebar { width: 380px; background: var(--panel); padding: 25px; overflow-y: auto; border-right: 1px solid #333; display: flex; flex-direction: column; }
+        h2 { color: var(--accent); font-size: 14px; text-transform: uppercase; margin: 0 0 20px 0; border-left: 3px solid var(--accent); padding-left: 10px; }
         
-        .field-group { margin-bottom: 15px; }
-        label { display: block; font-size: 11px; color: #888; margin-bottom: 6px; text-transform: uppercase; }
+        label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; text-transform: uppercase; }
         input, textarea, select { 
-            width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 5px; font-size: 13px; box-sizing: border-box;
+            width: 100%; background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 5px; font-size: 13px; margin-bottom: 15px; box-sizing: border-box;
         }
-        input:focus, textarea:focus { border-color: var(--accent); outline: none; }
         
         .btn-update { 
-            width: 100%; background: var(--accent); color: #000; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s;
+            background: var(--accent); color: #000; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; margin-bottom: 20px;
         }
-        .btn-update:hover { background: #fff; transform: translateY(-2px); }
+        .btn-update:hover { background: #fff; }
 
-        /* Область предпросмотра */
-        .preview-zone { flex-grow: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); }
-        .preview-tag { position: absolute; top: 20px; left: 20px; font-size: 12px; color: #444; font-weight: bold; letter-spacing: 2px; }
+        /* Окно с кодом */
+        .code-box { background: #000; border: 1px dashed #555; padding: 10px; border-radius: 5px; position: relative; }
+        #output-code { width: 100%; height: 80px; background: transparent; border: none; color: #0f0; font-family: monospace; font-size: 10px; resize: none; margin: 0; }
+        .copy-hint { font-size: 10px; color: var(--accent); margin-top: 5px; text-align: right; }
 
-        /* Виджет (справа) */
-        .widget-card {
-            width: 380px; background: #151515; border-radius: 24px; padding: 30px; display: flex; flex-direction: column; align-items: center;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8); border: 1px solid #222; position: relative;
+        /* Стили правой части (Предпросмотр) */
+        .preview-zone { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, #222 0%, #000 100%); position: relative; }
+        .tag { position: absolute; top: 20px; left: 20px; color: #444; font-size: 12px; font-weight: bold; letter-spacing: 2px; }
+
+        /* Сам виджет */
+        #widget-wrap {
+            width: 400px; background: #151515; border-radius: 25px; padding: 30px; display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.7); border: 1px solid #222; position: relative;
         }
-        
-        .lang-switch { position: absolute; top: 20px; right: 20px; display: flex; gap: 4px; }
-        .l-dot { font-size: 9px; padding: 2px 5px; border: 1px solid #444; border-radius: 3px; cursor: pointer; color: #666; }
-        .l-dot.active { border-color: var(--accent); color: var(--accent); }
+        .lang-dots { position: absolute; top: 20px; right: 20px; display: flex; gap: 5px; }
+        .dot { font-size: 10px; color: #555; border: 1px solid #444; padding: 2px 5px; border-radius: 3px; }
+        .dot.active { color: var(--accent); border-color: var(--accent); }
 
-        .pig-container { width: 220px; height: 150px; position: relative; margin-bottom: 20px; }
+        .pig-box { width: 240px; height: 160px; position: relative; margin-bottom: 15px; }
         .pig-img { width: 100%; height: 100%; object-fit: contain; z-index: 5; position: relative; }
-        
-        /* Слой наполнения (золото внутри) */
         .gold-fill { 
-            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
-            width: 140px; height: 0%; background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
-            border-radius: 0 0 70px 70px; transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0.7;
+            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); width: 140px; 
+            background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728); border-radius: 0 0 70px 70px; 
+            transition: height 0.6s ease; opacity: 0.8; z-index: 2;
         }
 
-        .score-box { text-align: center; margin-bottom: 20px; }
-        .score-label { font-size: 14px; color: #888; }
-        .score-num { font-size: 32px; color: var(--accent); font-weight: bold; display: block; }
+        .bank-info { text-align: center; margin-bottom: 20px; }
+        .bank-label { font-size: 14px; color: #888; display: block; }
+        .bank-val { font-size: 32px; color: var(--accent); font-weight: bold; }
 
-        .q-display { font-size: 18px; text-align: center; margin-bottom: 25px; min-height: 40px; line-height: 1.4; }
-
+        .q-area { text-align: center; font-size: 18px; margin-bottom: 25px; min-height: 45px; }
         .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-        .action-btn { 
+        .btn-game { 
             background: transparent; border: 2px solid var(--accent); color: var(--accent); 
-            padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; min-width: 60px;
+            padding: 10px 22px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;
         }
-        .action-btn:hover { background: rgba(255, 204, 0, 0.1); }
-        .ans-btn { border-color: #eee; color: #eee; }
-        .ans-btn:hover { background: #eee; color: #000; }
+        .btn-game:hover { background: var(--accent); color: #000; }
+        .btn-ans { border-color: #fff; color: #fff; }
 
         .hidden { display: none; }
     </style>
@@ -67,89 +66,128 @@
 <body>
 
 <div class="sidebar">
-    <h2>⚙️ Настройка игры</h2>
+    <h2>⚙️ Конструктор игры</h2>
     
-    <div class="field-group">
-        <label>Язык интерфейса</label>
-        <select id="cfg-lang">
-            <option value="ru">Русский</option>
-            <option value="de">Deutsch</option>
-            <option value="en">English</option>
-        </select>
-    </div>
+    <label>Язык (RU/DE/EN)</label>
+    <select id="cfg-lang">
+        <option value="ru">Русский</option>
+        <option value="de">Deutsch</option>
+        <option value="en">English</option>
+    </select>
 
-    <div class="field-group">
-        <label>Прямая ссылка на картинку (URL)</label>
-        <input type="text" id="cfg-img" value="https://ai-image.genially.com/666ae28033f3b6001441b7">
-    </div>
+    <label>Ссылка на картинку (URL)</label>
+    <input type="text" id="cfg-img" value="https://i.ibb.co/pX99S99/glass-pig.png">
 
-    <div class="field-group">
-        <label>Контент (Вопрос|Варианты|Индекс)</label>
-        <textarea id="cfg-content" rows="3">Emil ... um neun Uhr gefühstückt.|ist, hat|1</textarea>
-    </div>
+    <label>Вопрос | Ответы | Правильный(0,1..)</label>
+    <textarea id="cfg-content" rows="3">Emil ... um neun Uhr gefühstückt.|ist, hat|1</textarea>
 
-    <div class="field-group">
-        <label>Ставки (через запятую)</label>
-        <input type="text" id="cfg-bets" value="10, 25, 50">
-    </div>
+    <label>Ставки (через запятую)</label>
+    <input type="text" id="cfg-bets" value="10, 25, 50">
 
-    <div class="field-group">
-        <label>Цель (макс. баллов)</label>
-        <input type="number" id="cfg-target" value="200">
-    </div>
+    <button class="btn-update" onclick="generate()">ОБНОВИТЬ И СОЗДАТЬ КОД</button>
 
-    <button class="btn-update" onclick="applySettings()">ОБНОВИТЬ ПРЕДПРОСМОТР</button>
-    <p style="font-size: 10px; color: #555; margin-top: 20px;">* После настройки скопируйте финальный код для Genially.</p>
+    <label>Код для вставки в Genially (iFrame)</label>
+    <div class="code-box">
+        <textarea id="output-code" readonly onclick="this.select()">Нажмите кнопку выше...</textarea>
+    </div>
+    <div class="copy-hint">Кликните, чтобы выделить всё</div>
 </div>
 
 <div class="preview-zone">
-    <div class="preview-tag">ПРЕДПРОСМОТР</div>
+    <div class="tag">ПРЕДПРОСМОТР</div>
     
-    <div class="widget-card">
-        <div class="lang-switch">
-            <div class="l-dot">DE</div><div class="l-dot">EN</div><div class="l-dot active">RU</div>
+    <div id="widget-wrap">
+        <div class="lang-dots">
+            <div class="dot" id="d-de">DE</div><div class="dot" id="d-en">EN</div><div class="dot active" id="d-ru">RU</div>
         </div>
-
-        <div class="pig-container">
-            <div id="view-fill" class="gold-fill"></div>
-            <img id="view-img" class="pig-img" src="" alt="piggy">
+        <div class="pig-box">
+            <div id="view-fill" class="gold-fill" style="height: 0%"></div>
+            <img id="view-img" class="pig-img" src="" alt="">
         </div>
-
-        <div class="score-box">
-            <span class="score-label" id="lbl-total">Всего:</span>
-            <span class="score-num" id="view-score">0</span>
+        <div class="bank-info">
+            <span class="bank-label" id="lbl-bank">Всего:</span>
+            <span class="bank-val" id="view-score">0</span>
         </div>
-
-        <div class="q-display" id="view-q">Вопрос загружается...</div>
-
-        <div id="layer-bets" class="btn-row"></div>
-        
-        <div id="layer-ans" class="btn-row hidden"></div>
+        <div class="q-area" id="view-q">Вопрос</div>
+        <div id="row-bets" class="btn-row"></div>
+        <div id="row-ans" class="btn-row hidden"></div>
     </div>
 </div>
 
 <script>
-    let gameState = {
-        score: 0,
-        currentBet: 0,
-        correctIdx: 0,
-        target: 200,
-        lang: 'ru'
-    };
+    let state = { score: 0, bet: 0, correct: 0, ans: [], q: "" };
+    const dict = { ru: "Всего:", de: "Gesamt:", en: "Total:" };
 
-    const dictionary = {
-        ru: { total: "Всего:" },
-        en: { total: "Total:" },
-        de: { total: "Gesamt:" }
-    };
-
-    function applySettings() {
-        const imgUrl = document.getElementById('cfg-img').value;
-        const rawContent = document.getElementById('cfg-content').value.split('|');
+    function generate() {
+        const lang = document.getElementById('cfg-lang').value;
+        const img = document.getElementById('cfg-img').value;
+        const [q, a, c] = document.getElementById('cfg-content').value.split('|');
         const bets = document.getElementById('cfg-bets').value.split(',');
-        gameState.target = parseInt(document.getElementById('cfg-target').value);
-        gameState.lang = document.getElementById('cfg-lang').value;
+
+        state.q = q;
+        state.ans = a.split(',');
+        state.correct = parseInt(c);
+        state.score = 0;
+
+        // Обновляем визуальную часть
+        document.getElementById('view-img').src = img;
+        document.getElementById('lbl-bank').innerText = dict[lang];
+        document.getElementById('view-q').innerText = q;
+        document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+        document.getElementById('d-' + lang).classList.add('active');
+
+        // Кнопки ставок
+        const betRow = document.getElementById('row-bets');
+        betRow.innerHTML = '';
+        betRow.classList.remove('hidden');
+        document.getElementById('row-ans').classList.add('hidden');
+
+        bets.forEach(val => {
+            const b = document.createElement('button');
+            b.className = 'btn-game';
+            b.innerText = val.trim();
+            b.onclick = () => {
+                state.bet = parseInt(val);
+                showAnswers();
+            };
+            betRow.appendChild(b);
+        });
+
+        // Генерируем iFrame код (Base64 или прямой HTML для Genially)
+        const finalHTML = document.documentElement.outerHTML;
+        document.getElementById('output-code').value = `<iframe srcdoc='${finalHTML.replace(/'/g, "&apos;")}' width="100%" height="600" frameborder="0" style="background:transparent;"></iframe>`;
         
-        // 1. Обновляем картинку и тексты
-        document.getElementById('view-img').src = imgUrl;
-        document.getElementById('lbl-total').innerText = dictionary[gameState
+        updateVisuals();
+    }
+
+    function showAnswers() {
+        document.getElementById('row-bets').classList.add('hidden');
+        const ansRow = document.getElementById('row-ans');
+        ansRow.innerHTML = '';
+        ansRow.classList.remove('hidden');
+
+        state.ans.forEach((txt, i) => {
+            const b = document.createElement('button');
+            b.className = 'btn-game btn-ans';
+            b.innerText = txt.trim();
+            b.onclick = () => {
+                if(i === state.correct) state.score += state.bet;
+                else state.score = Math.max(0, state.score - state.bet);
+                updateVisuals();
+                document.getElementById('row-ans').classList.add('hidden');
+                document.getElementById('row-bets').classList.remove('hidden');
+            };
+            ansRow.appendChild(b);
+        });
+    }
+
+    function updateVisuals() {
+        document.getElementById('view-score').innerText = state.score;
+        let h = Math.min(80, (state.score / 200) * 80); // 200 - пример цели
+        document.getElementById('view-fill').style.height = h + '%';
+    }
+
+    generate(); // Первый запуск
+</script>
+</body>
+</html>
