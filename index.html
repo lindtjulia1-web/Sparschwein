@@ -4,156 +4,74 @@
     <meta charset="UTF-8">
     <style>
         :root {
-            --gold: #ffd700;
-            --glass: rgba(255, 255, 255, 0.2);
-            --bg-dark: #0a0a0a;
+            --gold: #ffcc00;
+            --bg: #121212;
         }
 
         body {
             background: transparent;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Georgia', serif;
             color: white;
             display: flex;
             justify-content: center;
         }
 
-        .squid-widget {
-            width: 380px;
-            background: #1a1a1b;
-            border-radius: 20px;
-            padding: 20px;
-            border: 1px solid #333;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        .widget {
+            width: 400px;
+            background: #1e1e1e;
+            border-radius: 25px;
+            padding: 25px;
             text-align: center;
+            border: 2px solid #333;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
         }
 
-        /* Огромная стеклянная свинья как в сериале */
-        .piggy-vault {
+        /* Прозрачная свинья-копилка */
+        .piggy-container {
             position: relative;
-            width: 200px;
-            height: 140px;
-            margin: 0 auto 20px;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), rgba(0,0,0,0.4));
-            border-radius: 100px / 80px;
-            border: 2px solid var(--glass);
-            box-shadow: inset 0 0 20px rgba(255,215,0,0.1);
-            overflow: hidden;
+            width: 280px;
+            height: 200px;
+            margin: 0 auto;
+            /* Используем маску или фоновое изображение прозрачной свиньи */
+            background: url('https://i.ibb.co/vz6mYmY/transparent-piggy.png') no-repeat center;
+            background-size: contain;
+        }
+
+        /* Золотой песок (монеты) внутри */
+        .gold-sand {
+            position: absolute;
+            bottom: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 0%; /* Растет с прогрессом */
+            background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            border-radius: 50% 50% 10px 10px;
+            transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+            z-index: -1;
+        }
+
+        .lang-switch { display: flex; justify-content: flex-end; gap: 5px; margin-bottom: 10px; }
+        .lang-switch button { 
+            background: #333; border: 1px solid #444; color: #888; 
+            font-size: 10px; cursor: pointer; border-radius: 4px;
+        }
+
+        /* Кнопки со значками монет */
+        .bet-option {
             display: flex;
-            align-items: flex-end;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
         }
 
-        /* Слой с монетами внутри копилки */
-        .coins-fill {
-            width: 100%;
-            height: 0%; /* Будет расти динамически */
-            background: linear-gradient(to top, #ffd700, #b8860b);
-            transition: height 0.5s ease-out;
-            box-shadow: 0 0 15px var(--gold);
-        }
-
-        /* Стилизация вашей пиратской монеты */
-        .pirate-coin-visual {
-            width: 60px;
-            height: 60px;
-            background-image: url('ВАША_ССЫЛКА_НА_ИЗОБРАЖЕНИЕ_МОНЕТЫ'); /* Вставьте ссылку на загруженное фото */
+        .bet-coin {
+            width: 40px;
+            height: 40px;
+            background: url('https://i.ibb.co/Vv3Y7zD/pirate-coin.png') no-repeat center;
             background-size: cover;
-            border-radius: 50%;
-            margin: 10px auto;
-            border: 2px solid var(--gold);
-            box-shadow: 0 0 10px var(--gold);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
 
-        .lang-bar { margin-bottom: 15px; text-align: right; }
-        .lang-bar button { 
-            background: #333; border: 1px solid #555; color: #aaa; 
-            cursor: pointer; padding: 3px 8px; border-radius: 4px;
-        }
-
-        .btn-bet {
-            background: transparent;
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            padding: 10px;
-            margin: 5px;
-            cursor: pointer;
-            width: 70px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-
-        .btn-bet:hover { background: var(--gold); color: black; }
-        .hidden { display: none; }
-    </style>
-</head>
-<body>
-
-<div class="squid-widget">
-    <div class="lang-bar">
-        <button onclick="changeLang('de')">DE</button>
-        <button onclick="changeLang('en')">EN</button>
-        <button onclick="changeLang('ru')">RU</button>
-    </div>
-
-    <div class="piggy-vault">
-        <div id="fill" class="coins-fill"></div>
-    </div>
-    
-    <div id="balance-info">
-        <span id="label-total">Всего:</span> <span id="coins-count">0</span> ⚓
-    </div>
-
-    <div id="bet-screen">
-        <p id="label-bet-title">Выберите ставку:</p>
-        <button class="btn-bet" onclick="setBet(1)">1</button>
-        <button class="btn-bet" onclick="setBet(5)">5</button>
-        <button class="btn-bet" onclick="setBet(10)">10</button>
-    </div>
-
-    <div id="quiz-screen" class="hidden">
-        <p id="label-question">Подтвердите ответ:</p>
-        <button onclick="resolve(true)" style="color:#00ff00; border:1px solid #00ff00;" class="btn-bet">OK</button>
-        <button onclick="resolve(false)" style="color:#ff0000; border:1px solid #ff0000;" class="btn-bet">NO</button>
-    </div>
-</div>
-
-<script>
-    let total = 0;
-    let currentBet = 0;
-    const maxFill = 100; // Монет до полной копилки
-
-    const texts = {
-        ru: { total: "В копилке:", bet: "Рискнуть монетами:", quest: "Вы уверены?" },
-        en: { total: "Total Bank:", bet: "Wager Doubloons:", quest: "Are you sure?" },
-        de: { total: "Gesamtbank:", bet: "Dublonen setzen:", quest: "Bist du sicher?" }
-    };
-
-    function changeLang(l) {
-        document.getElementById('label-total').innerText = texts[l].total;
-        document.getElementById('label-bet-title').innerText = texts[l].bet;
-        document.getElementById('label-question').innerText = texts[l].quest;
-    }
-
-    function setBet(amt) {
-        currentBet = amt;
-        document.getElementById('bet-screen').classList.add('hidden');
-        document.getElementById('quiz-screen').classList.remove('hidden');
-    }
-
-    function resolve(win) {
-        if(win) total += currentBet;
-        else total = Math.max(0, total - currentBet);
-
-        document.getElementById('coins-count').innerText = total;
-        
-        // Визуальное наполнение
-        let fillPercent = Math.min(100, (total / maxFill) * 100);
-        document.getElementById('fill').style.height = fillPercent + "%";
-
-        document.getElementById('bet-screen').classList.remove('hidden');
-        document.getElementById('quiz-screen').classList.add('hidden');
-    }
-</script>
-
-</body>
-</html>
+        .btn-bet
