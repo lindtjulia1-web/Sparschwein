@@ -1,24 +1,71 @@
-<div style="text-align:center; background:#1a1a1a; padding:20px; border-radius:20px; color:gold;">
-    
-    <div style="position:relative; width:250px; height:180px; margin:0 auto;">
-        <div id="goldFill" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); width:160px; height:20%; background:linear-gradient(to top, #bf953f, #fcf6ba); border-radius:0 0 50px 50px; transition:0.5s;"></div>
-        
-        <img src="ССЫЛКА_НА_ВАШУ_СВИНЬЮ" style="position:absolute; top:0; left:0; width:100%; z-index:2;">
-    </div>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root {
+            --gold: #ffcc00;
+            --glass: rgba(255, 255, 255, 0.15);
+            --bg: #121212;
+        }
 
-    <p>Баланс: <span id="val">0</span></p>
+        body {
+            background: transparent;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            margin: 0;
+        }
 
-    <div onclick="addGold()" style="cursor:pointer;">
-        <img src="ССЫЛКА_НА_ВАШУ_МОНЕТУ" style="width:60px; filter:drop-shadow(0 0 5px gold);">
-        <p>Рискнуть!</p>
-    </div>
-</div>
+        .widget-card {
+            width: 380px;
+            background: #1a1a1a;
+            border-radius: 24px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            border: 1px solid #333;
+        }
 
-<script>
-    let g = 20;
-    function addGold() {
-        g = Math.min(80, g + 10);
-        document.getElementById('goldFill').style.height = g + '%';
-        document.getElementById('val').innerText = parseInt(document.getElementById('val').innerText) + 10;
-    }
-</script>
+        /* Переключатель языков */
+        .lang-panel {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .lang-panel button {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #888;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: 0.2s;
+        }
+
+        .lang-panel button:hover { border-color: var(--gold); color: white; }
+
+        /* Стеклянная свинья из Игры в Кальмара */
+        .vault-container {
+            position: relative;
+            width: 260px;
+            height: 180px;
+            margin: 0 auto 20px;
+            background: url('https://i.ibb.co/3Y8M4v8/glass-pig-template.png') no-repeat center; /* Ссылка на прозрачный контур свиньи */
+            background-size: contain;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        /* Золотое наполнение (песок/монеты) */
+        .gold-fill {
+            width: 180px;
+            height: 0%; /* Динамически меняется */
+            background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
+            border-radius: 0 0 80px 80px;
+            transition: height 1s cubic-bezier(0.17, 0.67, 0.83,
