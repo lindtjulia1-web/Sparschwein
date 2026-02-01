@@ -3,181 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        :root { --accent: #ffcc00; --bg: #111; --panel: #1e1e1e; }
+        :root { --accent: #ffcc00; --panel: #1e1e1e; }
         body { background: #000; color: #eee; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        .sidebar { width: 360px; background: var(--panel); padding: 20px; overflow-y: auto; border-right: 1px solid #333; }
-        h2 { color: var(--accent); font-size: 14px; text-transform: uppercase; margin-bottom: 20px; }
+        .sidebar { width: 320px; background: var(--panel); padding: 20px; border-right: 1px solid #333; flex-shrink: 0; display: flex; flex-direction: column; }
+        label { display: block; font-size: 10px; color: #888; margin: 10px 0 5px; text-transform: uppercase; }
+        input, textarea { width: 100%; background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 4px; font-size: 12px; box-sizing: border-box; }
         
-        input, textarea, select { 
-            width: 100%; background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 5px; font-size: 13px; margin-bottom: 15px; box-sizing: border-box;
-        }
-        
-        .btn-update { background: var(--accent); color: #000; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 20px; }
-
-        #output-code { width: 100%; height: 60px; background: #000; color: #0f0; font-size: 10px; border: 1px dashed #555; margin-top: 10px; }
+        .btn-build { background: var(--accent); color: #000; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer; margin: 15px 0; width: 100%; }
+        #out-code { width: 100%; height: 50px; background: #000; color: #0f0; font-size: 10px; border: 1px dashed #555; }
 
         /* ПРЕДПРОСМОТР */
         .preview-zone { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: #0a0a0a; }
+        .card { width: 360px; background: #151515; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; align-items: center; border: 1px solid #222; }
 
-        .widget-card {
-            width: 400px; background: #151515; border-radius: 25px; padding: 30px; display: flex; flex-direction: column; align-items: center; border: 1px solid #222;
-        }
-
-        /* КОНТЕЙНЕР С ЭФФЕКТОМ НАПОЛНЕНИЯ ВНУТРИ */
+        /* КОНТЕЙНЕР СВИНКИ */
         .pig-container {
             position: relative;
-            width: 250px;
+            width: 240px;
             height: 180px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            overflow: hidden; /* Важно для обрезки */
         }
 
-        /* Сама картинка свинки */
-        .pig-layer {
+        /* Золото - теперь оно просто блок, который мы обрежем через SVG маску чуть позже, если нужно, 
+           но здесь используем самый надежный метод: Оверлей */
+        .fill-box {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: contain;
-            z-index: 10; /* Свинка поверх золота */
-            pointer-events: none;
-        }
-
-        /* Золото, которое обрезается по форме свинки */
-        .fill-mask {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 5;
-            /* Динамическая маска: золото видно только там, где есть пиксели картинки */
-            -webkit-mask-size: contain;
-            -webkit-mask-repeat: no-repeat;
-            -webkit-mask-position: center;
-            overflow: hidden;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-        }
-
-        .gold-fluid {
-            width: 100%;
-            height: 0%;
+            bottom: 0; left: 0; width: 100%;
             background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
-            transition: height 0.8s ease;
-            box-shadow: inset 0 10px 20px rgba(255,255,255,0.3);
+            transition: height 1s ease-in-out;
+            z-index: 1;
         }
 
-        .score-val { font-size: 32px; color: var(--accent); font-weight: bold; margin: 10px 0; }
-        .btn-row { display: flex; gap: 10px; }
-        .btn-game { background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        /* Картинка свинки. Она должна быть с прозрачным пузом и НЕПРОЗРАЧНЫМ фоном вокруг него. 
+           Либо PNG, где стекло - это полупрозрачность. */
+        .pig-view {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: contain;
+            z-index: 2; /* Свинка ВСЕГДА сверху */
+        }
+
+        .score-text { font-size: 32px; color: var(--accent); font-weight: bold; margin: 5px 0; }
+        .q-text { text-align: center; font-size: 16px; margin-bottom: 20px; height: 40px; }
+        .btn-group { display: flex; gap: 10px; }
+        .btn-ui { background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2>⚙️ Конструктор</h2>
-    <label>Ссылка на свинку (PNG с прозрачностью)</label>
-    <input type="text" id="cfg-img" value="https://i.ibb.co/pX99S99/glass-pig.png" oninput="updateMask()">
+    <h2>КОНСТРУКТОР</h2>
+    <label>Ссылка на PNG (прозрачное пузо)</label>
+    <input type="text" id="in-img" value="https://i.ibb.co/pX99S99/glass-pig.png">
     
-    <label>Вопрос|Ответы|Верный</label>
-    <textarea id="cfg-content" rows="3">Emil ... um neun Uhr gefühstückt.|ist, hat|1</textarea>
+    <label>Вопрос | Ответы | Верный</label>
+    <textarea id="in-content">Emil ... um neun Uhr gefühstückt.|ist, hat|1</textarea>
     
     <label>Ставки</label>
-    <input type="text" id="cfg-bets" value="10, 25, 50">
+    <input type="text" id="in-bets" value="10, 25, 50">
 
-    <button class="btn-update" onclick="build()">ОБНОВИТЬ</button>
+    <button class="btn-build" onclick="rebuild()">ОБНОВИТЬ</button>
     
     <label>Код для Genially</label>
-    <textarea id="output-code" readonly></textarea>
+    <textarea id="out-code" readonly onclick="this.select()"></textarea>
 </div>
 
 <div class="preview-zone">
-    <div class="widget-card">
-        <div class="pig-container">
-            <div id="mask-layer" class="fill-mask">
-                <div id="view-fill" class="gold-fluid"></div>
-            </div>
-            <img id="view-img" class="pig-layer" src="https://i.ibb.co/pX99S99/glass-pig.png">
-        </div>
-
-        <div class="score-val" id="view-score">0</div>
-        <div id="view-q" style="margin-bottom:20px; text-align:center">Вопрос</div>
-
-        <div id="row-bets" class="btn-row"></div>
-        <div id="row-ans" class="btn-row hidden"></div>
-    </div>
-</div>
-
-<script>
-    let state = { score: 0, bet: 0, correct: 0, ans: [] };
-
-    function updateMask() {
-        const url = document.getElementById('cfg-img').value;
-        document.getElementById('view-img').src = url;
-        // Применяем маску к слою с золотом
-        document.getElementById('mask-layer').style.webkitMaskImage = `url(${url})`;
-    }
-
-    function build() {
-        const [q, a, c] = document.getElementById('cfg-content').value.split('|');
-        const bets = document.getElementById('cfg-bets').value.split(',');
-        
-        state.ans = a.split(',');
-        state.correct = parseInt(c);
-        state.score = 0;
-        
-        document.getElementById('view-q').innerText = q;
-        updateMask();
-
-        const betRow = document.getElementById('row-bets');
-        betRow.innerHTML = '';
-        betRow.classList.remove('hidden');
-        document.getElementById('row-ans').classList.add('hidden');
-
-        bets.forEach(v => {
-            const b = document.createElement('button');
-            b.className = 'btn-game';
-            b.innerText = v.trim();
-            b.onclick = () => { state.bet = parseInt(v); showAns(); };
-            betRow.appendChild(b);
-        });
-
-        // Генерируем iFrame
-        const currentHTML = document.documentElement.outerHTML;
-        document.getElementById('output-code').value = `<iframe srcdoc='${currentHTML.replace(/'/g, "&apos;")}' width="100%" height="600" frameborder="0" style="background:transparent;"></iframe>`;
-        
-        render();
-    }
-
-    function showAns() {
-        document.getElementById('row-bets').classList.add('hidden');
-        const ansRow = document.getElementById('row-ans');
-        ansRow.innerHTML = '';
-        ansRow.classList.remove('hidden');
-
-        state.ans.forEach((txt, i) => {
-            const b = document.createElement('button');
-            b.className = 'btn-game';
-            b.style.borderColor = '#fff'; b.style.color = '#fff';
-            b.innerText = txt.trim();
-            b.onclick = () => {
-                if(i === state.correct) state.score += state.bet;
-                else state.score = Math.max(0, state.score - state.bet);
-                render();
-                document.getElementById('row-ans').classList.add('hidden');
-                document.getElementById('row-bets').classList.remove('hidden');
-            };
-            ansRow.appendChild(b);
-        });
-    }
-
-    function render() {
-        document.getElementById('view-score').innerText = state.score;
-        let h = Math.min(100, (state.score / 200) * 100);
-        document.getElementById('view-fill').style.height = h + '%';
-    }
-
-    build();
-</script>
-</body>
-</html>
+    <div class="card">
+        <div class="pig-container" id="pig-frame">
