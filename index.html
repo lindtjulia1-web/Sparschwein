@@ -3,53 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { background: transparent; font-family: Arial, sans-serif; display: flex; justify-content: center; margin: 0; color: white; }
+        body { background: transparent; font-family: 'Segoe UI', Arial, sans-serif; display: flex; justify-content: center; margin: 0; color: white; }
+        .widget-body { width: 420px; background: #1a1a1a; border-radius: 28px; padding: 25px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.8); border: 1px solid #333; }
         
-        /* Главный контейнер как на макете */
-        .widget-body {
-            width: 400px; background: #151515; border-radius: 25px; padding: 25px;
-            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9);
-        }
-
         /* Языковая панель */
-        .langs { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 10px; }
-        .langs button { background: #333; border: 1px solid #444; color: #888; border-radius: 4px; cursor: pointer; padding: 3px 8px; font-size: 11px; }
-        .langs button.active { border-color: gold; color: white; }
+        .langs { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 15px; }
+        .langs button { background: #2a2a2a; border: 1px solid #444; color: #888; border-radius: 6px; cursor: pointer; padding: 4px 10px; font-size: 12px; transition: 0.3s; }
+        .langs button:hover { border-color: #ffcc00; color: white; }
 
-        /* СТЕКЛЯННАЯ СВИНЬЯ (Центральный элемент макета) */
+        /* ВИЗУАЛИЗАЦИЯ СВИНЬИ (из вашего макета) */
         .pig-container {
-            position: relative; width: 280px; height: 180px; margin: 0 auto 20px;
-            /* Ссылка на то самое изображение свинки с макета */
+            position: relative; width: 300px; height: 180px; margin: 0 auto 20px;
             background: url('https://i.ibb.co/3Y8M4v8/glass-pig-template.png') no-repeat center;
-            background-size: contain; overflow: hidden; display: flex; align-items: flex-end; justify-content: center;
+            background-size: contain; display: flex; align-items: flex-end; justify-content: center;
         }
-
-        /* Золотой песок внутри свинки */
-        .sand-level {
-            width: 170px; height: 0%; 
+        .sand-fill {
+            width: 180px; height: 0%; 
             background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
-            transition: height 1s ease-in-out; border-radius: 0 0 70px 70px;
-            margin-bottom: 25px; opacity: 0.8;
+            transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0 0 80px 80px; margin-bottom: 25px; opacity: 0.9;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
         }
 
-        .stats { font-size: 24px; margin-bottom: 15px; }
-        .stats span#val { color: gold; font-weight: bold; }
+        .balance { font-size: 26px; margin-bottom: 20px; font-weight: bold; }
+        #val { color: #ffcc00; }
 
-        .hint { color: #666; font-size: 14px; margin-bottom: 15px; }
+        /* ИГРОВЫЕ ЭКРАНЫ */
+        .screen { min-height: 200px; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Квадраты ставок с макета */
-        .bets { display: flex; justify-content: center; gap: 15px; }
-        .bet-sq {
-            width: 75px; height: 55px; border: 2px solid gold; border-radius: 12px;
+        .question-box { font-size: 20px; margin-bottom: 20px; line-height: 1.4; color: #efefef; }
+
+        /* КВАДРАТЫ СТАВОК (как на макете) */
+        .bet-grid { display: flex; justify-content: center; gap: 15px; }
+        .bet-card {
+            width: 80px; height: 60px; border: 2px solid #ffcc00; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.2s;
+            color: #ffcc00; font-size: 22px; font-weight: bold; cursor: pointer; transition: 0.3s;
         }
-        .bet-sq:hover { background: gold; color: black; transform: scale(1.05); }
+        .bet-card:hover { background: #ffcc00; color: black; transform: scale(1.05); }
 
-        /* Кнопки ответов (появляются после ставки) */
-        .ans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .ans-btn { background: #222; border: 1px solid #444; color: white; padding: 12px; border-radius: 10px; cursor: pointer; }
-        .ans-btn:hover { border-color: gold; }
+        /* ВАРИАНТЫ ОТВЕТОВ */
+        .ans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .ans-btn {
+            background: #2a2a2a; border: 1px solid #444; color: white; padding: 15px;
+            border-radius: 12px; cursor: pointer; font-size: 16px; transition: 0.2s;
+        }
+        .ans-btn:hover { border-color: #ffcc00; background: #333; }
+
+        /* ФИДБЕК */
+        .feedback { font-size: 40px; margin-bottom: 10px; }
+        .next-btn { background: #ffcc00; color: black; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 15px; }
 
         .hidden { display: none; }
     </style>
@@ -58,105 +62,117 @@
 
 <div class="widget-body">
     <div class="langs">
-        <button onclick="setL('de')">DE</button>
-        <button onclick="setL('en')">EN</button>
-        <button onclick="setL('ru')">RU</button>
+        <button onclick="setLang('de')">DE</button>
+        <button onclick="setLang('en')">EN</button>
+        <button onclick="setLang('ru')">RU</button>
     </div>
 
     <div class="pig-container">
-        <div id="gold" class="sand-level"></div>
+        <div id="gold" class="sand-fill"></div>
     </div>
 
-    <div class="stats">
-        <span id="L-total">Gesamt:</span> <span id="val">0</span>
+    <div class="balance">
+        <span id="L-bank">Gesamt:</span> <span id="val">0</span>
     </div>
 
-    <div id="step1">
-        <p id="q-text" style="font-size:18px; margin-bottom:10px;">Question text...</p>
-        <div id="L-hint" class="hint">Einsatz wählen:</div>
-        <div class="bets">
-            <div class="bet-sq" onclick="place(10)">10</div>
-            <div class="bet-sq" onclick="place(25)">25</div>
-            <div class="bet-sq" onclick="place(50)">50</div>
+    <div id="scr-bet" class="screen">
+        <div id="q-text" class="question-box">Warten на вопрос...</div>
+        <div id="L-bet-msg" style="color: #888; margin-bottom: 15px;">Wählen Sie Ihre Wette:</div>
+        <div class="bet-grid">
+            <div class="bet-card" onclick="makeBet(10)">10</div>
+            <div class="bet-card" onclick="makeBet(25)">25</div>
+            <div class="bet-card" onclick="makeBet(50)">50</div>
         </div>
     </div>
 
-    <div id="step2" class="hidden">
-        <div id="options" class="ans-grid"></div>
+    <div id="scr-ans" class="screen hidden">
+        <div class="ans-grid" id="ans-box"></div>
     </div>
 
-    <div id="step3" class="hidden">
-        <p id="res-msg" style="font-weight:bold; font-size:20px;"></p>
-        <button class="ans-btn" style="width:100%; border-color:gold; margin-top:10px;" onclick="reset()">Next Question</button>
+    <div id="scr-res" class="screen hidden">
+        <div id="status-icon" class="feedback"></div>
+        <div id="res-msg" style="font-size: 18px; margin-bottom: 10px;"></div>
+        <button class="next-btn" onclick="toNext()">CONTINUE</button>
     </div>
 </div>
 
 <script>
-    let score = 0;
+    let total = 0;
     let bet = 0;
-    let cur = 0;
+    let currentIdx = 0;
+    let currentL = 'de';
 
-    const data = [
-        { q: "Choose the correct form: I ___ (be) at home.", o: ["am", "is", "are", "was"], c: 0 },
-        { q: "Translate 'Confidence':", o: ["Уверенность", "Риск", "Ошибка", "Урок"], c: 0 }
+    // Контент заданий (можно расширять)
+    const content = [
+        { q: "Er ... um drei Uhr Sport ...", o: ["hat ... gemacht", "ist ... gemacht"], c: 0 },
+        { q: "Emil ... um neun Uhr ...", o: ["ist ... gefrühstückt", "hat ... gefrühstückt"], c: 1 }
     ];
 
     const i18n = {
-        ru: { total: "Всего:", hint: "Выберите ставку:", win: "Верно!", lose: "Ошибка" },
-        en: { total: "Total:", hint: "Place your bet:", win: "Correct!", lose: "Wrong" },
-        de: { total: "Gesamt:", hint: "Einsatz wählen:", win: "Richtig!", lose: "Falsch" }
+        ru: { bank: "Всего:", bet: "Выберите ставку:", win: "Отлично!", lose: "Риск не оправдался" },
+        en: { bank: "Total:", bet: "Select your bet:", win: "Correct!", lose: "Risk failed" },
+        de: { bank: "Gesamt:", bet: "Wählen Sie Ihre Wette:", win: "Richtig!", lose: "Risiko gescheitert" }
     };
 
-    function setL(l) {
-        document.getElementById('L-total').innerText = i18n[l].total;
-        document.getElementById('L-hint').innerText = i18n[l].hint;
-        render();
+    function setLang(l) {
+        currentL = l;
+        document.getElementById('L-bank').innerText = i18n[l].bank;
+        document.getElementById('L-bet-msg').innerText = i18n[l].bet;
+        refreshQuestion();
     }
 
-    function render() {
-        document.getElementById('q-text').innerText = data[cur].q;
-        const optBox = document.getElementById('options');
-        optBox.innerHTML = '';
-        data[cur].o.forEach((item, i) => {
-            optBox.innerHTML += `<button class="ans-btn" onclick="check(${i})">${item}</button>`;
+    function refreshQuestion() {
+        document.getElementById('q-text').innerText = content[currentIdx].q;
+        const box = document.getElementById('ans-box');
+        box.innerHTML = '';
+        content[currentIdx].o.forEach((opt, i) => {
+            box.innerHTML += `<button class="ans-btn" onclick="handleAns(${i})">${opt}</button>`;
         });
     }
 
-    function place(v) {
+    function makeBet(v) {
         bet = v;
-        document.getElementById('step1').classList.add('hidden');
-        document.getElementById('step2').classList.remove('hidden');
+        document.getElementById('scr-bet').classList.add('hidden');
+        document.getElementById('scr-ans').classList.remove('hidden');
     }
 
-    function check(idx) {
-        const win = idx === data[cur].c;
+    function handleAns(i) {
+        const isWin = i === content[currentIdx].c;
+        const icon = document.getElementById('status-icon');
         const msg = document.getElementById('res-msg');
-        
-        if(win) {
-            score += bet;
-            msg.innerText = "✓"; msg.style.color = "#4caf50";
+
+        if(isWin) {
+            total += bet;
+            icon.innerText = "🏆";
+            msg.innerText = i18n[currentL].win;
+            msg.style.color = "#4caf50";
         } else {
-            score = Math.max(0, score - bet);
-            msg.innerText = "✗"; msg.style.color = "#f44336";
+            total = Math.max(0, total - bet);
+            icon.innerText = "❌";
+            msg.innerText = i18n[currentL].lose;
+            msg.style.color = "#f44336";
         }
 
-        document.getElementById('val').innerText = score;
-        let h = Math.min(85, (score / 200) * 85); 
-        document.getElementById('gold').style.height = h + "%";
-
-        document.getElementById('step2').classList.add('hidden');
-        document.getElementById('step3').classList.remove('hidden');
+        updateProgress();
+        document.getElementById('scr-ans').classList.add('hidden');
+        document.getElementById('scr-res').classList.remove('hidden');
     }
 
-    function reset() {
-        cur = (cur + 1) % data.length;
-        render();
-        document.getElementById('step3').classList.add('hidden');
-        document.getElementById('step1').classList.remove('hidden');
+    function updateProgress() {
+        document.getElementById('val').innerText = total;
+        // Наполнение свиньи (макс 250 монет для 85% высоты)
+        let fill = Math.min(85, (total / 250) * 85);
+        document.getElementById('gold').style.height = fill + "%";
     }
 
-    render();
+    function toNext() {
+        currentIdx = (currentIdx + 1) % content.length;
+        refreshQuestion();
+        document.getElementById('scr-res').classList.add('hidden');
+        document.getElementById('scr-bet').classList.remove('hidden');
+    }
+
+    refreshQuestion();
 </script>
-
 </body>
 </html>
