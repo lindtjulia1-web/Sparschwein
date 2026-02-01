@@ -5,183 +5,153 @@
     <style>
         :root {
             --gold: #ffd700;
-            --dark-bg: #1a1a1a;
-            --card-bg: #2d2d2d;
-            --text: #ffffff;
+            --glass: rgba(255, 255, 255, 0.2);
+            --bg-dark: #0a0a0a;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: transparent;
-            color: var(--text);
+            font-family: 'Arial', sans-serif;
+            color: white;
             display: flex;
             justify-content: center;
-            padding: 20px;
         }
 
-        .widget-container {
-            background: var(--card-bg);
-            border-radius: 15px;
+        .squid-widget {
+            width: 380px;
+            background: #1a1a1b;
+            border-radius: 20px;
             padding: 20px;
-            width: 350px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 2px solid #444;
+            border: 1px solid #333;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
             text-align: center;
         }
 
-        /* Селектор языка */
-        .lang-switch {
-            text-align: right;
-            margin-bottom: 10px;
-        }
-        .lang-switch button {
-            background: none;
-            border: 1px solid #666;
-            color: #ccc;
-            cursor: pointer;
-            font-size: 10px;
-            margin-left: 2px;
-        }
-
-        /* Визуализация копилки */
-        .piggy-container {
+        /* Огромная стеклянная свинья как в сериале */
+        .piggy-vault {
             position: relative;
-            height: 120px;
-            margin-bottom: 15px;
-            background: #222;
-            border-radius: 10px;
+            width: 200px;
+            height: 140px;
+            margin: 0 auto 20px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), rgba(0,0,0,0.4));
+            border-radius: 100px / 80px;
+            border: 2px solid var(--glass);
+            box-shadow: inset 0 0 20px rgba(255,215,0,0.1);
             overflow: hidden;
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             justify-content: center;
         }
 
-        .coin-icon {
-            font-size: 50px;
-            filter: drop-shadow(0 0 10px var(--gold));
+        /* Слой с монетами внутри копилки */
+        .coins-fill {
+            width: 100%;
+            height: 0%; /* Будет расти динамически */
+            background: linear-gradient(to top, #ffd700, #b8860b);
+            transition: height 0.5s ease-out;
+            box-shadow: 0 0 15px var(--gold);
         }
 
-        /* Пиратская монета (Дублон) */
-        .dublon {
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            background: var(--gold);
+        /* Стилизация вашей пиратской монеты */
+        .pirate-coin-visual {
+            width: 60px;
+            height: 60px;
+            background-image: url('ВАША_ССЫЛКА_НА_ИЗОБРАЖЕНИЕ_МОНЕТЫ'); /* Вставьте ссылку на загруженное фото */
+            background-size: cover;
             border-radius: 50%;
-            border: 2px dashed #b8860b;
-            color: #b8860b;
-            font-weight: bold;
-            line-height: 24px;
-            text-align: center;
-            margin-right: 5px;
+            margin: 10px auto;
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 10px var(--gold);
         }
 
-        .balance-display {
-            font-size: 20px;
-            margin: 10px 0;
+        .lang-bar { margin-bottom: 15px; text-align: right; }
+        .lang-bar button { 
+            background: #333; border: 1px solid #555; color: #aaa; 
+            cursor: pointer; padding: 3px 8px; border-radius: 4px;
+        }
+
+        .btn-bet {
+            background: transparent;
+            border: 1px solid var(--gold);
             color: var(--gold);
-        }
-
-        /* Кнопки */
-        .btn-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        button {
-            background: #444;
-            border: none;
             padding: 10px;
-            border-radius: 8px;
-            color: white;
+            margin: 5px;
             cursor: pointer;
-            transition: 0.3s;
+            width: 70px;
+            border-radius: 5px;
+            font-weight: bold;
         }
 
-        button:hover { background: #555; }
-        .bet-btn { border: 1px solid var(--gold); color: var(--gold); }
-        .bet-btn:hover { background: var(--gold); color: black; }
-
+        .btn-bet:hover { background: var(--gold); color: black; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<div class="widget-container">
-    <div class="lang-switch">
-        <button onclick="setLanguage('ru')">RU</button>
-        <button onclick="setLanguage('en')">EN</button>
-        <button onclick="setLanguage('de')">DE</button>
+<div class="squid-widget">
+    <div class="lang-bar">
+        <button onclick="changeLang('de')">DE</button>
+        <button onclick="changeLang('en')">EN</button>
+        <button onclick="changeLang('ru')">RU</button>
     </div>
 
-    <div class="piggy-container">
-        <div id="piggy-icon" class="coin-icon">🏴‍☠️</div>
+    <div class="piggy-vault">
+        <div id="fill" class="coins-fill"></div>
+    </div>
+    
+    <div id="balance-info">
+        <span id="label-total">Всего:</span> <span id="coins-count">0</span> ⚓
     </div>
 
-    <div class="balance-display">
-        <span class="dublon">⚓</span> <span id="coins">0</span>
+    <div id="bet-screen">
+        <p id="label-bet-title">Выберите ставку:</p>
+        <button class="btn-bet" onclick="setBet(1)">1</button>
+        <button class="btn-bet" onclick="setBet(5)">5</button>
+        <button class="btn-bet" onclick="setBet(10)">10</button>
     </div>
 
-    <div id="bet-zone">
-        <p id="label-bet">Твоя уверенность (ставка):</p>
-        <div class="btn-group">
-            <button class="bet-btn" onclick="makeBet(1)">1</button>
-            <button class="bet-btn" onclick="makeBet(5)">5</button>
-            <button class="bet-btn" onclick="makeBet(10)">10</button>
-            <button class="bet-btn" onclick="makeBet(20)">20</button>
-        </div>
-    </div>
-
-    <div id="quiz-zone" class="hidden">
-        <p id="label-question">Готов ответить?</p>
-        <div class="btn-group">
-            <button onclick="answer(true)" style="background: #2e7d32;" id="btn-correct">Верно</button>
-            <button onclick="answer(false)" style="background: #c62828;" id="btn-wrong">Ошибка</button>
-        </div>
+    <div id="quiz-screen" class="hidden">
+        <p id="label-question">Подтвердите ответ:</p>
+        <button onclick="resolve(true)" style="color:#00ff00; border:1px solid #00ff00;" class="btn-bet">OK</button>
+        <button onclick="resolve(false)" style="color:#ff0000; border:1px solid #ff0000;" class="btn-bet">NO</button>
     </div>
 </div>
 
 <script>
-    let balance = 0;
+    let total = 0;
     let currentBet = 0;
-    
-    const i18n = {
-        ru: { bet: "Твоя уверенность:", quest: "Выбери ответ:", correct: "Верно", wrong: "Ошибка" },
-        en: { bet: "Your confidence:", quest: "Choose answer:", correct: "Correct", wrong: "Wrong" },
-        de: { bet: "Deine Sicherheit:", quest: "Antwort wählen:", correct: "Richtig", wrong: "Falsch" }
+    const maxFill = 100; // Монет до полной копилки
+
+    const texts = {
+        ru: { total: "В копилке:", bet: "Рискнуть монетами:", quest: "Вы уверены?" },
+        en: { total: "Total Bank:", bet: "Wager Doubloons:", quest: "Are you sure?" },
+        de: { total: "Gesamtbank:", bet: "Dublonen setzen:", quest: "Bist du sicher?" }
     };
 
-    function setLanguage(lang) {
-        document.getElementById('label-bet').innerText = i18n[lang].bet;
-        document.getElementById('label-question').innerText = i18n[lang].quest;
-        document.getElementById('btn-correct').innerText = i18n[lang].correct;
-        document.getElementById('btn-wrong').innerText = i18n[lang].wrong;
+    function changeLang(l) {
+        document.getElementById('label-total').innerText = texts[l].total;
+        document.getElementById('label-bet-title').innerText = texts[l].bet;
+        document.getElementById('label-question').innerText = texts[l].quest;
     }
 
-    function makeBet(amount) {
-        currentBet = amount;
-        document.getElementById('bet-zone').classList.add('hidden');
-        document.getElementById('quiz-zone').classList.remove('hidden');
+    function setBet(amt) {
+        currentBet = amt;
+        document.getElementById('bet-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
     }
 
-    function answer(isCorrect) {
-        if (isCorrect) {
-            balance += currentBet;
-            document.getElementById('piggy-icon').innerText = '💰';
-        } else {
-            balance = Math.max(0, balance - currentBet);
-            document.getElementById('piggy-icon').innerText = '💀';
-        }
+    function resolve(win) {
+        if(win) total += currentBet;
+        else total = Math.max(0, total - currentBet);
+
+        document.getElementById('coins-count').innerText = total;
         
-        document.getElementById('coins').innerText = balance;
-        
-        setTimeout(() => {
-            document.getElementById('piggy-icon').innerText = '🏴‍☠️';
-            document.getElementById('bet-zone').classList.remove('hidden');
-            document.getElementById('quiz-zone').classList.add('hidden');
-        }, 1000);
+        // Визуальное наполнение
+        let fillPercent = Math.min(100, (total / maxFill) * 100);
+        document.getElementById('fill').style.height = fillPercent + "%";
+
+        document.getElementById('bet-screen').classList.remove('hidden');
+        document.getElementById('quiz-screen').classList.add('hidden');
     }
 </script>
 
