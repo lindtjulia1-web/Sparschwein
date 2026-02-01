@@ -2,165 +2,154 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Конструктор Копилки</title>
     <style>
         :root { --accent: #ffcc00; --bg: #111; --panel: #1e1e1e; }
         body { background: #000; color: #eee; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Стили левой панели */
-        .sidebar { width: 380px; background: var(--panel); padding: 25px; overflow-y: auto; border-right: 1px solid #333; display: flex; flex-direction: column; }
-        h2 { color: var(--accent); font-size: 14px; text-transform: uppercase; margin: 0 0 20px 0; border-left: 3px solid var(--accent); padding-left: 10px; }
+        .sidebar { width: 360px; background: var(--panel); padding: 20px; overflow-y: auto; border-right: 1px solid #333; }
+        h2 { color: var(--accent); font-size: 14px; text-transform: uppercase; margin-bottom: 20px; }
         
-        label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; text-transform: uppercase; }
         input, textarea, select { 
             width: 100%; background: #0a0a0a; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 5px; font-size: 13px; margin-bottom: 15px; box-sizing: border-box;
         }
         
-        .btn-update { 
-            background: var(--accent); color: #000; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; margin-bottom: 20px;
-        }
-        .btn-update:hover { background: #fff; }
+        .btn-update { background: var(--accent); color: #000; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 20px; }
 
-        /* Окно с кодом */
-        .code-box { background: #000; border: 1px dashed #555; padding: 10px; border-radius: 5px; position: relative; }
-        #output-code { width: 100%; height: 80px; background: transparent; border: none; color: #0f0; font-family: monospace; font-size: 10px; resize: none; margin: 0; }
-        .copy-hint { font-size: 10px; color: var(--accent); margin-top: 5px; text-align: right; }
+        #output-code { width: 100%; height: 60px; background: #000; color: #0f0; font-size: 10px; border: 1px dashed #555; margin-top: 10px; }
 
-        /* Стили правой части (Предпросмотр) */
-        .preview-zone { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, #222 0%, #000 100%); position: relative; }
-        .tag { position: absolute; top: 20px; left: 20px; color: #444; font-size: 12px; font-weight: bold; letter-spacing: 2px; }
+        /* ПРЕДПРОСМОТР */
+        .preview-zone { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: #0a0a0a; }
 
-        /* Сам виджет */
-        #widget-wrap {
-            width: 400px; background: #151515; border-radius: 25px; padding: 30px; display: flex; flex-direction: column; align-items: center;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.7); border: 1px solid #222; position: relative;
-        }
-        .lang-dots { position: absolute; top: 20px; right: 20px; display: flex; gap: 5px; }
-        .dot { font-size: 10px; color: #555; border: 1px solid #444; padding: 2px 5px; border-radius: 3px; }
-        .dot.active { color: var(--accent); border-color: var(--accent); }
-
-        .pig-box { width: 240px; height: 160px; position: relative; margin-bottom: 15px; }
-        .pig-img { width: 100%; height: 100%; object-fit: contain; z-index: 5; position: relative; }
-        .gold-fill { 
-            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); width: 140px; 
-            background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728); border-radius: 0 0 70px 70px; 
-            transition: height 0.6s ease; opacity: 0.8; z-index: 2;
+        .widget-card {
+            width: 400px; background: #151515; border-radius: 25px; padding: 30px; display: flex; flex-direction: column; align-items: center; border: 1px solid #222;
         }
 
-        .bank-info { text-align: center; margin-bottom: 20px; }
-        .bank-label { font-size: 14px; color: #888; display: block; }
-        .bank-val { font-size: 32px; color: var(--accent); font-weight: bold; }
-
-        .q-area { text-align: center; font-size: 18px; margin-bottom: 25px; min-height: 45px; }
-        .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-        .btn-game { 
-            background: transparent; border: 2px solid var(--accent); color: var(--accent); 
-            padding: 10px 22px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s;
+        /* КОНТЕЙНЕР С ЭФФЕКТОМ НАПОЛНЕНИЯ ВНУТРИ */
+        .pig-container {
+            position: relative;
+            width: 250px;
+            height: 180px;
+            margin-bottom: 20px;
         }
-        .btn-game:hover { background: var(--accent); color: #000; }
-        .btn-ans { border-color: #fff; color: #fff; }
 
+        /* Сама картинка свинки */
+        .pig-layer {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: contain;
+            z-index: 10; /* Свинка поверх золота */
+            pointer-events: none;
+        }
+
+        /* Золото, которое обрезается по форме свинки */
+        .fill-mask {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 5;
+            /* Динамическая маска: золото видно только там, где есть пиксели картинки */
+            -webkit-mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .gold-fluid {
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
+            transition: height 0.8s ease;
+            box-shadow: inset 0 10px 20px rgba(255,255,255,0.3);
+        }
+
+        .score-val { font-size: 32px; color: var(--accent); font-weight: bold; margin: 10px 0; }
+        .btn-row { display: flex; gap: 10px; }
+        .btn-game { background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2>⚙️ Конструктор игры</h2>
+    <h2>⚙️ Конструктор</h2>
+    <label>Ссылка на свинку (PNG с прозрачностью)</label>
+    <input type="text" id="cfg-img" value="https://i.ibb.co/pX99S99/glass-pig.png" oninput="updateMask()">
     
-    <label>Язык (RU/DE/EN)</label>
-    <select id="cfg-lang">
-        <option value="ru">Русский</option>
-        <option value="de">Deutsch</option>
-        <option value="en">English</option>
-    </select>
-
-    <label>Ссылка на картинку (URL)</label>
-    <input type="text" id="cfg-img" value="https://i.ibb.co/pX99S99/glass-pig.png">
-
-    <label>Вопрос | Ответы | Правильный(0,1..)</label>
+    <label>Вопрос|Ответы|Верный</label>
     <textarea id="cfg-content" rows="3">Emil ... um neun Uhr gefühstückt.|ist, hat|1</textarea>
-
-    <label>Ставки (через запятую)</label>
+    
+    <label>Ставки</label>
     <input type="text" id="cfg-bets" value="10, 25, 50">
 
-    <button class="btn-update" onclick="generate()">ОБНОВИТЬ И СОЗДАТЬ КОД</button>
-
-    <label>Код для вставки в Genially (iFrame)</label>
-    <div class="code-box">
-        <textarea id="output-code" readonly onclick="this.select()">Нажмите кнопку выше...</textarea>
-    </div>
-    <div class="copy-hint">Кликните, чтобы выделить всё</div>
+    <button class="btn-update" onclick="build()">ОБНОВИТЬ</button>
+    
+    <label>Код для Genially</label>
+    <textarea id="output-code" readonly></textarea>
 </div>
 
 <div class="preview-zone">
-    <div class="tag">ПРЕДПРОСМОТР</div>
-    
-    <div id="widget-wrap">
-        <div class="lang-dots">
-            <div class="dot" id="d-de">DE</div><div class="dot" id="d-en">EN</div><div class="dot active" id="d-ru">RU</div>
+    <div class="widget-card">
+        <div class="pig-container">
+            <div id="mask-layer" class="fill-mask">
+                <div id="view-fill" class="gold-fluid"></div>
+            </div>
+            <img id="view-img" class="pig-layer" src="https://i.ibb.co/pX99S99/glass-pig.png">
         </div>
-        <div class="pig-box">
-            <div id="view-fill" class="gold-fill" style="height: 0%"></div>
-            <img id="view-img" class="pig-img" src="" alt="">
-        </div>
-        <div class="bank-info">
-            <span class="bank-label" id="lbl-bank">Всего:</span>
-            <span class="bank-val" id="view-score">0</span>
-        </div>
-        <div class="q-area" id="view-q">Вопрос</div>
+
+        <div class="score-val" id="view-score">0</div>
+        <div id="view-q" style="margin-bottom:20px; text-align:center">Вопрос</div>
+
         <div id="row-bets" class="btn-row"></div>
         <div id="row-ans" class="btn-row hidden"></div>
     </div>
 </div>
 
 <script>
-    let state = { score: 0, bet: 0, correct: 0, ans: [], q: "" };
-    const dict = { ru: "Всего:", de: "Gesamt:", en: "Total:" };
+    let state = { score: 0, bet: 0, correct: 0, ans: [] };
 
-    function generate() {
-        const lang = document.getElementById('cfg-lang').value;
-        const img = document.getElementById('cfg-img').value;
+    function updateMask() {
+        const url = document.getElementById('cfg-img').value;
+        document.getElementById('view-img').src = url;
+        // Применяем маску к слою с золотом
+        document.getElementById('mask-layer').style.webkitMaskImage = `url(${url})`;
+    }
+
+    function build() {
         const [q, a, c] = document.getElementById('cfg-content').value.split('|');
         const bets = document.getElementById('cfg-bets').value.split(',');
-
-        state.q = q;
+        
         state.ans = a.split(',');
         state.correct = parseInt(c);
         state.score = 0;
-
-        // Обновляем визуальную часть
-        document.getElementById('view-img').src = img;
-        document.getElementById('lbl-bank').innerText = dict[lang];
+        
         document.getElementById('view-q').innerText = q;
-        document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
-        document.getElementById('d-' + lang).classList.add('active');
+        updateMask();
 
-        // Кнопки ставок
         const betRow = document.getElementById('row-bets');
         betRow.innerHTML = '';
         betRow.classList.remove('hidden');
         document.getElementById('row-ans').classList.add('hidden');
 
-        bets.forEach(val => {
+        bets.forEach(v => {
             const b = document.createElement('button');
             b.className = 'btn-game';
-            b.innerText = val.trim();
-            b.onclick = () => {
-                state.bet = parseInt(val);
-                showAnswers();
-            };
+            b.innerText = v.trim();
+            b.onclick = () => { state.bet = parseInt(v); showAns(); };
             betRow.appendChild(b);
         });
 
-        // Генерируем iFrame код (Base64 или прямой HTML для Genially)
-        const finalHTML = document.documentElement.outerHTML;
-        document.getElementById('output-code').value = `<iframe srcdoc='${finalHTML.replace(/'/g, "&apos;")}' width="100%" height="600" frameborder="0" style="background:transparent;"></iframe>`;
+        // Генерируем iFrame
+        const currentHTML = document.documentElement.outerHTML;
+        document.getElementById('output-code').value = `<iframe srcdoc='${currentHTML.replace(/'/g, "&apos;")}' width="100%" height="600" frameborder="0" style="background:transparent;"></iframe>`;
         
-        updateVisuals();
+        render();
     }
 
-    function showAnswers() {
+    function showAns() {
         document.getElementById('row-bets').classList.add('hidden');
         const ansRow = document.getElementById('row-ans');
         ansRow.innerHTML = '';
@@ -168,12 +157,13 @@
 
         state.ans.forEach((txt, i) => {
             const b = document.createElement('button');
-            b.className = 'btn-game btn-ans';
+            b.className = 'btn-game';
+            b.style.borderColor = '#fff'; b.style.color = '#fff';
             b.innerText = txt.trim();
             b.onclick = () => {
                 if(i === state.correct) state.score += state.bet;
                 else state.score = Math.max(0, state.score - state.bet);
-                updateVisuals();
+                render();
                 document.getElementById('row-ans').classList.add('hidden');
                 document.getElementById('row-bets').classList.remove('hidden');
             };
@@ -181,13 +171,13 @@
         });
     }
 
-    function updateVisuals() {
+    function render() {
         document.getElementById('view-score').innerText = state.score;
-        let h = Math.min(80, (state.score / 200) * 80); // 200 - пример цели
+        let h = Math.min(100, (state.score / 200) * 100);
         document.getElementById('view-fill').style.height = h + '%';
     }
 
-    generate(); // Первый запуск
+    build();
 </script>
 </body>
 </html>
