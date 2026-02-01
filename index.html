@@ -1,47 +1,189 @@
-<div id="game-container">
-  <div class="bank-visual">
-    <span id="coin-count">0</span> монет
-    <div id="piggy-bank" class="state-empty"></div>
-  </div>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root {
+            --gold: #ffd700;
+            --dark-bg: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text: #ffffff;
+        }
 
-  <div id="betting-zone">
-    <p>Насколько ты уверен?</p>
-    <button onclick="setBet(5)">5 (Рискну)</button>
-    <button onclick="setBet(1)">1 (Не уверен)</button>
-  </div>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: transparent;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
 
-  <div id="question-zone" style="display:none;">
-    <p id="question-text">Ваш вопрос здесь?</p>
-    <button onclick="checkAnswer(true)">Верно</button>
-    <button onclick="checkAnswer(false)">Неверно</button>
-  </div>
+        .widget-container {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            width: 350px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid #444;
+            text-align: center;
+        }
+
+        /* Селектор языка */
+        .lang-switch {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        .lang-switch button {
+            background: none;
+            border: 1px solid #666;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 10px;
+            margin-left: 2px;
+        }
+
+        /* Визуализация копилки */
+        .piggy-container {
+            position: relative;
+            height: 120px;
+            margin-bottom: 15px;
+            background: #222;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .coin-icon {
+            font-size: 50px;
+            filter: drop-shadow(0 0 10px var(--gold));
+        }
+
+        /* Пиратская монета (Дублон) */
+        .dublon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: var(--gold);
+            border-radius: 50%;
+            border: 2px dashed #b8860b;
+            color: #b8860b;
+            font-weight: bold;
+            line-height: 24px;
+            text-align: center;
+            margin-right: 5px;
+        }
+
+        .balance-display {
+            font-size: 20px;
+            margin: 10px 0;
+            color: var(--gold);
+        }
+
+        /* Кнопки */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            background: #444;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { background: #555; }
+        .bet-btn { border: 1px solid var(--gold); color: var(--gold); }
+        .bet-btn:hover { background: var(--gold); color: black; }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="widget-container">
+    <div class="lang-switch">
+        <button onclick="setLanguage('ru')">RU</button>
+        <button onclick="setLanguage('en')">EN</button>
+        <button onclick="setLanguage('de')">DE</button>
+    </div>
+
+    <div class="piggy-container">
+        <div id="piggy-icon" class="coin-icon">🏴‍☠️</div>
+    </div>
+
+    <div class="balance-display">
+        <span class="dublon">⚓</span> <span id="coins">0</span>
+    </div>
+
+    <div id="bet-zone">
+        <p id="label-bet">Твоя уверенность (ставка):</p>
+        <div class="btn-group">
+            <button class="bet-btn" onclick="makeBet(1)">1</button>
+            <button class="bet-btn" onclick="makeBet(5)">5</button>
+            <button class="bet-btn" onclick="makeBet(10)">10</button>
+            <button class="bet-btn" onclick="makeBet(20)">20</button>
+        </div>
+    </div>
+
+    <div id="quiz-zone" class="hidden">
+        <p id="label-question">Готов ответить?</p>
+        <div class="btn-group">
+            <button onclick="answer(true)" style="background: #2e7d32;" id="btn-correct">Верно</button>
+            <button onclick="answer(false)" style="background: #c62828;" id="btn-wrong">Ошибка</button>
+        </div>
+    </div>
 </div>
 
 <script>
-  let balance = 0;
-  let currentBet = 0;
+    let balance = 0;
+    let currentBet = 0;
+    
+    const i18n = {
+        ru: { bet: "Твоя уверенность:", quest: "Выбери ответ:", correct: "Верно", wrong: "Ошибка" },
+        en: { bet: "Your confidence:", quest: "Choose answer:", correct: "Correct", wrong: "Wrong" },
+        de: { bet: "Deine Sicherheit:", quest: "Antwort wählen:", correct: "Richtig", wrong: "Falsch" }
+    };
 
-  function setBet(amount) {
-    currentBet = amount;
-    document.getElementById('betting-zone').style.display = 'none';
-    document.getElementById('question-zone').style.display = 'block';
-  }
-
-  function checkAnswer(isCorrect) {
-    if (isCorrect) {
-      balance += currentBet;
-      alert("Отлично! + " + currentBet);
-    } else {
-      balance = Math.max(0, balance - currentBet);
-      alert("Риск не оправдался! - " + currentBet);
+    function setLanguage(lang) {
+        document.getElementById('label-bet').innerText = i18n[lang].bet;
+        document.getElementById('label-question').innerText = i18n[lang].quest;
+        document.getElementById('btn-correct').innerText = i18n[lang].correct;
+        document.getElementById('btn-wrong').innerText = i18n[lang].wrong;
     }
-    updateUI();
-  }
 
-  function updateUI() {
-    document.getElementById('coin-count').innerText = balance;
-    // Здесь логика смены картинок копилки в зависимости от balance
-    document.getElementById('betting-zone').style.display = 'block';
-    document.getElementById('question-zone').style.display = 'none';
-  }
+    function makeBet(amount) {
+        currentBet = amount;
+        document.getElementById('bet-zone').classList.add('hidden');
+        document.getElementById('quiz-zone').classList.remove('hidden');
+    }
+
+    function answer(isCorrect) {
+        if (isCorrect) {
+            balance += currentBet;
+            document.getElementById('piggy-icon').innerText = '💰';
+        } else {
+            balance = Math.max(0, balance - currentBet);
+            document.getElementById('piggy-icon').innerText = '💀';
+        }
+        
+        document.getElementById('coins').innerText = balance;
+        
+        setTimeout(() => {
+            document.getElementById('piggy-icon').innerText = '🏴‍☠️';
+            document.getElementById('bet-zone').classList.remove('hidden');
+            document.getElementById('quiz-zone').classList.add('hidden');
+        }, 1000);
+    }
 </script>
+
+</body>
+</html>
