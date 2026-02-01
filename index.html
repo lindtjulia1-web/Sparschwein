@@ -3,173 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        /* Полная прозрачность для Genially */
-        body, html { margin: 0; padding: 0; background: transparent; overflow: hidden; font-family: sans-serif; height: 100%; }
+        body, html { margin: 0; padding: 0; background: transparent; font-family: 'Segoe UI', sans-serif; overflow: hidden; height: 100%; }
         
-        .game-wrapper {
-            width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
+        .main-container {
+            width: 100%; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
-        /* Кнопки языков */
-        .lang-switch { position: absolute; top: 15px; right: 15px; display: flex; gap: 8px; }
-        .l-btn { font-size: 11px; border: 1px solid rgba(255,255,255,0.4); padding: 4px 8px; border-radius: 4px; cursor: pointer; color: #aaa; background: rgba(0,0,0,0.2); }
-        .l-btn.active { color: #ffd700; border-color: #ffd700; background: rgba(255,215,0,0.1); }
+        .lang-panel { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; z-index: 100; }
+        .l-btn { 
+            background: rgba(0,0,0,0.6); color: white; border: 1px solid #ccc; 
+            padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; 
+        }
+        .l-btn.active { background: #4A90E2; color: white; border-color: #4A90E2; font-weight: bold; }
 
-        /* Контейнер копилки */
-        .pig-container { position: relative; width: 260px; height: 180px; margin-bottom: 10px; display: flex; align-items: flex-end; justify-content: center; }
-        .pig-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5)); }
+        .pig-area { position: relative; width: 260px; height: 180px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 10px; }
+        .pig-body { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; 
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
         
-        /* Золотое наполнение */
-        .gold-fill { 
-            width: 170px; height: 0%; 
-            background: linear-gradient(to top, #8a6d3b, #ffd700, #fff5a0); 
-            border-radius: 0 0 85px 85px; margin-bottom: 25px; 
-            transition: height 1s cubic-bezier(0.17, 0.67, 0.83, 0.67); 
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.3); z-index: 5; 
+        .fill-level { 
+            width: 165px; height: 0%; 
+            background: linear-gradient(to top, #4A90E2, #50E3C2); 
+            border-radius: 0 0 80px 80px; margin-bottom: 25px; 
+            transition: height 0.6s ease-out; z-index: 5;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
         }
 
-        .total-display { font-size: 26px; color: #ffd700; margin: 10px 0 20px; font-weight: bold; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
-
-        /* Игровой блок */
-        .ui-box { text-align: center; width: 90%; max-width: 450px; }
-        .question { font-size: 20px; margin-bottom: 25px; min-height: 60px; text-shadow: 0 2px 5px black; line-height: 1.3; }
-
-        .btn-row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
-        .btn { 
-            background: rgba(20, 20, 20, 0.6); border: 2px solid #ffd700; color: #ffd700; 
-            padding: 14px 25px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 18px; 
-            transition: 0.3s; backdrop-filter: blur(5px);
+        .stats { 
+            font-size: 22px; color: #333; font-weight: bold; 
+            margin-bottom: 15px; text-shadow: 1px 1px 0px white;
         }
-        .btn:hover { background: #ffd700; color: #000; transform: scale(1.05); }
+
+        .question-box { 
+            color: #333; font-size: 18px; text-align: center; max-width: 90%; margin-bottom: 20px;
+            min-height: 44px; font-weight: 500;
+        }
+
+        .btn-zone { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .ui-btn { 
+            background: white; border: 2px solid #4A90E2; color: #4A90E2; 
+            padding: 10px 22px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 18px;
+            transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .ui-btn:hover { background: #4A90E2; color: white; }
         
-        .ans-btn { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); color: white; }
+        .ans-btn { border-color: #555; color: #555; }
+        .ans-btn:hover { background: #555; color: white; }
 
         .hidden { display: none; }
-        
-        /* Анимация ошибки */
-        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
-        .error { animation: shake 0.4s ease-in-out; }
     </style>
 </head>
 <body>
 
-<div class="game-wrapper">
-    <div class="lang-switch">
-        <div class="l-btn" onclick="changeLang('de')">DE</div>
-        <div class="l-btn" onclick="changeLang('en')">EN</div>
-        <div class="l-btn active" onclick="changeLang('ru')">RU</div>
+<div class="main-container">
+    <div class="lang-panel">
+        <div class="l-btn" id="btn-de" onclick="setLanguage('de')">DE</div>
+        <div class="l-btn" id="btn-en" onclick="setLanguage('en')">EN</div>
+        <div class="l-btn active" id="btn-ru" onclick="setLanguage('ru')">RU</div>
     </div>
 
-    <div class="pig-container" id="pig-vessel">
-        <svg class="pig-svg" viewBox="0 0 200 150">
-            <path d="M170,80 c0,40-30,60-70,60 s-70-20-70-60 s30-60 70-60 s70,20,70,60" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2.5"/>
-            <path d="M65,35 l-12-18 l-12,18 Z" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.4)" />
-            <path d="M135,35 l12-18 l12,18 Z" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.4)" />
-            <ellipse cx="178" cy="80" rx="8" ry="12" fill="rgba(0,0,0,0.4)" stroke="rgba(255,255,255,0.5)" />
-            <path d="M35,80 q-15,-15 -5,5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2" />
-            <circle cx="120" cy="65" r="3" fill="rgba(255,255,255,0.6)" />
+    <div class="pig-area">
+        <svg class="pig-body" viewBox="0 0 200 150">
+            <path d="M170,80 c0,40-30,60-70,60 s-70-20-70-60 s30-60 70-60 s70,20,70,60" fill="none" stroke="#555" stroke-width="2"/>
+            <path d="M70,35 l-10-15 l-10,15 Z" fill="none" stroke="#555" />
+            <path d="M130,35 l10-15 l10,15 Z" fill="none" stroke="#555" />
+            <ellipse cx="178" cy="80" rx="6" ry="10" fill="none" stroke="#555" />
         </svg>
-        <div id="gold-level" class="gold-fill"></div>
+        <div id="progress" class="fill-level"></div>
     </div>
 
-    <div class="total-display"><span id="txt-total">Всего</span>: <span id="val-score">0</span></div>
+    <div class="stats"><span id="lbl-bank">Баллы</span>: <span id="val-score">0</span></div>
 
-    <div class="ui-box">
-        <div id="q-display" class="question"></div>
-        
-        <div id="step-bet" class="btn-row">
-            <button class="btn" onclick="setBet(10)">10</button>
-            <button class="btn" onclick="setBet(25)">25</button>
-            <button class="btn" onclick="setBet(50)">50</button>
-        </div>
+    <div class="question-box" id="q-text">...</div>
 
-        <div id="step-ans" class="btn-row hidden"></div>
+    <div id="bet-ui" class="btn-zone">
+        <button class="ui-btn" onclick="makeBet(10)">10</button>
+        <button class="ui-btn" onclick="makeBet(25)">25</button>
+        <button class="ui-btn" onclick="makeBet(50)">50</button>
     </div>
+
+    <div id="ans-ui" class="btn-zone hidden"></div>
 </div>
 
 <script>
-    // --- НАСТРОЙКИ ВОПРОСОВ ---
-    const gameData = {
+    const data = {
         lang: 'ru',
-        targetScore: 200, // При каком счете свинья полная
+        score: 0,
+        currentQ: 0,
+        currentBet: 0,
+        target: 200,
         questions: [
             { q: "Emil ... um neun Uhr gefühstückt.", a: ["ist", "hat"], c: 1 },
-            { q: "Er ... um drei Uhr Sport gemacht.", a: ["hat", "ist"], c: 0 },
-            { q: "Wir ... nach Hause gegangen.", a: ["haben", "sind"], c: 1 }
+            { q: "Er ... um drei Uhr Sport gemacht.", a: ["hat", "ist"], c: 0 }
         ]
     };
 
-    const i18n = {
-        ru: { total: "Всего" },
-        de: { total: "Gesamt" },
-        en: { total: "Total" }
+    const lexicon = {
+        ru: { bank: "Накоплено баллов" },
+        en: { bank: "Points earned" },
+        de: { bank: "Gesammelte Punkte" }
     };
 
-    let score = 0;
-    let currentIdx = 0;
-    let currentBet = 0;
-
-    function init() {
-        renderQuestion();
-        updateDisplay();
+    function setLanguage(l) {
+        data.lang = l;
+        document.querySelectorAll('.l-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-' + l).classList.add('active');
+        refreshUI();
     }
 
-    function renderQuestion() {
-        document.getElementById('q-display').innerText = gameData.questions[currentIdx].q;
-        document.getElementById('step-bet').classList.remove('hidden');
-        document.getElementById('step-ans').classList.add('hidden');
+    function refreshUI() {
+        document.getElementById('lbl-bank').innerText = lexicon[data.lang].bank;
+        document.getElementById('val-score').innerText = data.score;
+        document.getElementById('q-text').innerText = data.questions[data.currentQ].q;
+        
+        let fillH = Math.min(85, (data.score / data.target) * 85);
+        document.getElementById('progress').style.height = fillH + '%';
     }
 
-    function setBet(amount) {
-        currentBet = amount;
-        document.getElementById('step-bet').classList.add('hidden');
-        const ansBox = document.getElementById('step-ans');
-        ansBox.innerHTML = '';
-        ansBox.classList.remove('hidden');
+    function makeBet(val) {
+        data.currentBet = val;
+        document.getElementById('bet-ui').classList.add('hidden');
+        const ansZone = document.getElementById('ans-ui');
+        ansZone.classList.remove('hidden');
+        ansZone.innerHTML = '';
 
-        gameData.questions[currentIdx].a.forEach((text, i) => {
+        data.questions[data.currentQ].a.forEach((txt, i) => {
             const b = document.createElement('button');
-            b.className = 'btn ans-btn';
-            b.innerText = text;
-            b.onclick = () => checkResult(i);
-            ansBox.appendChild(b);
+            b.className = 'ui-btn ans-btn';
+            b.innerText = txt;
+            b.onclick = () => finishTurn(i);
+            ansZone.appendChild(b);
         });
     }
 
-    function checkResult(choice) {
-        const isRight = choice === gameData.questions[currentIdx].c;
-        const vessel = document.getElementById('pig-vessel');
-
-        if (isRight) {
-            score += currentBet;
+    function finishTurn(idx) {
+        if (idx === data.questions[data.currentQ].c) {
+            data.score += data.currentBet;
         } else {
-            score = Math.max(0, score - currentBet);
-            vessel.classList.add('error');
-            setTimeout(() => vessel.classList.remove('error'), 400);
+            data.score = Math.max(0, data.score - data.currentBet);
         }
-
-        updateDisplay();
-        currentIdx = (currentIdx + 1) % gameData.questions.length;
-        renderQuestion();
+        data.currentQ = (data.currentQ + 1) % data.questions.length;
+        document.getElementById('ans-ui').classList.add('hidden');
+        document.getElementById('bet-ui').classList.remove('hidden');
+        refreshUI();
     }
 
-    function updateDisplay() {
-        document.getElementById('val-score').innerText = score;
-        document.getElementById('txt-total').innerText = i18n[gameData.lang].total;
-        
-        // Наполнение: макс 88% для визуальной красоты
-        const fill = Math.min(88, (score / gameData.targetScore) * 88);
-        document.getElementById('gold-level').style.height = fill + '%';
-    }
-
-    function changeLang(l) {
-        gameData.lang = l;
-        document.querySelectorAll('.l-btn').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
-        updateDisplay();
-    }
-
-    init();
+    setLanguage('ru');
 </script>
 </body>
 </html>
