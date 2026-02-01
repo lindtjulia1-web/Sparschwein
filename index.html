@@ -1,77 +1,84 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
     <style>
-        :root {
-            --gold: #ffcc00;
-            --bg: #121212;
+        :root { --gold: #ffcc00; --bg: #1a1a1a; }
+        body { background: transparent; font-family: 'Segoe UI', sans-serif; color: white; margin: 0; display: flex; justify-content: center; }
+        
+        .widget-box {
+            width: 350px; background: #252525; border-radius: 20px; padding: 20px;
+            border: 2px solid #444; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        body {
-            background: transparent;
-            font-family: 'Georgia', serif;
-            color: white;
-            display: flex;
-            justify-content: center;
+        /* Контейнер для свиньи */
+        .piggy-frame {
+            position: relative; width: 200px; height: 160px; margin: 0 auto;
+            border: 3px solid rgba(255,255,255,0.1); border-radius: 50% 50% 40% 40%;
+            background: rgba(255,255,255,0.05); overflow: hidden;
+            display: flex; align-items: flex-end; justify-content: center;
         }
 
-        .widget {
-            width: 400px;
-            background: #1e1e1e;
-            border-radius: 25px;
-            padding: 25px;
-            text-align: center;
-            border: 2px solid #333;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+        /* Золотой песок (уровень прогресса) */
+        .gold-level {
+            width: 100%; height: 0%; 
+            background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
+            transition: height 0.6s ease-out; box-shadow: 0 0 20px var(--gold);
         }
 
-        /* Прозрачная свинья-копилка */
-        .piggy-container {
-            position: relative;
-            width: 280px;
-            height: 200px;
-            margin: 0 auto;
-            /* Используем маску или фоновое изображение прозрачной свиньи */
-            background: url('https://i.ibb.co/vz6mYmY/transparent-piggy.png') no-repeat center;
-            background-size: contain;
+        /* Текст поверх свиньи */
+        .piggy-emoji {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 80px; opacity: 0.3; pointer-events: none;
         }
 
-        /* Золотой песок (монеты) внутри */
-        .gold-sand {
-            position: absolute;
-            bottom: 35px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 180px;
-            height: 0%; /* Растет с прогрессом */
-            background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-            border-radius: 50% 50% 10px 10px;
-            transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
-            z-index: -1;
-        }
+        .lang-btns { text-align: right; margin-bottom: 10px; }
+        .lang-btns button { background: #444; color: #fff; border: none; cursor: pointer; padding: 2px 6px; font-size: 10px; border-radius: 3px; }
 
-        .lang-switch { display: flex; justify-content: flex-end; gap: 5px; margin-bottom: 10px; }
-        .lang-switch button { 
-            background: #333; border: 1px solid #444; color: #888; 
-            font-size: 10px; cursor: pointer; border-radius: 4px;
-        }
+        .coin-btn-wrapper { display: flex; flex-direction: column; align-items: center; }
+        .coin-img { font-size: 30px; margin-bottom: 5px; } /* Замените на <img> когда будут ссылки */
 
-        /* Кнопки со значками монет */
-        .bet-option {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
+        .controls { display: flex; justify-content: space-around; margin-top: 20px; }
+        .btn { 
+            background: #333; border: 1px solid var(--gold); color: var(--gold);
+            padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: bold;
         }
+        .btn:hover { background: var(--gold); color: #000; }
+        
+        .hidden { display: none; }
+        #status { font-size: 20px; margin: 15px 0; color: var(--gold); }
+    </style>
+</head>
+<body>
 
-        .bet-coin {
-            width: 40px;
-            height: 40px;
-            background: url('https://i.ibb.co/Vv3Y7zD/pirate-coin.png') no-repeat center;
-            background-size: cover;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-        }
+<div class="widget-box">
+    <div class="lang-btns">
+        <button onclick="setL('de')">DE</button>
+        <button onclick="setL('en')">EN</button>
+        <button onclick="setL('ru')">RU</button>
+    </div>
 
-        .btn-bet
+    <div class="piggy-frame">
+        <div class="piggy-emoji">🐖</div>
+        <div id="goldSand" class="gold-level"></div>
+    </div>
+
+    <div id="status"><span id="L_bank">Банк:</span> <span id="balance">0</span> ⚓</div>
+
+    <div id="step-bet" class="controls">
+        <div class="coin-btn-wrapper">
+            <div class="coin-img">🪙</div>
+            <button class="btn" onclick="goBet(5)">5</button>
+        </div>
+        <div class="coin-btn-wrapper">
+            <div class="coin-img">🪙</div>
+            <button class="btn" onclick="goBet(15)">15</button>
+        </div>
+        <div class="coin-btn-wrapper">
+            <div class="coin-img">🪙</div>
+            <button class="btn" onclick="goBet(50)">50</button>
+        </div>
+    </div>
+
+    <div id="step-quiz" class="controls hidden">
+        <button class="btn" style="border-color:#00ff00; color:#00ff00
