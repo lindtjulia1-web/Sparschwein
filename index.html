@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <style>
         :root {
             --gold: #ffcc00;
-            --glass: rgba(255, 255, 255, 0.15);
-            --bg: #121212;
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --bg-dark: #121212;
         }
 
         body {
@@ -16,56 +16,187 @@
             display: flex;
             justify-content: center;
             margin: 0;
+            overflow: hidden;
         }
 
         .widget-card {
-            width: 380px;
+            width: 360px;
             background: #1a1a1a;
-            border-radius: 24px;
-            padding: 25px;
+            border-radius: 20px;
+            padding: 20px;
             text-align: center;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.7);
             border: 1px solid #333;
         }
 
-        /* Переключатель языков */
+        /* Переключатель языков: DE, EN, RU */
         .lang-panel {
             display: flex;
             justify-content: flex-end;
-            gap: 8px;
-            margin-bottom: 15px;
+            gap: 5px;
+            margin-bottom: 10px;
         }
 
         .lang-panel button {
             background: #2a2a2a;
             border: 1px solid #444;
             color: #888;
-            padding: 4px 8px;
-            border-radius: 6px;
+            padding: 3px 6px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 11px;
-            transition: 0.2s;
+            font-size: 10px;
         }
 
         .lang-panel button:hover { border-color: var(--gold); color: white; }
 
-        /* Стеклянная свинья из Игры в Кальмара */
-        .vault-container {
+        /* Прозрачная свинья-копилка */
+        .piggy-vessel {
             position: relative;
-            width: 260px;
-            height: 180px;
-            margin: 0 auto 20px;
-            background: url('https://i.ibb.co/3Y8M4v8/glass-pig-template.png') no-repeat center; /* Ссылка на прозрачный контур свиньи */
+            width: 240px;
+            height: 160px;
+            margin: 0 auto 15px;
+            background: url('https://i.ibb.co/3Y8M4v8/glass-pig-template.png') no-repeat center;
             background-size: contain;
             display: flex;
             align-items: flex-end;
             justify-content: center;
+            z-index: 1;
         }
 
-        /* Золотое наполнение (песок/монеты) */
-        .gold-fill {
-            width: 180px;
-            height: 0%; /* Динамически меняется */
+        /* Золотое наполнение (прогрессбанка) */
+        .gold-progress {
+            width: 160px;
+            height: 0%; /* Меняется динамически */
             background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
-            border-radius: 0 0 80px 80px;
-            transition: height 1s cubic-bezier(0.17, 0.67, 0.83,
+            border-radius: 0 0 70px 70px;
+            transition: height 0.8s ease-out;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
+        .status-text {
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: 300;
+        }
+
+        #bank-value { color: var(--gold); font-weight: bold; }
+
+        /* Квадраты ставок (вместо монет) */
+        .bet-container {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .bet-square {
+            width: 60px;
+            height: 45px;
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            color: var(--gold);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .bet-square:hover {
+            background: var(--gold);
+            color: black;
+            transform: translateY(-2px);
+        }
+
+        .action-btn {
+            padding: 10px 25px;
+            border-radius: 8px;
+            border: 2px solid;
+            background: transparent;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 0 8px;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="widget-card">
+    <div class="lang-panel">
+        <button onclick="setLang('de')">DE</button>
+        <button onclick="setLang('en')">EN</button>
+        <button onclick="setLang('ru')">RU</button>
+    </div>
+
+    <div class="piggy-vessel">
+        <div id="gold-level" class="gold-progress"></div>
+    </div>
+
+    <div class="status-text">
+        <span id="L-bank">Всего:</span> <span id="bank-value">0</span>
+    </div>
+
+    <div id="bet-step">
+        <p id="L-bet-hint" style="color:#777; font-size: 14px; margin-bottom: 10px;">Выберите ставку:</p>
+        <div class="bet-container">
+            <div class="bet-square" onclick="handleBet(10)">10</div>
+            <div class="bet-square" onclick="handleBet(25)">25</div>
+            <div class="bet-square" onclick="handleBet(50)">50</div>
+        </div>
+    </div>
+
+    <div id="confirm-step" class="hidden">
+        <p id="L-confirm-hint" style="color:#777; font-size: 14px; margin-bottom: 10px;">Проверим результат?</p>
+        <button class="action-btn" style="border-color:#2e7d32; color:#2e7d32;" onclick="finishRound(true)">OK</button>
+        <button class="action-btn" style="border-color:#c62828; color:#c62828;" onclick="finishRound(false)">NO</button>
+    </div>
+</div>
+
+<script>
+    let currentBalance = 0;
+    let activeBet = 0;
+    const targetCapacity = 300; // Монет до полной копилки
+
+    const texts = {
+        ru: { bank: "Всего:", bet: "Выберите ставку:", confirm: "Ответ верный?" },
+        en: { bank: "Total:", bet: "Select bet:", confirm: "Correct answer?" },
+        de: { bank: "Gesamt:", bet: "Einsatz wählen:", confirm: "Antwort richtig?" }
+    };
+
+    function setLang(lang) {
+        document.getElementById('L-bank').innerText = texts[lang].bank;
+        document.getElementById('L-bet-hint').innerText = texts[lang].bet;
+        document.getElementById('L-confirm-hint').innerText = texts[lang].confirm;
+    }
+
+    function handleBet(val) {
+        activeBet = val;
+        document.getElementById('bet-step').classList.add('hidden');
+        document.getElementById('confirm-step').classList.remove('hidden');
+    }
+
+    function finishRound(isSuccess) {
+        if(isSuccess) {
+            currentBalance += activeBet;
+        } else {
+            currentBalance = Math.max(0, currentBalance - activeBet);
+        }
+
+        document.getElementById('bank-value').innerText = currentBalance;
+        
+        // Обновление уровня "песка"
+        let fillHeight = Math.min(85, (currentBalance / targetCapacity) * 85);
+        document.getElementById('gold-level').style.height = fillHeight + "%";
+
+        document.getElementById('bet-step').classList.remove('hidden');
+        document.getElementById('confirm-step').classList.add('hidden');
+    }
+</script>
+
+</body>
+</html>
