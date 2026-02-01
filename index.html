@@ -2,44 +2,66 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Конструктор Копилки</title>
     <style>
-        :root { --accent: #ffd700; --bg: #1a1a1a; --panel: #2d2d2d; }
-        body { background: #111; color: #eee; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; display: flex; height: 100vh; }
+        :root { --accent: #ffcc00; --bg: #0f0f0f; --panel: #1e1e1e; --text: #e0e0e0; }
+        body { background: #050505; color: var(--text); font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Панель настроек */
-        .sidebar { width: 350px; background: var(--panel); padding: 20px; overflow-y: auto; border-right: 2px solid #000; }
-        h2 { color: var(--accent); font-size: 18px; margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 10px; }
-        label { display: block; margin: 15px 0 5px; font-size: 13px; color: #bbb; }
+        /* Левая панель настроек */
+        .sidebar { width: 340px; background: var(--panel); padding: 20px; overflow-y: auto; border-right: 1px solid #333; box-shadow: 10px 0 20px rgba(0,0,0,0.5); z-index: 10; }
+        h2 { color: var(--accent); font-size: 16px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 20px 0; display: flex; align-items: center; gap: 8px; }
+        
+        .field-group { margin-bottom: 15px; }
+        label { display: block; font-size: 11px; color: #888; margin-bottom: 6px; text-transform: uppercase; }
         input, textarea, select { 
-            width: 100%; background: #1a1a1a; border: 1px solid #444; color: #fff; 
-            padding: 8px; border-radius: 4px; box-sizing: border-box; 
+            width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 5px; font-size: 13px; box-sizing: border-box;
         }
-        .btn-main { 
-            width: 100%; padding: 12px; margin-top: 20px; border-radius: 6px; border: none;
-            background: var(--accent); color: #000; font-weight: bold; cursor: pointer; transition: 0.2s;
+        input:focus, textarea:focus { border-color: var(--accent); outline: none; }
+        
+        .btn-update { 
+            width: 100%; background: var(--accent); color: #000; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s;
         }
-        .btn-main:hover { background: #fff; transform: translateY(-2px); }
+        .btn-update:hover { background: #fff; transform: translateY(-2px); }
 
         /* Область предпросмотра */
-        .preview-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; position: relative; }
-        .preview-label { position: absolute; top: 10px; left: 10px; color: #555; font-weight: bold; text-transform: uppercase; }
+        .preview-zone { flex-grow: 1; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); }
+        .preview-tag { position: absolute; top: 20px; left: 20px; font-size: 12px; color: #444; font-weight: bold; letter-spacing: 2px; }
+
+        /* Виджет (справа) */
+        .widget-card {
+            width: 380px; background: #151515; border-radius: 24px; padding: 30px; display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8); border: 1px solid #222; position: relative;
+        }
         
-        /* Виджет игры */
-        #widget-container {
-            width: 400px; height: 500px; background: #1a1a1a; border-radius: 20px;
-            display: flex; flex-direction: column; align-items: center; padding: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid #333;
+        .lang-switch { position: absolute; top: 20px; right: 20px; display: flex; gap: 4px; }
+        .l-dot { font-size: 9px; padding: 2px 5px; border: 1px solid #444; border-radius: 3px; cursor: pointer; color: #666; }
+        .l-dot.active { border-color: var(--accent); color: var(--accent); }
+
+        .pig-container { width: 220px; height: 150px; position: relative; margin-bottom: 20px; }
+        .pig-img { width: 100%; height: 100%; object-fit: contain; z-index: 5; position: relative; }
+        
+        /* Слой наполнения (золото внутри) */
+        .gold-fill { 
+            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+            width: 140px; height: 0%; background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
+            border-radius: 0 0 70px 70px; transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0.7;
         }
-        .pig-img { width: 220px; height: 160px; object-fit: contain; margin-bottom: 15px; }
-        .score-val { color: var(--accent); font-size: 28px; font-weight: bold; margin: 10px 0; }
-        .q-text { text-align: center; font-size: 18px; min-height: 50px; margin-bottom: 20px; }
-        .btn-grid { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-        .game-btn { 
-            background: none; border: 2px solid var(--accent); color: var(--accent);
-            padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;
+
+        .score-box { text-align: center; margin-bottom: 20px; }
+        .score-label { font-size: 14px; color: #888; }
+        .score-num { font-size: 32px; color: var(--accent); font-weight: bold; display: block; }
+
+        .q-display { font-size: 18px; text-align: center; margin-bottom: 25px; min-height: 40px; line-height: 1.4; }
+
+        .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .action-btn { 
+            background: transparent; border: 2px solid var(--accent); color: var(--accent); 
+            padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; min-width: 60px;
         }
+        .action-btn:hover { background: rgba(255, 204, 0, 0.1); }
+        .ans-btn { border-color: #eee; color: #eee; }
+        .ans-btn:hover { background: #eee; color: #000; }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -47,93 +69,87 @@
 <div class="sidebar">
     <h2>⚙️ Настройка игры</h2>
     
-    <label>Язык интерфейса</label>
-    <select id="cfg-lang">
-        <option value="ru">Русский</option>
-        <option value="de">Deutsch</option>
-        <option value="en">English</option>
-    </select>
-
-    <label>Прямая ссылка на картинку (URL)</label>
-    <input type="text" id="cfg-img" placeholder="https://example.com/pig.png" value="https://i.ibb.co/pX99S99/glass-pig.png">
-    
-    <label>Вопрос</label>
-    <textarea id="cfg-q" rows="2">Emil ... um neun Uhr gefühstückt.</textarea>
-    
-    <label>Варианты (через запятую)</label>
-    <input type="text" id="cfg-ans" value="ist, hat">
-    
-    <label>Индекс правильного (0, 1, 2...)</label>
-    <input type="number" id="cfg-correct" value="1">
-
-    <label>Ставки (через запятую)</label>
-    <input type="text" id="cfg-bets" value="10, 25, 50">
-
-    <button class="btn-main" onclick="updatePreview()">ОБНОВИТЬ ПРЕДПРОСМОТР</button>
-    
-    <div style="margin-top: 30px; font-size: 11px; color: #666;">
-        * Вставьте этот URL в настройки для Genially после публикации.
+    <div class="field-group">
+        <label>Язык интерфейса</label>
+        <select id="cfg-lang">
+            <option value="ru">Русский</option>
+            <option value="de">Deutsch</option>
+            <option value="en">English</option>
+        </select>
     </div>
+
+    <div class="field-group">
+        <label>Прямая ссылка на картинку (URL)</label>
+        <input type="text" id="cfg-img" value="https://ai-image.genially.com/666ae28033f3b6001441b7">
+    </div>
+
+    <div class="field-group">
+        <label>Контент (Вопрос|Варианты|Индекс)</label>
+        <textarea id="cfg-content" rows="3">Emil ... um neun Uhr gefühstückt.|ist, hat|1</textarea>
+    </div>
+
+    <div class="field-group">
+        <label>Ставки (через запятую)</label>
+        <input type="text" id="cfg-bets" value="10, 25, 50">
+    </div>
+
+    <div class="field-group">
+        <label>Цель (макс. баллов)</label>
+        <input type="number" id="cfg-target" value="200">
+    </div>
+
+    <button class="btn-update" onclick="applySettings()">ОБНОВИТЬ ПРЕДПРОСМОТР</button>
+    <p style="font-size: 10px; color: #555; margin-top: 20px;">* После настройки скопируйте финальный код для Genially.</p>
 </div>
 
-<div class="preview-area">
-    <div class="preview-label">Предпросмотр</div>
+<div class="preview-zone">
+    <div class="preview-tag">ПРЕДПРОСМОТР</div>
     
-    <div id="widget-container">
-        <div style="width: 100%; display: flex; justify-content: flex-end; gap: 5px;">
-            <div style="font-size: 10px; border: 1px solid #444; padding: 2px 5px;">DE</div>
-            <div style="font-size: 10px; border: 1px solid #444; padding: 2px 5px;">EN</div>
-            <div style="font-size: 10px; border: 1px solid var(--accent); color: var(--accent); padding: 2px 5px;">RU</div>
+    <div class="widget-card">
+        <div class="lang-switch">
+            <div class="l-dot">DE</div><div class="l-dot">EN</div><div class="l-dot active">RU</div>
         </div>
 
-        <img id="view-img" class="pig-img" src="https://i.ibb.co/pX99S99/glass-pig.png" alt="piggy">
+        <div class="pig-container">
+            <div id="view-fill" class="gold-fill"></div>
+            <img id="view-img" class="pig-img" src="" alt="piggy">
+        </div>
+
+        <div class="score-box">
+            <span class="score-label" id="lbl-total">Всего:</span>
+            <span class="score-num" id="view-score">0</span>
+        </div>
+
+        <div class="q-display" id="view-q">Вопрос загружается...</div>
+
+        <div id="layer-bets" class="btn-row"></div>
         
-        <div id="view-label-bank" style="color: #888; font-size: 14px; margin-top: 10px;">Всего:</div>
-        <div class="score-val">0</div>
-
-        <div id="view-q" class="q-text">Вопрос появится здесь</div>
-
-        <div id="view-btns" class="btn-grid">
-            </div>
+        <div id="layer-ans" class="btn-row hidden"></div>
     </div>
 </div>
 
 <script>
-    const lexicon = {
-        ru: { bank: "Всего:" },
-        en: { bank: "Total:" },
-        de: { bank: "Gesamt:" }
+    let gameState = {
+        score: 0,
+        currentBet: 0,
+        correctIdx: 0,
+        target: 200,
+        lang: 'ru'
     };
 
-    function updatePreview() {
-        const lang = document.getElementById('cfg-lang').value;
+    const dictionary = {
+        ru: { total: "Всего:" },
+        en: { total: "Total:" },
+        de: { total: "Gesamt:" }
+    };
+
+    function applySettings() {
         const imgUrl = document.getElementById('cfg-img').value;
-        const question = document.getElementById('cfg-q').value;
+        const rawContent = document.getElementById('cfg-content').value.split('|');
         const bets = document.getElementById('cfg-bets').value.split(',');
-
-        // Обновляем картинку
-        const imgEl = document.getElementById('view-img');
-        imgEl.onerror = () => { imgEl.src = 'https://via.placeholder.com/220x160?text=Image+Error'; };
-        imgEl.src = imgUrl;
-
-        // Обновляем тексты
-        document.getElementById('view-label-bank').innerText = lexicon[lang].bank;
-        document.getElementById('view-q').innerText = question;
-
-        // Обновляем кнопки ставок
-        const btnContainer = document.getElementById('view-btns');
-        btnContainer.innerHTML = '';
-        bets.forEach(val => {
-            const b = document.createElement('button');
-            b.className = 'game-btn';
-            b.innerText = val.trim();
-            btnContainer.appendChild(b);
-        });
-    }
-
-    // Инициализация
-    updatePreview();
-</script>
-
-</body>
-</html>
+        gameState.target = parseInt(document.getElementById('cfg-target').value);
+        gameState.lang = document.getElementById('cfg-lang').value;
+        
+        // 1. Обновляем картинку и тексты
+        document.getElementById('view-img').src = imgUrl;
+        document.getElementById('lbl-total').innerText = dictionary[gameState
