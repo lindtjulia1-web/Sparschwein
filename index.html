@@ -1,125 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <style>
-        body { background: transparent; font-family: 'Helvetica Neue', Arial, sans-serif; color: white; display: flex; justify-content: center; margin: 0; }
-        .widget { width: 340px; background: #1a1a1a; border-radius: 20px; padding: 20px; text-align: center; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
-        /* Рисуем свинку кодом (SVG), чтобы она не пропадала */
-        .piggy-bank {
-            position: relative; width: 220px; height: 160px; margin: 0 auto 15px;
-            background: rgba(255,255,255,0.05);
-            border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 110px / 80px; /* Овальное тело */
-            overflow: hidden;
-            display: flex; align-items: flex-end; justify-content: center;
+        :root {
+            --gold: #ffcc00;
+            --bg: #121212;
+            --card: #1e1e1e;
         }
-        /* Пятачок */
-        .piggy-bank::after {
-            content: ''; position: absolute; right: -10px; top: 70px;
-            width: 20px; height: 30px; background: rgba(255,255,255,0.1);
-            border: 2px solid rgba(255,255,255,0.2); border-radius: 5px;
+
+        body {
+            background: transparent;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .widget-container {
+            width: 380px;
+            background: var(--card);
+            border-radius: 24px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.8);
+            border: 1px solid #333;
+        }
+
+        /* Селектор языков */
+        .lang-bar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 10px; }
+        .lang-bar button { background: #333; border: 1px solid #444; color: #888; cursor: pointer; padding: 4px 8px; border-radius: 5px; font-size: 10px; }
+        .lang-bar button:hover { border-color: var(--gold); color: white; }
+
+        /* Стеклянная свинья из "Игры в кальмара" */
+        .pig-vault {
+            position: relative;
+            width: 260px;
+            height: 180px;
+            margin: 0 auto 15px;
+            /* Используем прозрачный слой для контура свиньи */
+            background: url('https://i.ibb.co/3Y8M4v8/glass-pig-template.png') no-repeat center;
+            background-size: contain;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 2;
         }
 
         .gold-sand {
-            width: 100%; height: 0%; 
-            background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
-            transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
+            width: 175px;
+            height: 0%; /* Наполняется динамически */
+            background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728, #fbf5b7);
+            border-radius: 0 0 80px 80px;
+            transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 25px rgba(255, 204, 0, 0.3);
+            margin-bottom: 24px;
         }
 
-        .lang-bar { display: flex; justify-content: flex-end; gap: 5px; margin-bottom: 10px; }
-        .lang-bar button { background: #333; border: none; color: #888; font-size: 10px; cursor: pointer; padding: 2px 5px; border-radius: 3px; }
-        .lang-bar button:hover { color: #ffcc00; }
+        .balance-info { font-size: 22px; margin-bottom: 15px; color: var(--gold); }
 
-        .balance { font-size: 20px; margin: 10px 0; color: #ffcc00; }
-        
-        .bet-grid { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
+        /* Контейнеры этапов */
+        .game-screen { transition: 0.3s; min-height: 180px; }
+        .hidden { display: none; opacity: 0; }
+
+        /* Квадраты ставок */
+        .bet-grid { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
         .bet-box {
-            width: 60px; height: 45px; border: 2px solid #ffcc00; border-radius: 8px;
+            width: 70px; height: 50px; border: 2px solid var(--gold); border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            color: #ffcc00; font-weight: bold; cursor: pointer; transition: 0.2s;
+            color: var(--gold); font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s;
         }
-        .bet-box:hover { background: #ffcc00; color: black; transform: translateY(-3px); }
+        .bet-box:hover { background: var(--gold); color: black; transform: translateY(-3px); }
 
-        .controls { display: flex; justify-content: space-around; margin-top: 15px; }
-        .btn-action { padding: 10px 25px; border-radius: 8px; border: 2px solid; background: transparent; cursor: pointer; font-weight: bold; }
-        .hidden { display: none; }
+        /* Кнопки ответов */
+        .ans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .ans-btn {
+            background: #2a2a2a; border: 1px solid #444; color: white; padding: 12px;
+            border-radius: 8px; cursor: pointer; transition: 0.2s;
+        }
+        .ans-btn:hover { background: #3a3a3a; border-color: var(--gold); }
+
+        .feedback { font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="widget" id="main">
+<div class="widget-container">
     <div class="lang-bar">
-        <button onclick="setL('de')">DE</button>
-        <button onclick="setL('en')">EN</button>
-        <button onclick="setL('ru')">RU</button>
+        <button onclick="changeL('de')">DE</button>
+        <button onclick="changeL('en')">EN</button>
+        <button onclick="changeL('ru')">RU</button>
     </div>
 
-    <div class="piggy-bank">
-        <div id="fill" class="gold-sand"></div>
+    <div class="pig-vault">
+        <div id="sand" class="gold-sand"></div>
     </div>
 
-    <div class="balance">
-        <span id="txt-bank">Всего:</span> <span id="val">0</span>
+    <div class="balance-info">
+        <span id="L-bank">Всего:</span> <span id="val">0</span>
     </div>
 
-    <div id="step-bet">
-        <p id="txt-bet" style="color:#777; font-size:14px;">Выберите ставку:</p>
+    <div id="screen-bet" class="game-screen">
+        <p id="question-text" style="font-size: 18px;">Question text here...</p>
+        <p id="L-bet-hint" style="color: #888; font-size: 14px;">Насколько вы уверены?</p>
         <div class="bet-grid">
-            <div class="bet-box" onclick="makeBet(10)">10</div>
-            <div class="bet-box" onclick="makeBet(25)">25</div>
-            <div class="bet-box" onclick="makeBet(50)">50</div>
-        </div>
-    </div>
-
-    <div id="step-quiz" class="hidden">
-        <p id="txt-quiz" style="color:#777; font-size:14px;">Ответ верный?</p>
-        <div class="controls">
-            <button class="btn-action" style="border-color:#2e7d32; color:#2e7d32;" onclick="solve(true)">YES</button>
-            <button class="btn-action" style="border-color:#c62828; color:#c62828;" onclick="solve(false)">NO</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    let total = 0;
-    let bet = 0;
-    const capacity = 300; // Монет до полной свиньи
-
-    const lang = {
-        ru: { bank: "Всего:", bet: "Выберите ставку:", quiz: "Результат ответа:" },
-        en: { bank: "Total:", bet: "Place your bet:", quiz: "Is it correct?" },
-        de: { bank: "Gesamt:", bet: "Einsatz wählen:", quiz: "Antwort richtig?" }
-    };
-
-    function setL(l) {
-        document.getElementById('txt-bank').innerText = lang[l].bank;
-        document.getElementById('txt-bet').innerText = lang[l].bet;
-        document.getElementById('txt-quiz').innerText = lang[l].quiz;
-    }
-
-    function makeBet(v) {
-        bet = v;
-        document.getElementById('step-bet').classList.add('hidden');
-        document.getElementById('step-quiz').classList.remove('hidden');
-    }
-
-    function solve(win) {
-        if(win) total += bet;
-        else total = Math.max(0, total - bet);
-
-        document.getElementById('val').innerText = total;
-        
-        // Наполнение
-        let p = Math.min(100, (total / capacity) * 100);
-        document.getElementById('fill').style.height = p + "%";
-
-        document.getElementById('step-bet').classList.remove('hidden');
-        document.getElementById('step-quiz').classList.add('hidden');
-    }
-</script>
-
-</body>
-</html>
+            <div class="bet-box" onclick="placeBet(10)">10</div>
+            <div class="bet-box" onclick="placeBet(25)">25</div>
+            <div class="bet-box" onclick="
