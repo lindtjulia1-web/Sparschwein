@@ -3,96 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        /* Текстура золотого песка (не плоский желтый!) */
         :root { 
-            --sand-texture: radial-gradient(circle at 50% 50%, #f9e076 0%, #d4af37 50%, #b8860b 100%); 
+            --gold-sand: linear-gradient(to top, #8a6d3b, #f1d37e, #bf953f, #fcf6ba, #d4af37); 
+            --accent: #ffcc00;
         }
-        body { background: #000; color: #fff; font-family: sans-serif; display: flex; margin: 0; height: 100vh; }
-        
-        .editor { width: 350px; background: #1a1a1a; padding: 20px; border-right: 2px solid #333; }
-        .preview { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: #0d0d0d; }
+        body { background: #0a0a0a; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
-        /* КОНТЕЙНЕР ДЛЯ МАГИИ */
-        .pig-container {
-            position: relative;
-            width: 300px;
-            height: 200px;
-        }
+        /* ИНТЕРФЕЙС (как на твоих скринах) */
+        .editor { width: 380px; background: #161616; padding: 25px; border-right: 1px solid #333; box-sizing: border-box; }
+        .editor h2 { color: #fff; font-size: 18px; text-transform: uppercase; margin-bottom: 30px; }
+        label { display: block; font-size: 10px; color: #666; margin: 15px 0 5px; text-transform: uppercase; letter-spacing: 1px; }
+        input, textarea, select { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 6px; margin-bottom: 5px; font-size: 13px; }
+        .btn-update { background: var(--accent); color: #000; border: none; padding: 18px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 25px; text-transform: uppercase; }
 
-        /* ПЕСОК, КОТОРЫЙ ПРИНИМАЕТ ФОРМУ СВИНКИ */
-        .sand-layer {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 0%; /* Наполняется скриптом */
-            background: var(--sand-texture);
-            
-            /* ГЛАВНОЕ: Песок виден только внутри контуров картинки */
+        /* ПРЕДПРОСМОТР */
+        .preview { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #1a1a1a, #000); }
+        .widget { background: #111; width: 450px; padding: 50px; border-radius: 40px; text-align: center; border: 1px solid #222; position: relative; }
+
+        /* МАГИЯ НАПОЛНЕНИЯ */
+        .pig-frame { 
+            position: relative; width: 320px; height: 220px; margin: 0 auto 20px; 
+            /* Эта строка превращает свинку в трафарет */
             -webkit-mask-image: var(--pig-url);
             mask-image: var(--pig-url);
             -webkit-mask-size: contain;
             -webkit-mask-repeat: no-repeat;
-            -webkit-mask-position: bottom;
-            
-            transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1;
+            -webkit-mask-position: center;
         }
 
-        /* САМА СВИНКА (БЛИКИ И КОНТУРЫ) */
-        .pig-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: contain;
-            z-index: 2; /* Всегда сверху */
-            pointer-events: none;
-            opacity: 0.8; /* Делаем её чуть прозрачной для объема */
-        }
-
-        .score-display { font-size: 40px; color: #ffcc00; margin-top: 20px; text-align: center; font-weight: bold; }
-        .bet-btns { display: flex; gap: 10px; margin-top: 15px; }
-        .btn { border: 2px solid #ffcc00; background: none; color: #ffcc00; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
-    </style>
-</head>
-<body>
-
-<div class="editor">
-    <label style="font-size: 10px; color: #888;">URL СВИНКИ (PNG)</label>
-    <input type="text" id="p-url" style="width:100%; margin-bottom: 20px;" value="https://i.ibb.co/pX99S99/glass-pig.png">
-    <button onclick="apply()" style="width:100%; padding:10px; background:#ffcc00; border:none; font-weight:bold;">ОБНОВИТЬ</button>
-</div>
-
-<div class="preview">
-    <div style="text-align: center;">
-        <div class="pig-container" id="v-box" style="--pig-url: url('https://i.ibb.co/pX99S99/glass-pig.png')">
-            <div id="v-sand" class="sand-layer"></div>
-            <img id="v-img" class="pig-overlay" src="https://i.ibb.co/pX99S99/glass-pig.png">
-        </div>
-        <div class="score-display" id="v-score">0</div>
-        <div class="bet-btns">
-            <button class="btn" onclick="add(10)">+10</button>
-            <button class="btn" onclick="add(50)">+50</button>
-            <button class="btn" onclick="add(100)">+100</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    let current = 0;
-    function apply() {
-        const u = document.getElementById('p-url').value;
-        document.getElementById('v-img').src = u;
-        document.getElementById('v-box').style.setProperty('--pig-url', `url('${u}')`);
-        current = 0;
-        update();
-    }
-    function add(n) { current += n; update(); }
-    function update() {
-        document.getElementById('v-score').innerText = current;
-        let h = Math.min(100, (current / 300) * 100);
-        document.getElementById('v-sand').style.height = h + '%';
-    }
-    apply();
-</script>
-</body>
-</html>
+        .sand-fill { 
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
+            background: var(--gold-sand);
