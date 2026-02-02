@@ -3,129 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        :root { --sand: linear-gradient(to top, #d4af37, #f9e076, #c5a028); --bg: #0a0a0a; }
-        body { background: #000; color: #fff; font-family: sans-serif; display: flex; margin: 0; height: 100vh; }
+        :root { --accent: #ffcc00; --bg: #111; --panel: #1a1a1a; }
+        body { background: var(--bg); color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; }
         
-        /* Панель настроек */
-        .settings { width: 340px; background: #151515; padding: 20px; border-right: 1px solid #333; overflow-y: auto; }
-        input, textarea { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 10px; margin: 5px 0 15px; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; background: #f9e076; border: none; padding: 15px; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        /* Панель редактора */
+        .editor { width: 360px; background: var(--panel); padding: 25px; border-right: 2px solid #333; overflow-y: auto; }
+        .editor h2 { color: var(--accent); font-size: 18px; text-transform: uppercase; margin-top: 0; }
+        label { display: block; font-size: 12px; color: #888; margin: 15px 0 5px; }
+        input, textarea, select { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 6px; box-sizing: border-box; }
+        .btn-main { background: var(--accent); color: #000; border: none; padding: 15px; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 20px; cursor: pointer; }
 
-        /* Превью */
+        /* Превью виджета */
         .preview { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #222, #000); }
-        
-        /* ГЛАВНОЕ РЕШЕНИЕ: Контейнер копилки */
-        .pig-container { 
-            position: relative; 
-            width: 300px; height: 220px; 
-            margin-bottom: 20px;
-        }
+        .widget { background: #151515; padding: 40px; border-radius: 25px; text-align: center; width: 450px; box-shadow: 0 30px 60px rgba(0,0,0,0.8); }
 
-        /* Слой песка, который принимает форму свинки */
-        .sand-layer {
-            position: absolute;
-            bottom: 0; left: 0; width: 100%; height: 0%;
-            background: var(--sand);
-            /* Магия: используем ту же картинку как маску */
+        /* ИДЕАЛЬНОЕ НАПОЛНЕНИЕ (SVG MASK) */
+        .pig-container { 
+            position: relative; width: 300px; height: 200px; margin: 0 auto 20px; 
+            overflow: hidden; 
+        }
+        
+        /* Слой песка */
+        .sand-fill {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
+            background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
+            transition: height 1s ease-in-out;
+            /* Используем маску, чтобы песок не выходил за края */
             -webkit-mask-image: var(--pig-url);
             mask-image: var(--pig-url);
             -webkit-mask-size: contain;
-            mask-size: contain;
             -webkit-mask-repeat: no-repeat;
-            mask-repeat: no-repeat;
             -webkit-mask-position: bottom;
-            mask-position: bottom;
-            transition: height 1s ease-in-out;
-            z-index: 1;
         }
 
-        /* Сама картинка свинки (полупрозрачная поверх) */
-        .pig-visual {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: contain;
-            z-index: 2;
-            opacity: 0.9;
-        }
+        .pig-img { position: relative; width: 100%; height: 100%; object-fit: contain; z-index: 2; pointer-events: none; }
 
-        .widget-card { background: #1a1a1a; padding: 40px; border-radius: 20px; text-align: center; width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .score { font-size: 48px; color: #f9e076; font-weight: bold; margin-bottom: 10px; }
-        .btns { display: flex; gap: 10px; justify-content: center; }
-        .btn { border: 1px solid #f9e076; background: none; color: #f9e076; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: auto; }
-    </style>
-</head>
-<body>
-
-<div class="settings">
-    <h3>Настройка игры</h3>
-    <label>Ссылка на свинку (PNG)</label>
-    <input type="text" id="inp-img" value="https://i.ibb.co/pX99S99/glass-pig.png" oninput="applySettings()">
-    
-    <label>Вопрос | Варианты | Верный(0,1)</label>
-    <textarea id="inp-data" oninput="applySettings()">Emil ... um neun Uhr gefühstückt.|ist, hat|1</textarea>
-    
-    <label>Ставки</label>
-    <input type="text" id="inp-bets" value="10, 25, 50" oninput="applySettings()">
-
-    <label>Код для Genially</label>
-    <textarea id="res-code" readonly style="height: 80px; font-size: 10px; color: #888;"></textarea>
-</div>
-
-<div class="preview">
-    <div class="widget-card">
-        <div class="pig-container" id="v-pig-cont" style="--pig-url: url('https://i.ibb.co/pX99S99/glass-pig.png')">
-            <div id="v-sand" class="sand-layer"></div>
-            <img id="v-img" class="pig-visual" src="https://i.ibb.co/pX99S99/glass-pig.png">
-        </div>
-        <div class="score" id="v-score">0</div>
-        <div id="v-q" style="margin-bottom: 20px;">Загрузка...</div>
-        <div class="btns" id="v-btns"></div>
-    </div>
-</div>
-
-<script>
-    let score = 0;
-    let bet = 0;
-
-    function applySettings() {
-        const img = document.getElementById('inp-img').value;
-        const [q, opts, cor] = document.getElementById('inp-data').value.split('|');
-        const bets = document.getElementById('inp-bets').value.split(',');
-
-        document.getElementById('v-img').src = img;
-        document.getElementById('v-pig-cont').style.setProperty('--pig-url', `url('${img}')`);
-        document.getElementById('v-q').innerText = q;
-        
-        const btnBox = document.getElementById('v-btns');
-        btnBox.innerHTML = '';
-        bets.forEach(val => {
-            const b = document.createElement('button');
-            b.className = 'btn';
-            b.innerText = val.trim();
-            b.onclick = () => { bet = parseInt(val); alert('Ставка принята: ' + bet); play(opts.split(','), cor); };
-            btnBox.appendChild(b);
-        });
-
-        // Формируем код для iFrame
-        const widgetHtml = document.querySelector('.preview').innerHTML;
-        document.getElementById('res-code').value = `<iframe srcdoc='${widgetHtml.replace(/'/g, "&quot;")}' width="100%" height="500" frameborder="0"></iframe>`;
-    }
-
-    function play(opts, cor) {
-        // Упрощенная демонстрация для превью
-        score += bet; 
-        updateUI();
-    }
-
-    function updateUI() {
-        document.getElementById('v-score').innerText = score;
-        // Наполняем песком (от 0 до 100%)
-        let percent = Math.min(100, (score / 200) * 100);
-        document.getElementById('v-sand').style.height = percent + '%';
-    }
-
-    applySettings();
-</script>
-
-</body>
-</html>
+        .score { font-size: 54px; color: var(--accent); font-weight: bold; margin: 10px 0; }
+        .btns { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .game-btn { background: none; border: 2px solid var(--accent); color: var(--accent); padding: 10px 25px; border-radius: 10px; font-weight: bold; cursor
