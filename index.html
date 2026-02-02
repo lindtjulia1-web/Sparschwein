@@ -2,132 +2,96 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Конструктор Пиратской Копилки</title>
     <style>
-        body { background: #0a0a0a; color: #fff; font-family: sans-serif; display: flex; margin: 0; height: 100vh; }
-        .panel { width: 350px; background: #1a1a1a; padding: 20px; border-right: 1px solid #333; overflow-y: auto; }
-        input, textarea, select { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 10px; margin: 8px 0; box-sizing: border-box; border-radius: 4px; }
-        .btn { background: #ffcc00; color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 10px; }
-        #res-code { width: 100%; height: 120px; background: #050505; color: #0f0; font-family: monospace; font-size: 10px; margin-top: 15px; }
-        .preview { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: #111; position: relative; }
-        .preview::after { content: 'ПРЕДПРОСМОТР'; position: absolute; top: 10px; left: 10px; color: #333; letter-spacing: 5px; }
-    </style>
-</head>
-<body>
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; padding: 20px; overflow: hidden; }
+        .widget { background: #151515; border-radius: 25px; padding: 25px; display: inline-block; border: 1px solid #333; width: 350px; }
+        
+        /* Копилка */
+        .pig-container { position: relative; width: 220px; height: 160px; margin: 0 auto 20px; background: #000; border-radius: 15px; overflow: hidden; }
+        .gold-layer { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728); transition: height 0.8s ease; z-index: 1; }
+        /* Картинка с 'дыркой' в животе */
+        .pig-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 2; pointer-events: none; }
 
-<div class="panel">
-    <h3>⚙️ Настройка</h3>
-    <label>Картинка (URL PNG)</label>
-    <input type="text" id="i-img" value="https://i.ibb.co/pX99S99/glass-pig.png">
-    
-    <label>Язык</label>
-    <select id="i-lang">
-        <option value="RU">Русский</option>
-        <option value="EN">English</option>
-        <option value="DE">Deutsch</option>
-    </select>
-
-    <label>Вопрос | Варианты | Верный(0,1)</label>
-    <textarea id="i-q" rows="3">Emil ... Sport|hat gemacht,ist gemacht|0</textarea>
-
-    <label>Ставки</label>
-    <input type="text" id="i-bets" value="10, 25, 50">
-
-    <button class="btn" onclick="generate()">СОЗДАТЬ КОД ДЛЯ GENIALLY</button>
-
-    <label>Скопируйте это в Genially:</label>
-    <textarea id="res-code" readonly onclick="this.select()"></textarea>
-</div>
-
-<div class="preview" id="p-zone">
-    </div>
-
-<script>
-function generate() {
-    const img = document.getElementById('i-img').value;
-    const lang = document.getElementById('i-lang').value;
-    const [q, opts, right] = document.getElementById('i-q').value.split('|');
-    const bets = document.getElementById('i-bets').value;
-    
-    const labels = { RU: 'Пиратские монеты', EN: 'Pirate Coins', DE: 'Piratenmünzen' };
-
-    // Создаем чистый HTML виджета
-    const widgetHTML = `
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { background: transparent; color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
-        .card { background: #151515; border-radius: 20px; padding: 20px; border: 1px solid #333; display: inline-block; width: 320px; }
-        .pig-box { position: relative; width: 200px; height: 150px; margin: 0 auto 15px; overflow: hidden; background: #000; border-radius: 10px; }
-        .gold { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728); transition: height 0.6s; z-index: 1; }
-        .pig-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 2; }
-        .score { font-size: 32px; color: #ffcc00; font-weight: bold; margin: 10px 0; }
-        .btns { display: flex; gap: 8px; justify-content: center; }
-        button { background: transparent; border: 2px solid #ffcc00; color: #ffcc00; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .ans-btn { border-color: white; color: white; }
+        .score { font-size: 38px; color: #ffcc00; font-weight: bold; margin: 5px 0; }
+        .label { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+        .question { font-size: 16px; margin-bottom: 20px; min-height: 45px; color: #ddd; }
+        
+        .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        button { background: transparent; border: 2px solid #ffcc00; color: #ffcc00; padding: 10px 18px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: rgba(255, 204, 0, 0.1); }
+        .ans-btn { border-color: #fff; color: #fff; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="pig-box">
-            <div id="f" class="gold" style="height: 0%"></div>
-            <img class="pig-img" src="${img}">
-        </div>
-        <div class="score" id="s">0</div>
-        <div style="font-size:10px; color:#666; margin-bottom:15px;">${labels[lang]}</div>
-        <div id="q" style="margin-bottom:20px; min-height:40px;">${q}</div>
-        <div id="b-row" class="btns"></div>
-        <div id="a-row" class="btns hidden"></div>
+
+<div class="widget">
+    <div class="pig-container">
+        <div id="fill" class="gold-layer" style="height: 0%"></div>
+        <img class="pig-overlay" src="https://i.ibb.co/pX99S99/glass-pig.png">
     </div>
 
-    <script>
-        let score = 0, bet = 0;
-        const options = "${opts}".split(',');
-        const rightIdx = ${right};
-        const bets = "${bets}".split(',');
+    <div class="score" id="score">0</div>
+    <div class="label" id="lang-label">Пиратские монеты</div>
+    
+    <div class="question" id="q-text">Emil ... um neun Uhr gefühstückt.</div>
 
-        function drawBets() {
-            const div = document.getElementById('b-row');
-            div.innerHTML = '';
-            bets.forEach(v => {
-                const b = document.createElement('button');
-                b.innerText = v.trim();
-                b.onclick = () => { bet = parseInt(v); showAns(); };
-                div.appendChild(b);
-            });
-        }
+    <div id="bets" class="btn-row">
+        <button onclick="setBet(10)">10</button>
+        <button onclick="setBet(25)">25</button>
+        <button onclick="setBet(50)">50</button>
+    </div>
 
-        function showAns() {
-            document.getElementById('b-row').classList.add('hidden');
-            const div = document.getElementById('a-row');
-            div.innerHTML = '';
-            div.classList.remove('hidden');
-            options.forEach((t, i) => {
-                const b = document.createElement('button');
-                b.className = 'ans-btn';
-                b.innerText = t.trim();
-                b.onclick = () => {
-                    if(i === rightIdx) score += bet;
-                    else score = Math.max(0, score - bet);
-                    document.getElementById('s').innerText = score;
-                    document.getElementById('f').style.height = Math.min(100, (score/200)*100) + '%';
-                    div.classList.add('hidden');
-                    document.getElementById('b-row').classList.remove('hidden');
-                };
-                div.appendChild(b);
-            });
+    <div id="answers" class="btn-row hidden">
+        <button class="ans-btn" onclick="check(0)">ist</button>
+        <button class="ans-btn" onclick="check(1)">hat</button>
+    </div>
+</div>
+
+<script>
+    // НАСТРОЙКИ (можешь менять их прямо здесь)
+    const config = {
+        correctIndex: 1, // hat
+        targetScore: 200,
+        lang: 'RU' // RU, EN, DE
+    };
+
+    const labels = {
+        RU: 'Пиратские монеты',
+        EN: 'Pirate Coins',
+        DE: 'Piratenmünzen'
+    };
+
+    let total = 0;
+    let currentBet = 0;
+
+    document.getElementById('lang-label').innerText = labels[config.lang];
+
+    function setBet(v) {
+        currentBet = v;
+        document.getElementById('bets').classList.add('hidden');
+        document.getElementById('answers').classList.remove('hidden');
+    }
+
+    function check(idx) {
+        if (idx === config.correctIndex) {
+            total += currentBet;
+        } else {
+            total = Math.max(0, total - currentBet);
         }
-        drawBets();
-    <\/script>
+        
+        updateUI();
+        document.getElementById('answers').classList.add('hidden');
+        document.getElementById('bets').classList.remove('hidden');
+    }
+
+    function updateUI() {
+        document.getElementById('score').innerText = total;
+        // Расчет высоты наполнения
+        let h = Math.min(100, (total / config.targetScore) * 100);
+        document.getElementById('fill').style.height = h + '%';
+    }
+</script>
+
 </body>
-</html>`;
-
-    // Показываем в предпросмотре через iframe
-    const previewFrame = document.createElement('iframe');
-    previewFrame.style.width = '100%';
-    previewFrame.style.height = '100%';
-    previewFrame.style.border = 'none';
-    document.getElementById('p-zone').innerHTML = '';
-    document.getElementById('p-zone').appendChild
+</html>
