@@ -2,154 +2,168 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Piggy Bank Builder v2</title>
     <style>
-        :root { --accent: #ffcc00; --panel-bg: #161616; }
-        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        .editor { width: 420px; background: var(--panel-bg); padding: 20px; border-right: 2px solid #333; overflow-y: auto; box-sizing: border-box; }
-        h2 { color: var(--accent); font-size: 16px; text-transform: uppercase; margin: 0 0 20px; }
-        label { display: block; font-size: 10px; color: #888; margin: 15px 0 5px; text-transform: uppercase; }
-        input, textarea { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 5px; font-size: 13px; box-sizing: border-box; }
-        .btn-build { background: var(--accent); color: #000; border: none; padding: 15px; border-radius: 8px; font-weight: bold; width: 100%; margin: 20px 0; cursor: pointer; }
-        .preview { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: #0d0d0d; }
-        #final-code { height: 80px; background: #050505; color: #0f0; font-family: monospace; font-size: 10px; border: 1px dashed #555; }
+        :root { --accent: #ffcc00; --bg: #0d0d0d; }
+        body { background: transparent; color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow: hidden; }
+        
+        .game-card { background: #111; padding: 25px; border-radius: 35px; border: 1px solid #222; width: 420px; margin: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        
+        /* Визуализация свинки */
+        .pig-box { position: relative; width: 280px; height: 180px; margin: 0 auto 15px; }
+        .sand-fill {
+            position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%);
+            width: 240px; background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
+            height: 0%; transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            clip-path: path('M215,85 c0-35-30-65-85-65 c-45,0-80,25-90,55 c-10,5-15,0-20-10 c-5-10-10,0-5,10 c5,15,15,25,25,30 c0,25,5,40,15,40 c15,0,20-15,25-25 h90 c5,10,10,25,20,25 c15,0,20-25,20-35 C195,110,215,105,215,85z');
+        }
+        .pig-outline {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border: 2px solid rgba(255,255,255,0.1); border-radius: 20px; /* Заглушка, если нет картинки */
+            background: url('https://img.genially.com/666ae277f4d337001522cf25/dd99430b-967b-402c-b51c-4b1464309f3e.png') no-repeat center;
+            background-size: contain; z-index: 5; pointer-events: none;
+        }
+
+        .score-val { font-size: 42px; color: var(--accent); font-weight: bold; margin-bottom: 10px; }
+        .q-text { font-size: 18px; min-height: 50px; margin: 10px 0 20px; padding: 0 10px; color: #eee; }
+        
+        .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; min-height: 60px; }
+        .btn { 
+            background: transparent; border: 2px solid var(--accent); color: var(--accent); 
+            padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; 
+            transition: 0.3s; font-size: 14px;
+        }
+        .btn:hover { background: rgba(255,204,0,0.1); transform: scale(1.05); }
+        .btn:disabled { border-color: #444; color: #444; cursor: not-allowed; }
+        
+        .bet-btn { border-color: #ffcc00; color: #ffcc00; }
+        .ans-btn { border-color: #fff; color: #fff; }
+        
+        .feedback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.5s; z-index: 10; }
+        .show-fb { opacity: 1; transform: translate(-50%, -60%); }
     </style>
 </head>
 <body>
 
-<div class="editor">
-    <h2>⚙️ Конструктор Игры</h2>
+<div class="game-card">
+    <div class="pig-box">
+        <div id="sand" class="sand-fill"></div>
+        <div class="pig-outline"></div>
+        <div id="fb" class="feedback"></div>
+    </div>
     
-    <label>Прямая ссылка на PNG (Свинка)</label>
-    <input type="text" id="cfg-url" value="https://img.genially.com/666ae277f4d337001522cf25/dd99430b-967b-402c-b51c-4b1464309f3e.png">
-
-    <label>Данные (Вопрос|Варианты|Индекс верного)</label>
-    <textarea id="cfg-data" rows="4">Emil ... um neun Uhr gefühstückt.|ist,hat|1
-Wir ... im Park gelaufen|sind,haben|0</textarea>
+    <div id="score" class="score-val">0</div>
+    <div id="question" class="q-text">Загрузка...</div>
     
-    <label>Цель (баллы для 100% песка)</label>
-    <input type="number" id="cfg-goal" value="200">
-
-    <button class="btn-build" onclick="generate()">ОБНОВИТЬ ПРЕДПРОСМОТР</button>
-    
-    <label>Код для вставки (iFrame)</label>
-    <textarea id="final-code" readonly onclick="this.select()"></textarea>
+    <div id="controls" class="btn-row">
+        </div>
 </div>
 
-<div class="preview" id="preview-area"></div>
-
 <script>
-function generate() {
-    const goal = document.getElementById('cfg-goal').value;
-    const imgUrl = document.getElementById('cfg-url').value;
-    const rawData = document.getElementById('cfg-data').value.split('\n').filter(l => l.trim());
-    const questions = rawData.map(line => {
-        const [q, opts, cor] = line.split('|');
-        return { q, opts: opts.split(','), cor: parseInt(cor) };
-    });
+    // ПАРАМЕТРЫ ДЛЯ РЕДАКТОРА (потом будут приходить извне)
+    const config = {
+        lang: "RU",
+        goal: 300,
+        allowPenalty: true, // Включить штрафы
+        betSteps: [10, 25, 50],
+        questions: [
+            { q: "Emil ... um neun Uhr gefühstückt.", a: ["ist", "hat"], c: 1 },
+            { q: "Wir ... gestern im Kino.", a: ["haben", "waren"], c: 1 },
+            { q: "Ich ... meine Hausaufgaben gemacht.", a: ["habe", "bin"], c: 0 }
+        ],
+        messages: {
+            RU: { correct: "Отлично!", wrong: "Риск не оправдался", start: "Сделай ставку!" },
+            EN: { correct: "Great!", wrong: "Risk failed", start: "Make a bet!" }
+        }
+    };
 
-    const widgetCode = `
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { background: transparent; color: #fff; font-family: sans-serif; text-align: center; margin: 0; overflow: hidden; }
-        .game-card { background: #0c0c0c; padding: 30px; border-radius: 40px; width: 380px; margin: auto; position: relative; }
+    let state = {
+        score: 0,
+        currentQ: 0,
+        currentBet: 0,
+        phase: 'BET' // BET или ANS
+    };
+
+    function init() {
+        render();
+    }
+
+    function render() {
+        const qData = config.questions[state.currentQ];
+        const msg = config.messages[config.lang];
         
-        /* Контейнер для свинки и песка */
-        .pig-container {
-            position: relative;
-            width: 300px;
-            height: 200px;
-            margin: 0 auto 10px;
+        if (!qData) {
+            document.getElementById('question').innerText = "Игра окончена!";
+            document.getElementById('controls').innerHTML = "";
+            return;
         }
 
-        /* Золотой песок с маской по форме свинки */
-        .sand {
-            position: absolute;
-            bottom: 25px; /* Корректировка под ножки */
-            left: 50%;
-            transform: translateX(-50%);
-            width: 280px;
-            height: 0%; /* Начальное состояние */
-            background: linear-gradient(to top, #b8860b, #ffd700, #fff2ac);
-            transition: height 0.8s ease-out;
-            /* Точный контур стеклянной свинки */
-            clip-path: path('M245,95 c0-40-35-75-95-75 c-50,0-90,30-100,65 c-10,5-20,0-25-10 c-5-10-10,0-5,10 c5,15,20,25,30,30 c0,25,5,50,20,50 c15,0,20-15,25-25 h110 c5,10,10,25,25,25 c15,0,20-25,20-40 C220,125,245,120,245,95z');
-        }
+        document.getElementById('question').innerText = qData.q;
+        const ctrl = document.getElementById('controls');
+        ctrl.innerHTML = "";
 
-        .pig-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('${imgUrl}') no-repeat center;
-            background-size: contain;
-            z-index: 5;
-            pointer-events: none;
-        }
-
-        .score { font-size: 60px; color: #ffcc00; font-weight: bold; margin: 10px 0; }
-        .q-text { font-size: 18px; color: #ccc; margin-bottom: 20px; min-height: 44px; }
-        .btn { background: transparent; border: 2px solid #ffcc00; color: #ffcc00; padding: 12px 25px; border-radius: 12px; cursor: pointer; margin: 5px; font-weight: bold; font-size: 16px; transition: 0.2s; }
-        .btn:hover { background: rgba(255,204,0,0.1); }
-    </style>
-</head>
-<body>
-    <div class="game-card">
-        <div class="pig-container">
-            <div class="sand" id="sand-fill"></div>
-            <div class="pig-overlay"></div>
-        </div>
-
-        <div class="score" id="score">0</div>
-        <div class="q-text" id="question">Загрузка...</div>
-        <div id="answers"></div>
-    </div>
-
-    <script>
-        const questions = ${JSON.stringify(questions)};
-        let currentIdx = 0, totalScore = 0, goal = ${goal};
-
-        function updateUI() {
-            document.getElementById('score').innerText = totalScore;
-            
-            // Расчет высоты песка (макс ~75% высоты контейнера чтобы не залило уши)
-            const percent = Math.min(100, (totalScore / goal) * 100);
-            document.getElementById('sand-fill').style.height = (percent * 0.75) + "%";
-
-            if(currentIdx >= questions.length) {
-                document.getElementById('question').innerText = "ГОТОВО!";
-                document.getElementById('answers').innerHTML = "";
-                return;
-            }
-
-            const q = questions[currentIdx];
-            document.getElementById('question').innerText = q.q;
-            const btnBox = document.getElementById('answers');
-            btnBox.innerHTML = "";
-
-            q.opts.forEach((opt, i) => {
+        if (state.phase === 'BET') {
+            // ФАЗА 1: СТАВКА
+            config.betSteps.forEach(amount => {
                 const b = document.createElement('button');
-                b.className = 'btn';
-                b.innerText = opt;
+                b.className = "btn bet-btn";
+                b.innerText = "💰 " + amount;
                 b.onclick = () => {
-                    if(i === q.cor) totalScore += 50; 
-                    else totalScore = Math.max(0, totalScore - 25);
-                    currentIdx++;
-                    updateUI();
+                    state.currentBet = amount;
+                    state.phase = 'ANS';
+                    render();
                 };
-                btnBox.appendChild(b);
+                ctrl.appendChild(b);
+            });
+        } else {
+            // ФАЗА 2: ОТВЕТ
+            qData.a.forEach((text, i) => {
+                const b = document.createElement('button');
+                b.className = "btn ans-btn";
+                b.innerText = text;
+                b.onclick = () => checkAnswer(i);
+                ctrl.appendChild(b);
             });
         }
-        updateUI();
-    <\/script>
-</body>
-</html>`;
+        
+        updatePig();
+    }
 
-    const finalIframe = `<iframe srcdoc='${widgetCode.replace(/'/g, "&apos;")}' width="100%" height="600" frameborder="0"></iframe>`;
-    document.getElementById('final-code').value = finalIframe;
-    document.getElementById('preview-area').innerHTML = finalIframe;
-}
-generate();
+    function checkAnswer(index) {
+        const qData = config.questions[state.currentQ];
+        const isCorrect = index === qData.c;
+        const fb = document.getElementById('fb');
+        const msg = config.messages[config.lang];
+
+        if (isCorrect) {
+            state.score += state.currentBet;
+            fb.innerText = msg.correct;
+            fb.style.color = "#44ff44";
+        } else {
+            if (config.allowPenalty) {
+                state.score = Math.max(0, state.score - state.currentBet);
+            }
+            fb.innerText = msg.wrong;
+            fb.style.color = "#ff4444";
+        }
+
+        fb.classList.add('show-fb');
+        
+        setTimeout(() => {
+            fb.classList.remove('show-fb');
+            state.currentQ++;
+            state.phase = 'BET';
+            render();
+        }, 1500);
+    }
+
+    function updatePig() {
+        document.getElementById('score').innerText = state.score;
+        const pct = Math.min(100, (state.score / config.goal) * 100);
+        // Регулируем высоту (75% - это примерно полный живот свинки)
+        document.getElementById('sand').style.height = (pct * 0.75) + "%";
+    }
+
+    init();
 </script>
 </body>
 </html>
