@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <style>
         :root { --accent: #ffcc00; --bg: #0d0d0d; }
-        body { background: transparent; color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        body { background: transparent; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         
         .game-card { background: #111; padding: 25px; border-radius: 35px; border: 1px solid #222; width: 440px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); position: relative; }
         
@@ -13,45 +13,166 @@
         .l-btn { background: #222; border: 1px solid #444; color: #888; font-size: 10px; padding: 3px 7px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
         .l-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(255,204,0,0.1); }
 
-        .pig-container { position: relative; width: 320px; height: 200px; margin: 0 auto; }
-        .pig-svg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        .pig-overlay {
+        /* Контейнер для графики */
+        .pig-visual { position: relative; width: 320px; height: 220px; margin: 0 auto; }
+        
+        /* Слой с песком и маской */
+        .sand-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://img.genially.com/666ae277f4d337001522cf25/dd99430b-967b-402c-b51c-4b1464309f3e.png') no-repeat center;
-            background-size: contain; z-index: 2; pointer-events: none;
+            z-index: 1;
         }
 
-        .score-val { font-size: 50px; color: var(--accent); font-weight: bold; margin-top: -5px; }
-        .q-text { font-size: 17px; min-height: 48px; margin: 10px 0; color: #eee; }
+        /* Сама картинка свинки (прозрачная) */
+        .pig-img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://img.genially.com/666ae277f4d337001522cf25/dd99430b-967b-402c-b51c-4b1464309f3e.png') no-repeat center;
+            background-size: contain; z-index: 5; pointer-events: none;
+        }
+
+        .score-display { font-size: 48px; color: var(--accent); font-weight: bold; margin-top: -10px; }
+        .question-box { font-size: 18px; min-height: 50px; margin: 15px 0; color: #eee; line-height: 1.4; }
         
-        .btn-row { display: flex; gap: 8px; justify-content: center; min-height: 55px; flex-wrap: wrap; }
+        .controls { display: flex; gap: 10px; justify-content: center; min-height: 60px; flex-wrap: wrap; }
         .btn { 
             background: transparent; border: 2px solid var(--accent); color: var(--accent); 
-            padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; 
-            transition: 0.2s; font-size: 14px;
+            padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s;
         }
         .btn:hover { background: rgba(255,204,0,0.1); transform: translateY(-2px); }
 
-        .fb-msg { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); font-weight: bold; font-size: 20px; z-index: 10; pointer-events: none; transition: 0.4s; opacity: 0; }
-        .fb-show { opacity: 1; top: 80px; }
+        /* Сообщения фидбека */
+        .feedback { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); font-weight: bold; font-size: 22px; z-index: 10; opacity: 0; transition: 0.4s; pointer-events: none; }
+        .fb-active { opacity: 1; top: 80px; }
     </style>
 </head>
 <body>
 
 <div class="game-card">
-    <div class="lang-sw" id="lang-btns">
-        <button class="l-btn" onclick="setLang('DE')">DE</button>
-        <button class="l-btn" onclick="setLang('EN')">EN</button>
-        <button class="l-btn active" onclick="setLang('RU')">RU</button>
+    <div class="lang-sw" id="lang-menu">
+        <button class="l-btn" onclick="updateLanguage('DE')">DE</button>
+        <button class="l-btn" onclick="updateLanguage('EN')">EN</button>
+        <button class="l-btn active" onclick="updateLanguage('RU')">RU</button>
     </div>
 
-    <div class="pig-container">
-        <svg class="pig-svg-canvas" viewBox="0 0 320 200">
+    <div class="pig-visual">
+        <svg class="sand-layer" viewBox="0 0 320 220">
             <defs>
-                <clipPath id="pigMask"><path d="M245,100 c0-40-35-75-95-75 c-50,0-90,30-100,65 c-10,5-20,0-25-10 c-5-10-10,0-5,10 c5,15,20,25,30,30 c0,25,5,50,20,50 c15,0,20-15,25-25 h110 c5,10,10,25,25,25 c15,0,20-25,20-40 C220,130,245,125,245,100z" /></clipPath>
-                <linearGradient id="goldSand" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#b8860b"/><stop offset="100%" stop-color="#fff2ac"/></linearGradient>
+                <clipPath id="pigShape">
+                    <path d="M250,110 c0-45-40-75-95-75 c-55,0-90,30-100,65 c-15,5-25,0-30-10 c-5-10-10,0-5,10 c5,15,20,25,30,30 c0,25,5,40,15,40 c15,0,20-15,25-25 h110 c5,10,10,25,25,25 c15,0,20-25,20-35 C225,130,250,125,250,110z" />
+                </clipPath>
+                <linearGradient id="goldGradient" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stop-color="#bf953f" />
+                    <stop offset="50%" stop-color="#fcf6ba" />
+                    <stop offset="100%" stop-color="#b38728" />
+                </linearGradient>
             </defs>
-            <rect id="sandRect" x="0" y="200" width="320" height="0" fill="url(#goldSand)" clip-path="url(#pigMask)" style="transition: all 0.8s ease-out;" />
+            <rect id="sandLevel" x="0" y="220" width="320" height="0" fill="url(#goldGradient)" clip-path="url(#pigShape)" style="transition: all 1s ease-in-out;" />
         </svg>
-        <div class="pig-overlay"></div>
-        <div id="fb" class="fb
+        <div class="pig-img"></div>
+        <div id="status-msg" class="feedback"></div>
+    </div>
+    
+    <div id="score-text" class="score-display">0</div>
+    <div id="q-area" class="question-box"></div>
+    <div id="btn-area" class="controls"></div>
+</div>
+
+<script>
+    const dictionary = {
+        RU: { bet: "ВАША СТАВКА:", win: "ВЕРНО! +", loss: "ОШИБКА! -", end: "КОПИЛКА ПОЛНА!", again: "ЕЩЕ РАЗ" },
+        EN: { bet: "PLACE A BET:", win: "CORRECT! +", loss: "WRONG! -", end: "BANK IS FULL!", again: "PLAY AGAIN" },
+        DE: { bet: "DEIN EINSATZ:", win: "RICHTIG! +", loss: "FALSCH! -", end: "FERTIG!", again: "WIEDERHOLEN" }
+    };
+
+    const gameData = {
+        lang: "RU",
+        goal: 200,
+        questions: [
+            { q: "Emil ... um neun Uhr gefühstückt.", a: ["ist", "hat"], c: 1 },
+            { q: "Wir ... gestern im Kino.", a: ["haben", "waren"], c: 1 },
+            { q: "Ich ... ein Buch gelesen.", a: ["habe", "bin"], c: 0 }
+        ]
+    };
+
+    let currentScore = 0, currentQIndex = 0, activeBet = 0, currentPhase = 'BET';
+
+    function updateLanguage(newLang) {
+        gameData.lang = newLang;
+        document.querySelectorAll('.l-btn').forEach(b => b.classList.toggle('active', b.innerText === newLang));
+        renderFrame();
+    }
+
+    function renderFrame() {
+        const q = gameData.questions[currentQIndex];
+        const texts = dictionary[gameData.lang];
+        const btnContainer = document.getElementById('btn-area');
+        const qContainer = document.getElementById('q-area');
+        
+        btnContainer.innerHTML = "";
+        
+        if (!q) {
+            qContainer.innerText = texts.end;
+            btnContainer.innerHTML = `<button class="btn" onclick="location.reload()">${texts.again}</button>`;
+            return;
+        }
+
+        if (currentPhase === 'BET') {
+            qContainer.innerText = texts.bet;
+            [10, 25, 50].forEach(val => {
+                let b = document.createElement('button');
+                b.className = "btn";
+                b.innerText = "💰 " + val;
+                b.onclick = () => { activeBet = val; currentPhase = 'ANS'; renderFrame(); };
+                btnContainer.appendChild(b);
+            });
+        } else {
+            qContainer.innerText = q.q;
+            q.a.forEach((option, i) => {
+                let b = document.createElement('button');
+                b.className = "btn";
+                b.innerText = option;
+                b.onclick = () => processAnswer(i);
+                btnContainer.appendChild(b);
+            });
+        }
+        refreshPig();
+    }
+
+    function processAnswer(idx) {
+        const isRight = idx === gameData.questions[currentQIndex].c;
+        const fb = document.getElementById('status-msg');
+        const texts = dictionary[gameData.lang];
+        
+        if (isRight) {
+            currentScore += activeBet;
+            fb.innerText = texts.win + activeBet;
+            fb.style.color = "#44ff44";
+        } else {
+            currentScore = Math.max(0, currentScore - activeBet);
+            fb.innerText = texts.loss + activeBet;
+            fb.style.color = "#ff4444";
+        }
+
+        fb.classList.add('fb-active');
+        setTimeout(() => {
+            fb.classList.remove('fb-active');
+            currentQIndex++;
+            currentPhase = 'BET';
+            renderFrame();
+        }, 1300);
+    }
+
+    function refreshPig() {
+        document.getElementById('score-text').innerText = currentScore;
+        const fillPercent = Math.min(1, currentScore / gameData.goal);
+        const sand = document.getElementById('sandLevel');
+        
+        // Математика наполнения: 140px - это высота "пуза"
+        const fillHeight = fillPercent * 140; 
+        sand.setAttribute('height', fillHeight);
+        sand.setAttribute('y', 175 - fillHeight);
+    }
+
+    updateLanguage('RU'); // Старт
+</script>
+</body>
+</html>
