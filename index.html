@@ -58,4 +58,108 @@
         <svg class="pig-svg-canvas" viewBox="0 0 320 220">
             <defs>
                 <clipPath id="pigMask">
-                    <path d="M245,115 c0-45-40-75-95-75 c-55,0-90,30-100,65 c-15,5-25,0-30-10 c-5-10-1
+                    <path d="M245,115 c0-45-40-75-95-75 c-55,0-90,30-100,65 c-15,5-25,0-30-10 c-5-10-10,0-5,10 c5,15,20,25,30,30 c0,25,5,40,15,40 c15,0,20-15,25-25 h110 c5,10,10,25,25,25 c15,0,20-25,20-35 C220,135,245,130,245,115z" />
+                </clipPath>
+                <linearGradient id="goldSand" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stop-color="#b8860b" />
+                    <stop offset="50%" stop-color="#ffd700" />
+                    <stop offset="100%" stop-color="#fff2ac" />
+                </linearGradient>
+            </defs>
+            <rect id="sandRect" x="0" y="220" width="320" height="0" fill="url(#goldSand)" clip-path="url(#pigMask)" style="transition: all 0.8s ease-out;" />
+        </svg>
+        <div class="pig-overlay"></div>
+        <div id="fb" class="fb-msg"></div>
+    </div>
+    
+    <div id="score" class="score-val">0</div>
+    <div id="question" class="q-text">Загрузка...</div>
+    <div id="controls" class="btn-row"></div>
+</div>
+
+<script>
+    const config = {
+        lang: "RU",
+        goal: 200,
+        questions: [
+            { q: "Emil ... um neun Uhr gefühstückt.", a: ["ist", "hat"], c: 1 },
+            { q: "Wir ... gestern im Kino.", a: ["haben", "waren"], c: 1 },
+            { q: "Ich ... meine Hausaufgaben gemacht.", a: ["habe", "bin"], c: 0 }
+        ],
+        msg: { correct: "ОТЛИЧНО! +", wrong: "ОШИБКА! -" }
+    };
+
+    let score = 0, currentQ = 0, bet = 0, phase = 'BET';
+
+    function render() {
+        const q = config.questions[currentQ];
+        const ctrl = document.getElementById('controls');
+        const qBox = document.getElementById('question');
+        
+        if (!q) {
+            qBox.innerText = "УРА! ВСЁ ЗАПОЛНЕНО!";
+            ctrl.innerHTML = '<button class="btn" onclick="location.reload()">ЗАНОВО</button>';
+            return;
+        }
+
+        ctrl.innerHTML = "";
+        
+        if (phase === 'BET') {
+            qBox.innerText = "ВЫБЕРИ СТАВКУ (УВЕРЕННОСТЬ):";
+            [10, 25, 50].forEach(amt => {
+                let b = document.createElement('button');
+                b.className = "btn";
+                b.innerText = "💰 " + amt;
+                b.onclick = () => { bet = amt; phase = 'ANS'; render(); };
+                ctrl.appendChild(b);
+            });
+        } else {
+            qBox.innerText = q.q;
+            q.a.forEach((txt, i) => {
+                let b = document.createElement('button');
+                b.className = "btn";
+                b.innerText = txt;
+                b.onclick = () => check(i);
+                ctrl.appendChild(b);
+            });
+        }
+        updatePig();
+    }
+
+    function check(idx) {
+        const correct = idx === config.questions[currentQ].c;
+        const fb = document.getElementById('fb');
+        
+        if (correct) {
+            score += bet;
+            fb.innerText = config.msg.correct + bet;
+            fb.style.color = "#44ff44";
+        } else {
+            score = Math.max(0, score - bet);
+            fb.innerText = config.msg.wrong + bet;
+            fb.style.color = "#ff4444";
+        }
+
+        fb.classList.add('fb-show');
+        setTimeout(() => {
+            fb.classList.remove('fb-show');
+            currentQ++;
+            phase = 'BET';
+            render();
+        }, 1200);
+    }
+
+    function updatePig() {
+        document.getElementById('score').innerText = score;
+        const pct = Math.min(1, score / config.goal);
+        const sand = document.getElementById('sandRect');
+        // Рассчитываем высоту и позицию Y так, чтобы песок рос снизу вверх внутри маски
+        const h = pct * 140; 
+        sand.setAttribute('height', h);
+        sand.setAttribute('y', 170 - h);
+    }
+
+    render();
+</script>
+</body>
+</html>
