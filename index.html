@@ -4,166 +4,58 @@
     <meta charset="UTF-8">
     <style>
         :root { --accent: #ffcc00; --bg: #0d0d0d; }
-        body { background: transparent; color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; overflow: hidden; }
+        body { background: transparent; color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         
-        .game-card { background: #111; padding: 25px; border-radius: 35px; border: 1px solid #222; width: 420px; margin: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .game-card { background: #111; padding: 25px; border-radius: 35px; border: 1px solid #222; width: 420px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); position: relative; }
         
-        /* Визуализация свинки */
-        .pig-box { position: relative; width: 280px; height: 180px; margin: 0 auto 15px; }
-        .sand-fill {
-            position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%);
-            width: 240px; background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
-            height: 0%; transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            clip-path: path('M215,85 c0-35-30-65-85-65 c-45,0-80,25-90,55 c-10,5-15,0-20-10 c-5-10-10,0-5,10 c5,15,15,25,25,30 c0,25,5,40,15,40 c15,0,20-15,25-25 h90 c5,10,10,25,20,25 c15,0,20-25,20-35 C195,110,215,105,215,85z');
-        }
-        .pig-outline {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            border: 2px solid rgba(255,255,255,0.1); border-radius: 20px; /* Заглушка, если нет картинки */
-            background: url('https://img.genially.com/666ae277f4d337001522cf25/dd99430b-967b-402c-b51c-4b1464309f3e.png') no-repeat center;
-            background-size: contain; z-index: 5; pointer-events: none;
+        /* КОНТЕЙНЕР СО СВИНКОЙ И ПЕСКОМ */
+        .pig-container {
+            position: relative;
+            width: 320px;
+            height: 220px;
+            margin: 0 auto;
         }
 
-        .score-val { font-size: 42px; color: var(--accent); font-weight: bold; margin-bottom: 10px; }
-        .q-text { font-size: 18px; min-height: 50px; margin: 10px 0 20px; padding: 0 10px; color: #eee; }
+        /* SVG Маска для песка */
+        .pig-svg-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+
+        /* Картинка свинки поверх песка */
+        .pig-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: url('https://img.genially.com/666ae277f4d337001522cf25/dd99430b-967b-402c-b51c-4b1464309f3e.png') no-repeat center;
+            background-size: contain;
+            z-index: 2; /* Поверх песка */
+            pointer-events: none;
+        }
+
+        .score-val { font-size: 50px; color: var(--accent); font-weight: bold; margin-top: -10px; text-shadow: 0 0 15px rgba(255,204,0,0.3); }
+        .q-text { font-size: 18px; min-height: 50px; margin: 15px 0; color: #eee; line-height: 1.4; }
         
-        .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; min-height: 60px; }
+        .btn-row { display: flex; gap: 10px; justify-content: center; min-height: 60px; }
         .btn { 
             background: transparent; border: 2px solid var(--accent); color: var(--accent); 
-            padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; 
-            transition: 0.3s; font-size: 14px;
+            padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: bold; 
+            transition: 0.2s; font-size: 16px;
         }
-        .btn:hover { background: rgba(255,204,0,0.1); transform: scale(1.05); }
-        .btn:disabled { border-color: #444; color: #444; cursor: not-allowed; }
-        
-        .bet-btn { border-color: #ffcc00; color: #ffcc00; }
-        .ans-btn { border-color: #fff; color: #fff; }
-        
-        .feedback { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; font-weight: bold; opacity: 0; pointer-events: none; transition: 0.5s; z-index: 10; }
-        .show-fb { opacity: 1; transform: translate(-50%, -60%); }
+        .btn:hover { background: rgba(255,204,0,0.1); transform: translateY(-2px); }
+        .btn:active { transform: scale(0.95); }
+
+        .fb-msg { position: absolute; top: 110px; left: 50%; transform: translateX(-50%); font-weight: bold; font-size: 20px; z-index: 10; pointer-events: none; transition: 0.4s; opacity: 0; }
+        .fb-show { opacity: 1; top: 90px; }
     </style>
 </head>
 <body>
 
 <div class="game-card">
-    <div class="pig-box">
-        <div id="sand" class="sand-fill"></div>
-        <div class="pig-outline"></div>
-        <div id="fb" class="feedback"></div>
-    </div>
-    
-    <div id="score" class="score-val">0</div>
-    <div id="question" class="q-text">Загрузка...</div>
-    
-    <div id="controls" class="btn-row">
-        </div>
-</div>
-
-<script>
-    // ПАРАМЕТРЫ ДЛЯ РЕДАКТОРА (потом будут приходить извне)
-    const config = {
-        lang: "RU",
-        goal: 300,
-        allowPenalty: true, // Включить штрафы
-        betSteps: [10, 25, 50],
-        questions: [
-            { q: "Emil ... um neun Uhr gefühstückt.", a: ["ist", "hat"], c: 1 },
-            { q: "Wir ... gestern im Kino.", a: ["haben", "waren"], c: 1 },
-            { q: "Ich ... meine Hausaufgaben gemacht.", a: ["habe", "bin"], c: 0 }
-        ],
-        messages: {
-            RU: { correct: "Отлично!", wrong: "Риск не оправдался", start: "Сделай ставку!" },
-            EN: { correct: "Great!", wrong: "Risk failed", start: "Make a bet!" }
-        }
-    };
-
-    let state = {
-        score: 0,
-        currentQ: 0,
-        currentBet: 0,
-        phase: 'BET' // BET или ANS
-    };
-
-    function init() {
-        render();
-    }
-
-    function render() {
-        const qData = config.questions[state.currentQ];
-        const msg = config.messages[config.lang];
-        
-        if (!qData) {
-            document.getElementById('question').innerText = "Игра окончена!";
-            document.getElementById('controls').innerHTML = "";
-            return;
-        }
-
-        document.getElementById('question').innerText = qData.q;
-        const ctrl = document.getElementById('controls');
-        ctrl.innerHTML = "";
-
-        if (state.phase === 'BET') {
-            // ФАЗА 1: СТАВКА
-            config.betSteps.forEach(amount => {
-                const b = document.createElement('button');
-                b.className = "btn bet-btn";
-                b.innerText = "💰 " + amount;
-                b.onclick = () => {
-                    state.currentBet = amount;
-                    state.phase = 'ANS';
-                    render();
-                };
-                ctrl.appendChild(b);
-            });
-        } else {
-            // ФАЗА 2: ОТВЕТ
-            qData.a.forEach((text, i) => {
-                const b = document.createElement('button');
-                b.className = "btn ans-btn";
-                b.innerText = text;
-                b.onclick = () => checkAnswer(i);
-                ctrl.appendChild(b);
-            });
-        }
-        
-        updatePig();
-    }
-
-    function checkAnswer(index) {
-        const qData = config.questions[state.currentQ];
-        const isCorrect = index === qData.c;
-        const fb = document.getElementById('fb');
-        const msg = config.messages[config.lang];
-
-        if (isCorrect) {
-            state.score += state.currentBet;
-            fb.innerText = msg.correct;
-            fb.style.color = "#44ff44";
-        } else {
-            if (config.allowPenalty) {
-                state.score = Math.max(0, state.score - state.currentBet);
-            }
-            fb.innerText = msg.wrong;
-            fb.style.color = "#ff4444";
-        }
-
-        fb.classList.add('show-fb');
-        
-        setTimeout(() => {
-            fb.classList.remove('show-fb');
-            state.currentQ++;
-            state.phase = 'BET';
-            render();
-        }, 1500);
-    }
-
-    function updatePig() {
-        document.getElementById('score').innerText = state.score;
-        const pct = Math.min(100, (state.score / config.goal) * 100);
-        // Регулируем высоту (75% - это примерно полный живот свинки)
-        document.getElementById('sand').style.height = (pct * 0.75) + "%";
-    }
-
-    init();
-</script>
-</body>
-</html>
+    <div class="pig-container">
+        <svg class="pig-svg-canvas" viewBox="0 0 320 220">
+            <defs>
+                <clipPath id="pigMask">
+                    <path d="M245,115 c0-45-40-75-95-75 c-55,0-90,30-100,65 c-15,5-25,0-30-10 c-5-10-1
