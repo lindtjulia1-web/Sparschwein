@@ -2,172 +2,110 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Конструктор: Золотой Песок</title>
     <style>
-        :root { --accent: #ffcc00; --panel-bg: #1a1a1a; --preview-bg: #0d0d0d; }
-        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-
-        /* РЕДАКТОР (СЛЕВА) */
-        .editor { width: 380px; background: var(--panel-bg); padding: 25px; border-right: 2px solid #333; overflow-y: auto; box-sizing: border-box; }
-        .editor h2 { color: var(--accent); font-size: 18px; margin-top: 0; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        label { display: block; font-size: 11px; color: #888; margin: 15px 0 5px; text-transform: uppercase; }
-        input, textarea, select { width: 100%; background: #080808; border: 1px solid #444; color: #fff; padding: 12px; border-radius: 6px; box-sizing: border-box; font-size: 13px; }
-        .btn-update { background: var(--accent); color: #000; border: none; padding: 15px; border-radius: 8px; font-weight: bold; width: 100%; margin: 25px 0 10px; cursor: pointer; transition: 0.3s; }
-        .btn-update:hover { background: #fff; }
-        #final-code { height: 100px; font-family: monospace; font-size: 10px; color: #0f0; background: #050505; border: 1px dashed #444; margin-top: 10px; }
-
-        /* ПРЕДПРОСМОТР (СПРАВА) */
-        .preview { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #222 0%, #000 100%); position: relative; }
-        .preview::before { content: "ПРЕДПРОСМОТР"; position: absolute; top: 20px; left: 20px; color: #333; font-weight: bold; letter-spacing: 5px; }
-
-        /* ИГРОВОЙ ЭКРАН */
-        .widget-card { background: #151515; width: 420px; padding: 40px; border-radius: 35px; border: 1px solid #222; text-align: center; box-shadow: 0 40px 80px rgba(0,0,0,0.8); }
+        :root { --sand-color: linear-gradient(to top, #d4af37, #f9e076, #c5a028); }
+        body { background: #000; color: #fff; font-family: sans-serif; display: flex; margin: 0; height: 100vh; }
         
-        /* ПЕСОК ВНУТРИ СВИНКИ */
-        .pig-container { position: relative; width: 280px; height: 180px; margin: 0 auto 20px; background: #000; border-radius: 20px; overflow: hidden; }
-        .sand-fill { 
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
-            background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
-            transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1; 
+        /* Стили редактора */
+        .editor { width: 350px; background: #1a1a1a; padding: 20px; border-right: 2px solid #333; overflow-y: auto; }
+        input, textarea, select { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 10px; margin-bottom: 15px; border-radius: 5px; }
+        .btn-build { width: 100%; background: #ffcc00; color: #000; border: none; padding: 15px; font-weight: bold; cursor: pointer; border-radius: 5px; }
+
+        /* Стили виджета */
+        .preview { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: #0d0d0d; }
+        .widget-box { background: #151515; padding: 30px; border-radius: 20px; text-align: center; width: 400px; }
+
+        /* МАГИЯ НАПОЛНЕНИЯ */
+        .pig-frame { 
+            position: relative; 
+            width: 280px; height: 200px; 
+            margin: 0 auto 20px;
         }
-        .pig-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 2; pointer-events: none; }
 
-        .score-display { font-size: 52px; color: var(--accent); font-weight: bold; margin: 10px 0; text-shadow: 0 0 20px rgba(255,204,0,0.3); }
-        .question-box { font-size: 18px; color: #ccc; margin-bottom: 30px; min-height: 50px; line-height: 1.5; }
-        
-        .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-        .game-btn { background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 12px 24px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
-        .game-btn:hover { background: rgba(255,204,0,0.1); transform: scale(1.05); }
-        .ans-btn { border-color: #fff; color: #fff; }
-        .hidden { display: none; }
+        .sand-body {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 0%;
+            background: var(--sand-color);
+            /* Трафарет: песок принимает форму картинки */
+            -webkit-mask-image: var(--pig-url);
+            mask-image: var(--pig-url);
+            -webkit-mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-position: bottom;
+            transition: height 1s ease-in-out;
+            z-index: 1;
+        }
+
+        .pig-glass {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: contain;
+            z-index: 2; /* Стекло поверх песка */
+            pointer-events: none;
+        }
+
+        .score-num { font-size: 48px; color: #ffcc00; font-weight: bold; }
+        .btn-grid { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .game-btn { border: 2px solid #ffcc00; background: none; color: #ffcc00; padding: 10px 20px; border-radius: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="editor">
-    <h2>⚙️ Настройка игры</h2>
+    <h3>⚙️ Настройка</h3>
+    <label>URL PNG (прозрачный фон)</label>
+    <input type="text" id="url" value="https://i.ibb.co/pX99S99/glass-pig.png">
     
-    <label>Язык интерфейса</label>
-    <select id="cfg-lang">
-        <option value="RU">Русский</option>
-        <option value="EN">English</option>
-        <option value="DE">Deutsch</option>
-    </select>
+    <label>Вопрос | Варианты | Верный</label>
+    <textarea id="data">Emil ... Sport|hat gemacht, ist gemacht|0</textarea>
+    
+    <label>Ставки</label>
+    <input type="text" id="bets" value="10, 25, 50">
 
-    <label>Прямая ссылка на PNG (прозрачное пузо)</label>
-    <input type="text" id="cfg-url" value="https://i.ibb.co/pX99S99/glass-pig.png">
-    
-    <label>Вопрос | Ответы | Верный (0,1..)</label>
-    <textarea id="cfg-data" rows="3">Emil ... um neun Uhr gefühstückt.|ist, hat|1</textarea>
-    
-    <label>Ставки (через запятую)</label>
-    <input type="text" id="cfg-bets" value="10, 25, 50">
-
-    <label>Цель (баллы для 100% песка)</label>
-    <input type="number" id="cfg-goal" value="200">
-
-    <button class="btn-update" onclick="build()">ОБНОВИТЬ И СОЗДАТЬ КОД</button>
-    
-    <label>Код для Genially (iFrame)</label>
-    <textarea id="final-code" readonly onclick="this.select()"></textarea>
+    <button class="btn-build" onclick="rebuild()">ОБНОВИТЬ</button>
 </div>
 
 <div class="preview">
-    <div class="widget-card">
-        <div class="pig-container">
-            <div id="v-sand" class="sand-fill"></div>
-            <img id="v-img" class="pig-overlay" src="">
+    <div class="widget-box">
+        <div class="pig-frame" id="v-frame" style="--pig-url: url('https://i.ibb.co/pX99S99/glass-pig.png')">
+            <div id="v-sand" class="sand-body"></div>
+            <img id="v-img" class="pig-glass" src="https://i.ibb.co/pX99S99/glass-pig.png">
         </div>
-        <div class="score-display" id="v-score">0</div>
-        <div class="question-box" id="v-q">Настройте вопрос в редакторе...</div>
-        
-        <div id="row-bets" class="btn-row"></div>
-        <div id="row-ans" class="btn-row hidden"></div>
+        <div class="score-num" id="v-score">0</div>
+        <div id="v-q">Текст вопроса</div>
+        <div class="btn-grid" id="v-btns"></div>
     </div>
 </div>
 
 <script>
-    let state = { score: 0, bet: 0, correct: 0, answers: [], goal: 200 };
+    let score = 0;
+    function rebuild() {
+        const img = document.getElementById('url').value;
+        const [q, opts, cor] = document.getElementById('data').value.split('|');
+        const bts = document.getElementById('bets').value.split(',');
 
-    function build() {
-        const url = document.getElementById('cfg-url').value;
-        const [q, opts, cor] = document.getElementById('cfg-data').value.split('|');
-        const bets = document.getElementById('cfg-bets').value.split(',');
-        state.goal = parseInt(document.getElementById('cfg-goal').value);
-        state.correct = parseInt(cor);
-        state.answers = opts.split(',').map(a => a.trim());
-        state.score = 0;
-
-        document.getElementById('v-img').src = url;
+        document.getElementById('v-img').src = img;
+        document.getElementById('v-frame').style.setProperty('--pig-url', `url('${img}')`);
         document.getElementById('v-q').innerText = q;
         
-        createBets(bets);
-        updateUI();
-        generateCode();
-    }
-
-    function createBets(bets) {
-        const r = document.getElementById('row-bets');
-        r.innerHTML = '';
-        r.classList.remove('hidden');
-        document.getElementById('row-ans').classList.add('hidden');
-
-        bets.forEach(v => {
+        const bBox = document.getElementById('v-btns');
+        bBox.innerHTML = '';
+        bts.forEach(v => {
             const b = document.createElement('button');
             b.className = 'game-btn';
             b.innerText = v.trim();
-            b.onclick = () => { state.bet = parseInt(v); showAnswers(); };
-            r.appendChild(b);
+            b.onclick = () => { score += parseInt(v); update(); };
+            bBox.appendChild(b);
         });
+        score = 0; update();
     }
 
-    function showAnswers() {
-        document.getElementById('row-bets').classList.add('hidden');
-        const r = document.getElementById('row-ans');
-        r.innerHTML = '';
-        r.classList.remove('hidden');
-
-        state.answers.forEach((text, i) => {
-            const b = document.createElement('button');
-            b.className = 'game-btn ans-btn';
-            b.innerText = text;
-            b.onclick = () => {
-                if(i === state.correct) state.score += state.bet;
-                else state.score = Math.max(0, state.score - state.bet);
-                updateUI();
-                showBets();
-            };
-            r.appendChild(b);
-        });
-    }
-
-    function showBets() {
-        document.getElementById('row-ans').classList.add('hidden');
-        document.getElementById('row-bets').classList.remove('hidden');
-    }
-
-    function updateUI() {
-        document.getElementById('v-score').innerText = state.score;
-        let h = Math.min(100, (state.score / state.goal) * 100);
+    function update() {
+        document.getElementById('v-score').innerText = score;
+        let h = Math.min(100, (score / 200) * 100);
         document.getElementById('v-sand').style.height = h + '%';
     }
-
-    function generateCode() {
-        const css = document.querySelector('style').innerHTML;
-        const html = document.querySelector('.widget-card').outerHTML;
-        const script = `let s=0,b=0,g=${state.goal},c=${state.correct}; /* ...логика... */`;
-        
-        const final = `<iframe srcdoc='<html><head><style>${css}</style></head><body><div class="preview">${html}</div></body></html>' width="100%" height="600" frameborder="0"></iframe>`;
-        document.getElementById('final-code').value = final.replace(/'/g, "&apos;");
-    }
-
-    function showBets() {
-        document.getElementById('row-ans').classList.add('hidden');
-        document.getElementById('row-bets').classList.remove('hidden');
-    }
-
-    build();
+    rebuild();
 </script>
 </body>
 </html>
