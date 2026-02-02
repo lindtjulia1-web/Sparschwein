@@ -2,104 +2,98 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Конструктор Виджета: Копилка</title>
     <style>
-        :root { --accent: #ffcc00; --bg: #0d0d0d; --panel: #161616; }
-        body { background: #000; color: #fff; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        :root { --gold: linear-gradient(to top, #bf953f, #fcf6ba, #b38728); --panel: #1a1a1a; }
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
 
-        /* ЛЕВАЯ ПАНЕЛЬ (РЕДАКТОР) */
+        /* РЕДАКТОР СЛЕВА */
         .editor { width: 380px; background: var(--panel); padding: 25px; border-right: 2px solid #333; overflow-y: auto; }
-        .editor h2 { color: var(--accent); font-size: 16px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 25px; display: flex; align-items: center; }
-        .editor h2::before { content: '⚙️'; margin-right: 10px; }
-        
-        label { display: block; font-size: 10px; color: #777; margin: 15px 0 5px; text-transform: uppercase; font-weight: bold; }
-        input, textarea, select { width: 100%; background: #0a0a0a; border: 1px solid #333; color: #eee; padding: 12px; border-radius: 6px; font-size: 13px; box-sizing: border-box; }
-        input:focus { border-color: var(--accent); outline: none; }
-        
-        .update-btn { background: var(--accent); color: #000; border: none; padding: 18px; border-radius: 8px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 25px; transition: 0.3s; text-transform: uppercase; }
-        .update-btn:hover { background: #fff; transform: translateY(-2px); }
+        label { display: block; font-size: 10px; color: #888; margin: 15px 0 5px; text-transform: uppercase; }
+        input, textarea, select { width: 100%; background: #000; border: 1px solid #444; color: #eee; padding: 12px; border-radius: 6px; margin-bottom: 5px; }
+        .btn-update { background: #ffcc00; color: #000; border: none; padding: 18px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 20px; }
 
-        /* ПРАВАЯ ПАНЕЛЬ (ПРЕДПРОСМОТР) */
-        .preview-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #222, #000); position: relative; }
-        .preview-label { position: absolute; top: 20px; left: 20px; color: #444; font-weight: 900; letter-spacing: 5px; font-size: 12px; }
+        /* ПРЕДПРОСМОТР СПРАВА */
+        .preview { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: #0d0d0d; }
+        .widget-card { background: #111; width: 420px; padding: 40px; border-radius: 35px; text-align: center; border: 1px solid #222; position: relative; }
 
-        /* ВИДЖЕТ (КАК НА СКРИНШОТЕ) */
-        .widget-card { background: #111; width: 440px; padding: 40px; border-radius: 30px; text-align: center; position: relative; border: 1px solid #222; box-shadow: 0 40px 100px rgba(0,0,0,0.8); }
-        
-        /* Переключатель языков */
-        .lang-switch { position: absolute; top: 25px; right: 25px; display: flex; gap: 5px; }
-        .lang-btn { background: #222; border: 1px solid #444; color: #666; font-size: 10px; padding: 3px 6px; border-radius: 4px; cursor: pointer; }
-        .lang-btn.active { border-color: var(--accent); color: var(--accent); }
+        /* ЯЗЫКИ (как на твоем скрине) */
+        .lang-chips { position: absolute; top: 30px; right: 30px; display: flex; gap: 5px; }
+        .chip { padding: 4px 8px; border: 1px solid #444; font-size: 10px; border-radius: 4px; color: #666; cursor: pointer; }
+        .chip.active { border-color: #ffcc00; color: #ffcc00; }
 
-        /* СВИНКА И ПЕСОК */
-        .pig-container { 
-            position: relative; width: 280px; height: 180px; margin: 0 auto 30px; 
-            background: #000; border-radius: 20px; overflow: hidden; /* Эффект тонущей свинки убираем здесь */
+        /* КОНТЕЙНЕР ДЛЯ СВИНКИ */
+        .pig-viewport { 
+            position: relative; 
+            width: 320px; height: 200px; 
+            margin: 0 auto 20px; 
+            background: #000; /* Фон за свинкой */
+            overflow: hidden; 
+            border-radius: 15px;
         }
-        .sand-fill { 
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
-            background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
-            box-shadow: 0 0 20px rgba(255, 204, 0, 0.4);
+
+        /* ПЕСОК (СЛОЙ ПОД КАРТИНКОЙ) */
+        .sand-underlay {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 0%;
+            background: var(--gold);
             transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1; 
+            z-index: 1;
         }
-        .pig-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 2; pointer-events: none; }
 
-        .score-val { font-size: 56px; color: var(--accent); font-weight: 800; margin: 10px 0; }
-        .q-display { font-size: 18px; color: #ccc; margin-bottom: 30px; min-height: 40px; }
+        /* КАРТИНКА (СЛОЙ НАД ПЕСКОМ) */
+        .pig-glass-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: contain;
+            z-index: 2; /* Картинка перекрывает песок */
+            pointer-events: none;
+        }
 
-        .btn-group { display: flex; gap: 12px; justify-content: center; }
-        .bet-btn { background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 12px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .bet-btn:hover { background: rgba(255, 204, 0, 0.1); }
+        .total-label { color: #666; font-size: 12px; margin-top: 10px; }
+        .score-val { font-size: 56px; color: #ffcc00; font-weight: 800; margin-bottom: 5px; }
+        .q-text { color: #ccc; font-size: 18px; margin-bottom: 30px; }
+
+        .btn-row { display: flex; gap: 10px; justify-content: center; }
+        .bet-btn { border: 2px solid #ffcc00; background: none; color: #ffcc00; padding: 12px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="editor">
-    <h2>Конструктор Игры</h2>
+    <h2 style="color:#ffcc00; font-size: 18px;">КОНСТРУКТОР ИГРЫ</h2>
     
     <label>Язык интерфейса</label>
-    <select id="set-lang" onchange="updateLang()">
-        <option value="RU">Русский</option>
-        <option value="EN">English</option>
-        <option value="DE">Deutsch</option>
-    </select>
+    <select id="in-lang"><option value="RU">Русский</option><option value="DE">Deutsch</option><option value="EN">English</option></select>
 
-    <label>Прямая ссылка на PNG (прозрачную)</label>
-    <input type="text" id="set-img" value="https://i.ibb.co/pX99S99/glass-pig.png">
+    <label>Прямая ссылка на новую PNG</label>
+    <input type="text" id="in-url" value="https://img.genially.com/666ae277f4d337001522cf25/dd9943">
     
-    <label>Контент (Вопрос | Ответы | Индекс)</label>
-    <textarea id="set-data" rows="3">Emil ... um neun Uhr gefühstückt.|ist, hat|1</textarea>
+    <label>Вопрос | Ответы | Индекс</label>
+    <textarea id="in-data" rows="3">Emil ... um neun Uhr gefühstückt.|ist, hat|1</textarea>
     
-    <label>Ставки (через запятую)</label>
-    <input type="text" id="set-bets" value="10, 25, 50">
-
     <label>Цель (баллы для 100% песка)</label>
-    <input type="number" id="set-goal" value="200">
+    <input type="number" id="in-goal" value="200">
 
-    <button class="update-btn" onclick="apply()">Обновить предпросмотр</button>
+    <button class="btn-update" onclick="render()">ОБНОВИТЬ ПРЕДПРОСМОТР</button>
 </div>
 
-<div class="preview-area">
-    <div class="preview-label">ПРЕДПРОСМОТР</div>
-    
+<div class="preview">
     <div class="widget-card">
-        <div class="lang-switch">
-            <div class="lang-btn" id="l-de">DE</div>
-            <div class="lang-btn" id="l-en">EN</div>
-            <div class="lang-btn active" id="l-ru">RU</div>
+        <div class="lang-chips">
+            <div class="chip">DE</div><div class="chip">EN</div><div class="chip active">RU</div>
         </div>
-
-        <div class="pig-container">
-            <div id="v-sand" class="sand-fill"></div>
-            <img id="v-img" class="pig-image" src="" alt="">
+        <div class="pig-viewport">
+            <div id="v-sand" class="sand-underlay"></div>
+            <img id="v-img" class="pig-glass-overlay" src="">
         </div>
-
-        <div id="v-label" style="color: #666; font-size: 12px;">Всего:</div>
+        <div class="total-label" id="v-lab">Всего:</div>
         <div class="score-val" id="v-score">0</div>
-        <div class="q-display" id="v-q">Загрузка...</div>
-        
-        <div id="v-btns" class="btn-group"></div>
+        <div class="q-text" id="v-q"></div>
+        <div class="btn-row" id="v-btns">
+            <button class="bet-btn" onclick="add(10)">10</button>
+            <button class="bet-btn" onclick="add(25)">25</button>
+            <button class="bet-btn" onclick="add(50)">50</button>
+        </div>
     </div>
 </div>
 
@@ -107,43 +101,30 @@
     let score = 0;
     let goal = 200;
 
-    function apply() {
-        const url = document.getElementById('set-img').value;
-        const [q, opts, cor] = document.getElementById('set-data').value.split('|');
-        const bets = document.getElementById('set-bets').value.split(',');
-        goal = parseInt(document.getElementById('set-goal').value);
-
+    function render() {
+        const url = document.getElementById('in-url').value;
+        const [q, opts, cor] = document.getElementById('in-data').value.split('|');
+        goal = parseInt(document.getElementById('in-goal').value);
+        
         document.getElementById('v-img').src = url;
         document.getElementById('v-q').innerText = q;
-        
-        const bBox = document.getElementById('v-btns');
-        bBox.innerHTML = '';
-        bets.forEach(val => {
-            const b = document.createElement('button');
-            b.className = 'bet-btn';
-            b.innerText = val.trim();
-            b.onclick = () => { score += parseInt(val); updateUI(); };
-            bBox.appendChild(b);
-        });
-
         score = 0;
+        updateUI();
+    }
+
+    function add(val) {
+        score += val;
         updateUI();
     }
 
     function updateUI() {
         document.getElementById('v-score').innerText = score;
         let p = Math.min(100, (score / goal) * 100);
+        // Регулируем высоту песка
         document.getElementById('v-sand').style.height = p + '%';
     }
 
-    function updateLang() {
-        const lang = document.getElementById('set-lang').value;
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('l-' + lang.toLowerCase()).classList.add('active');
-        document.getElementById('v-label').innerText = lang === 'RU' ? 'Всего:' : (lang === 'DE' ? 'Gesamt:' : 'Total:');
-    }
-
-    apply();
+    render();
 </script>
 </body>
 </html>
