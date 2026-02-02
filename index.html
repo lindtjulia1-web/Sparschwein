@@ -6,160 +6,52 @@
         :root { --accent: #ffcc00; --bg: #0d0d0d; }
         body { background: transparent; color: #fff; font-family: 'Segoe UI', sans-serif; text-align: center; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         
-        .game-card { background: #111; padding: 25px; border-radius: 35px; border: 1px solid #222; width: 420px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); position: relative; }
+        .game-card { background: #111; padding: 25px; border-radius: 35px; border: 1px solid #222; width: 440px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); position: relative; }
         
-        /* КОНТЕЙНЕР СО СВИНКОЙ И ПЕСКОМ */
-        .pig-container {
-            position: relative;
-            width: 320px;
-            height: 220px;
-            margin: 0 auto;
-        }
+        /* Переключатель языков */
+        .lang-sw { position: absolute; top: 15px; right: 20px; display: flex; gap: 5px; z-index: 20; }
+        .l-btn { background: #222; border: 1px solid #444; color: #888; font-size: 10px; padding: 3px 7px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        .l-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(255,204,0,0.1); }
 
-        /* SVG Маска для песка */
-        .pig-svg-canvas {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 1;
-        }
-
-        /* Картинка свинки поверх песка */
+        .pig-container { position: relative; width: 320px; height: 200px; margin: 0 auto; }
+        .pig-svg-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         .pig-overlay {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: url('https://img.genially.com/666ae277f4d337001522cf25/dd99430b-967b-402c-b51c-4b1464309f3e.png') no-repeat center;
-            background-size: contain;
-            z-index: 2; /* Поверх песка */
-            pointer-events: none;
+            background-size: contain; z-index: 2; pointer-events: none;
         }
 
-        .score-val { font-size: 50px; color: var(--accent); font-weight: bold; margin-top: -10px; text-shadow: 0 0 15px rgba(255,204,0,0.3); }
-        .q-text { font-size: 18px; min-height: 50px; margin: 15px 0; color: #eee; line-height: 1.4; }
+        .score-val { font-size: 50px; color: var(--accent); font-weight: bold; margin-top: -5px; }
+        .q-text { font-size: 17px; min-height: 48px; margin: 10px 0; color: #eee; }
         
-        .btn-row { display: flex; gap: 10px; justify-content: center; min-height: 60px; }
+        .btn-row { display: flex; gap: 8px; justify-content: center; min-height: 55px; flex-wrap: wrap; }
         .btn { 
             background: transparent; border: 2px solid var(--accent); color: var(--accent); 
-            padding: 12px 24px; border-radius: 12px; cursor: pointer; font-weight: bold; 
-            transition: 0.2s; font-size: 16px;
+            padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; 
+            transition: 0.2s; font-size: 14px;
         }
         .btn:hover { background: rgba(255,204,0,0.1); transform: translateY(-2px); }
-        .btn:active { transform: scale(0.95); }
 
-        .fb-msg { position: absolute; top: 110px; left: 50%; transform: translateX(-50%); font-weight: bold; font-size: 20px; z-index: 10; pointer-events: none; transition: 0.4s; opacity: 0; }
-        .fb-show { opacity: 1; top: 90px; }
+        .fb-msg { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); font-weight: bold; font-size: 20px; z-index: 10; pointer-events: none; transition: 0.4s; opacity: 0; }
+        .fb-show { opacity: 1; top: 80px; }
     </style>
 </head>
 <body>
 
 <div class="game-card">
+    <div class="lang-sw" id="lang-btns">
+        <button class="l-btn" onclick="setLang('DE')">DE</button>
+        <button class="l-btn" onclick="setLang('EN')">EN</button>
+        <button class="l-btn active" onclick="setLang('RU')">RU</button>
+    </div>
+
     <div class="pig-container">
-        <svg class="pig-svg-canvas" viewBox="0 0 320 220">
+        <svg class="pig-svg-canvas" viewBox="0 0 320 200">
             <defs>
-                <clipPath id="pigMask">
-                    <path d="M245,115 c0-45-40-75-95-75 c-55,0-90,30-100,65 c-15,5-25,0-30-10 c-5-10-10,0-5,10 c5,15,20,25,30,30 c0,25,5,40,15,40 c15,0,20-15,25-25 h110 c5,10,10,25,25,25 c15,0,20-25,20-35 C220,135,245,130,245,115z" />
-                </clipPath>
-                <linearGradient id="goldSand" x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%" stop-color="#b8860b" />
-                    <stop offset="50%" stop-color="#ffd700" />
-                    <stop offset="100%" stop-color="#fff2ac" />
-                </linearGradient>
+                <clipPath id="pigMask"><path d="M245,100 c0-40-35-75-95-75 c-50,0-90,30-100,65 c-10,5-20,0-25-10 c-5-10-10,0-5,10 c5,15,20,25,30,30 c0,25,5,50,20,50 c15,0,20-15,25-25 h110 c5,10,10,25,25,25 c15,0,20-25,20-40 C220,130,245,125,245,100z" /></clipPath>
+                <linearGradient id="goldSand" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#b8860b"/><stop offset="100%" stop-color="#fff2ac"/></linearGradient>
             </defs>
-            <rect id="sandRect" x="0" y="220" width="320" height="0" fill="url(#goldSand)" clip-path="url(#pigMask)" style="transition: all 0.8s ease-out;" />
+            <rect id="sandRect" x="0" y="200" width="320" height="0" fill="url(#goldSand)" clip-path="url(#pigMask)" style="transition: all 0.8s ease-out;" />
         </svg>
         <div class="pig-overlay"></div>
-        <div id="fb" class="fb-msg"></div>
-    </div>
-    
-    <div id="score" class="score-val">0</div>
-    <div id="question" class="q-text">Загрузка...</div>
-    <div id="controls" class="btn-row"></div>
-</div>
-
-<script>
-    const config = {
-        lang: "RU",
-        goal: 200,
-        questions: [
-            { q: "Emil ... um neun Uhr gefühstückt.", a: ["ist", "hat"], c: 1 },
-            { q: "Wir ... gestern im Kino.", a: ["haben", "waren"], c: 1 },
-            { q: "Ich ... meine Hausaufgaben gemacht.", a: ["habe", "bin"], c: 0 }
-        ],
-        msg: { correct: "ОТЛИЧНО! +", wrong: "ОШИБКА! -" }
-    };
-
-    let score = 0, currentQ = 0, bet = 0, phase = 'BET';
-
-    function render() {
-        const q = config.questions[currentQ];
-        const ctrl = document.getElementById('controls');
-        const qBox = document.getElementById('question');
-        
-        if (!q) {
-            qBox.innerText = "УРА! ВСЁ ЗАПОЛНЕНО!";
-            ctrl.innerHTML = '<button class="btn" onclick="location.reload()">ЗАНОВО</button>';
-            return;
-        }
-
-        ctrl.innerHTML = "";
-        
-        if (phase === 'BET') {
-            qBox.innerText = "ВЫБЕРИ СТАВКУ (УВЕРЕННОСТЬ):";
-            [10, 25, 50].forEach(amt => {
-                let b = document.createElement('button');
-                b.className = "btn";
-                b.innerText = "💰 " + amt;
-                b.onclick = () => { bet = amt; phase = 'ANS'; render(); };
-                ctrl.appendChild(b);
-            });
-        } else {
-            qBox.innerText = q.q;
-            q.a.forEach((txt, i) => {
-                let b = document.createElement('button');
-                b.className = "btn";
-                b.innerText = txt;
-                b.onclick = () => check(i);
-                ctrl.appendChild(b);
-            });
-        }
-        updatePig();
-    }
-
-    function check(idx) {
-        const correct = idx === config.questions[currentQ].c;
-        const fb = document.getElementById('fb');
-        
-        if (correct) {
-            score += bet;
-            fb.innerText = config.msg.correct + bet;
-            fb.style.color = "#44ff44";
-        } else {
-            score = Math.max(0, score - bet);
-            fb.innerText = config.msg.wrong + bet;
-            fb.style.color = "#ff4444";
-        }
-
-        fb.classList.add('fb-show');
-        setTimeout(() => {
-            fb.classList.remove('fb-show');
-            currentQ++;
-            phase = 'BET';
-            render();
-        }, 1200);
-    }
-
-    function updatePig() {
-        document.getElementById('score').innerText = score;
-        const pct = Math.min(1, score / config.goal);
-        const sand = document.getElementById('sandRect');
-        // Рассчитываем высоту и позицию Y так, чтобы песок рос снизу вверх внутри маски
-        const h = pct * 140; 
-        sand.setAttribute('height', h);
-        sand.setAttribute('y', 170 - h);
-    }
-
-    render();
-</script>
-</body>
-</html>
+        <div id="fb" class="fb
