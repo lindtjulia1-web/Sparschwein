@@ -3,95 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <style>
+        :root { --gold: linear-gradient(to top, #8a6d3b, #f1d37e, #bf953f, #fcf6ba); }
         body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; }
-        .editor { width: 340px; background: #111; padding: 20px; border-right: 2px solid #222; overflow-y: auto; }
-        .preview { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: #050505; }
-        
-        /* Виджет */
-        .widget-card { background: #111; width: 400px; padding: 40px; border-radius: 30px; text-align: center; border: 1px solid #222; position: relative; }
-        
-        /* КОНТЕЙНЕР СВИНКИ */
-        .pig-box { 
-            position: relative; 
-            width: 280px; height: 180px; 
+
+        /* РЕДАКТОР */
+        .editor { width: 360px; background: #111; padding: 25px; border-right: 2px solid #222; }
+        label { display: block; font-size: 10px; color: #666; margin-top: 15px; text-transform: uppercase; }
+        input, textarea { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px; box-sizing: border-box; }
+        .btn-upd { background: #ffcc00; color: #000; border: none; padding: 15px; width: 100%; margin-top: 20px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+
+        /* ВИДЖЕТ */
+        .preview { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: #080808; }
+        .card { background: #111; width: 420px; padding: 40px; border-radius: 35px; text-align: center; border: 1px solid #222; }
+
+        /* КОНТЕЙНЕР-МАСКА */
+        .pig-mask-area {
+            position: relative;
+            width: 300px; height: 200px;
             margin: 0 auto 20px;
-            background: #000; /* Черная пустота внутри свинки */
-            border-radius: 20px;
-            overflow: hidden;
+            /* Магия: используем картинку как форму для всего, что внутри */
+            -webkit-mask-image: var(--pig-url);
+            mask-image: var(--pig-url);
+            -webkit-mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-position: center;
         }
 
-        /* ЗОЛОТОЙ ПЕСОК (Снизу) */
-        .sand-fill { 
-            position: absolute; 
+        /* ПЕСОК ВНУТРИ ФОРМЫ */
+        .sand-inner {
+            position: absolute;
             bottom: 0; left: 0; width: 100%; height: 0%;
-            /* Зернистый золотой градиент */
-            background: linear-gradient(to top, #8a6d3b 0%, #d4af37 40%, #f9e076 80%, #fff 100%);
-            box-shadow: 0 0 15px rgba(255, 204, 0, 0.5);
-            transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--gold);
+            transition: height 1s cubic-bezier(0.17, 0.67, 0.83, 0.67);
             z-index: 1;
         }
 
-        /* СТЕКЛЯННАЯ СВИНКА (Сверху) */
-        .pig-img { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            object-fit: contain; 
-            z-index: 2; /* Всегда поверх песка */
+        /* ОТДЕЛЬНЫЙ СЛОЙ ДЛЯ БЛИКОВ (Поверх маски) */
+        .pig-glass-overlay {
+            position: absolute;
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%);
+            width: 300px; height: 200px;
+            object-fit: contain;
+            z-index: 10;
             pointer-events: none;
+            opacity: 0.5; /* Чтобы видеть золото сквозь стекло */
         }
 
-        .score-num { font-size: 50px; color: #ffcc00; font-weight: 900; margin: 10px 0; }
-        .btn-group { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
-        .btn-coin { border: 2px solid #ffcc00; background: none; color: #ffcc00; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        
-        /* Поля ввода */
-        label { display: block; font-size: 10px; color: #666; margin-top: 15px; text-transform: uppercase; }
-        input { width: 100%; background: #000; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 5px; box-sizing: border-box; }
-        .update-btn { background: #ffcc00; color: #000; border: none; padding: 15px; width: 100%; margin-top: 20px; font-weight: bold; border-radius: 5px; cursor: pointer; }
+        .score { font-size: 50px; color: #ffcc00; font-weight: 900; margin: 10px 0; }
+        .btns { display: flex; gap: 10px; justify-content: center; }
+        .btn-c { border: 2px solid #ffcc00; background: none; color: #ffcc00; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="editor">
-    <h3 style="color:#ffcc00">НАСТРОЙКИ</h3>
     <label>Ссылка на свинку (PNG)</label>
     <input type="text" id="url" value="https://img.genially.com/666ae277f4d337001522cf25/dd99430b-060e-4f48-82c7-14fd6d8e58b8.png">
     
-    <label>Цель (для 100%)</label>
+    <label>Цель (для 100% наполнения)</label>
     <input type="number" id="goal" value="300">
 
-    <button class="update-btn" onclick="apply()">ПРИМЕНИТЬ</button>
+    <button class="btn-upd" onclick="apply()">ОБНОВИТЬ</button>
 </div>
 
 <div class="preview">
-    <div class="widget-card">
-        <div class="pig-box">
-            <div id="v-sand" class="sand-fill"></div>
-            <img id="v-img" class="pig-img" src="https://img.genially.com/666ae277f4d337001522cf25/dd99430b-060e-4f48-82c7-14fd6d8e58b8.png">
+    <div class="card">
+        <div style="position: relative; width: 300px; height: 200px; margin: 0 auto;">
+            <div class="pig-mask-area" id="v-box" style="--pig-url: url('https://img.genially.com/666ae277f4d337001522cf25/dd99430b-060e-4f48-82c7-14fd6d8e58b8.png')">
+                <div id="v-sand" class="sand-inner"></div>
+            </div>
+            <img id="v-img" class="pig-glass-overlay" src="https://img.genially.com/666ae277f4d337001522cf25/dd99430b-060e-4f48-82c7-14fd6d8e58b8.png">
         </div>
-        <div class="score-num" id="v-score">0</div>
-        <div class="btn-group">
-            <button class="btn-coin" onclick="add(10)">10</button>
-            <button class="btn-coin" onclick="add(25)">25</button>
-            <button class="btn-coin" onclick="add(50)">50</button>
+        
+        <div class="score" id="v-score">0</div>
+        <div class="btns">
+            <button class="btn-c" onclick="add(10)">10</button>
+            <button class="btn-c" onclick="add(25)">25</button>
+            <button class="btn-c" onclick="add(50)">50</button>
         </div>
     </div>
 </div>
 
 <script>
-    let total = 0;
+    let current = 0;
     function apply() {
-        document.getElementById('v-img').src = document.getElementById('url').value;
-        total = 0;
-        update();
+        const u = document.getElementById('url').value;
+        document.getElementById('v-img').src = u;
+        document.getElementById('v-box').style.setProperty('--pig-url', `url('${u}')`);
+        current = 0; update();
     }
-    function add(n) {
-        total += n;
-        update();
-    }
+    function add(n) { current += n; update(); }
     function update() {
         const goal = document.getElementById('goal').value;
-        document.getElementById('v-score').innerText = total;
-        let p = Math.min(100, (total / goal) * 100);
+        document.getElementById('v-score').innerText = current;
+        let p = Math.min(100, (current / goal) * 100);
         document.getElementById('v-sand').style.height = p + '%';
     }
     apply();
