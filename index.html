@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Piggy Bank: Penalty System</title>
+    <title>Piggy Bank Widget Generator</title>
     <style>
         :root { --accent: #ffcc00; --panel-bg: #161616; }
         body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; }
@@ -18,10 +18,7 @@
 <body>
 
 <div class="editor">
-    <h2>⚙️ Конструктор (Штрафы)</h2>
-    
-    <label>Ссылка на PNG свинку</label>
-    <input type="text" id="cfg-url" value="https://img.genially.com/666ae277f4d337001522cf25/dd99430b-060e-4f48-82c7-14fd6d8e58b8.png">
+    <h2>⚙️ Конструктор Виджета</h2>
     
     <label>Вопросы (Вопрос|Варианты|Верный)</label>
     <textarea id="cfg-data" rows="5">Emil ... um neun Uhr gefühstückt.|ist,hat|1
@@ -47,7 +44,6 @@ Wir ... viel Sport gemacht|haben,sind|0</textarea>
 
 <script>
 function generate() {
-    const url = document.getElementById('cfg-url').value;
     const goal = document.getElementById('cfg-goal').value;
     const plus = document.getElementById('cfg-plus').value;
     const minus = document.getElementById('cfg-minus').value;
@@ -57,6 +53,7 @@ function generate() {
         return { q, opts: opts.split(','), cor: parseInt(cor) };
     });
 
+    // В этот раз мы используем SVG прямо в коде виджета!
     const widgetCode = `
 <!DOCTYPE html>
 <html>
@@ -64,9 +61,18 @@ function generate() {
     <style>
         body { background: transparent; color: #fff; font-family: sans-serif; text-align: center; margin: 0; overflow: hidden; }
         .card { background: #111; padding: 30px; border-radius: 30px; border: 1px solid #222; width: 380px; margin: auto; }
-        .pig-wrap { position: relative; width: 260px; height: 160px; margin: 0 auto 20px; background: #000; border-radius: 15px; overflow: hidden; }
-        .sand { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728); transition: height 0.6s ease-in-out; z-index: 1; }
-        .img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 2; pointer-events: none; }
+        
+        /* Стили для SVG свинки */
+        .piggy-progress {
+            margin: 0 auto 20px;
+            display: block;
+            filter: drop-shadow(0 0 5px rgba(255, 204, 0, 0.3)); /* Легкое свечение */
+        }
+        /* Анимация наполнения песком */
+        #sand-fill {
+            transition: height 0.6s ease-in-out, y 0.6s ease-in-out;
+        }
+
         .score { font-size: 48px; color: #ffcc00; font-weight: bold; margin: 10px 0; transition: color 0.3s; }
         .q-box { font-size: 16px; min-height: 40px; margin-bottom: 20px; color: #ccc; }
         .btn { background: transparent; border: 2px solid #ffcc00; color: #ffcc00; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin: 5px; font-weight: bold; transition: 0.2s; }
@@ -75,10 +81,26 @@ function generate() {
 </head>
 <body>
     <div class="card">
-        <div class="pig-wrap">
-            <div id="sand" class="sand"></div>
-            <img src="${url}" class="img">
-        </div>
+        <svg width="200" height="160" viewBox="0 0 200 160" class="piggy-progress">
+            <defs>
+                <linearGradient id="sand-gradient" x1="0%" y1="100%" x2="0%" y2="0%">
+                    <stop offset="0%" style="stop-color:#c2b280;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#d4c492;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#e6dba6;stop-opacity:1" />
+                </linearGradient>
+                <clipPath id="piggy-clip">
+                    <path d="M 40,80 C 40,55 65,35 100,35 C 135,35 160,55 160,80 C 160,105 135,125 100,125 C 65,125 40,105 40,80 Z M 60,123 L 60,140 L 80,140 L 80,123 Z M 120,123 L 120,140 L 140,140 L 140,123 Z" />
+                </clipPath>
+            </defs>
+
+            <rect id="sand-fill" width="200" height="0" y="160" fill="url(#sand-gradient)" clip-path="url(#piggy-clip)" />
+
+            <g fill="none" stroke="#eee" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8">
+                <path d="M 40,80 C 40,55 65,35 100,35 C 135,35 160,55 160,80 C 160,105 135,125 100,125 C 65,125 40,105 40,80 Z" /> <path d="M 138,50 L 150,25 L 156,55" /> <path d="M 42,82 C 25,70 25,100 40,88" /> <path d="M 159,72 L 175,72 L 175,88 L 159,88" /> <path d="M 170,77 L 170,83" stroke-width="1" />
+                <path d="M 60,123 L 60,140 L 80,140 L 80,123" /> <path d="M 120,123 L 120,140 L 140,140 L 140,123" />
+            </g>
+        </svg>
+
         <div class="score" id="score">0</div>
         <div id="q-box" class="q-box"></div>
         <div id="ans-box"></div>
@@ -94,8 +116,20 @@ function generate() {
                 document.getElementById('ans-box').innerHTML = "<button class='btn' onclick='location.reload()'>ЗАНОВО</button>";
                 return;
             }
+            
+            // Обновляем счет
             document.getElementById('score').innerText = score;
-            document.getElementById('sand').style.height = Math.min(100, Math.max(0, (score/goal)*100)) + '%';
+            
+            // Обновляем уровень песка в SVG
+            const percentage = Math.min(1, Math.max(0, score / goal)); // От 0 до 1
+            const svgHeight = 160; // Высота SVG
+            const fillHeight = percentage * svgHeight; // Новая высота песка
+            const fillY = svgHeight - fillHeight; // Новая позиция Y (чтобы рос снизу)
+
+            const sandFill = document.getElementById('sand-fill');
+            sandFill.setAttribute('height', fillHeight);
+            sandFill.setAttribute('y', fillY);
+
             document.getElementById('q-box').innerText = qs[cur].q;
             const abox = document.getElementById('ans-box');
             abox.innerHTML = "";
