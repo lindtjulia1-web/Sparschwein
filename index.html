@@ -3,132 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        :root { --accent: #ffcc00; --bg: #0d0d0d; }
-        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        :root { --gold: linear-gradient(to top, #bf953f, #fcf6ba, #b38728); }
+        body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; }
 
-        /* ПАНЕЛЬ РЕДАКТОРА */
-        .editor { width: 380px; background: #161616; padding: 25px; border-right: 2px solid #333; overflow-y: auto; box-sizing: border-box; }
-        .editor h2 { color: var(--accent); font-size: 16px; text-transform: uppercase; margin-bottom: 25px; }
-        label { display: block; font-size: 10px; color: #777; margin: 15px 0 5px; text-transform: uppercase; font-weight: bold; }
-        input, textarea, select { width: 100%; background: #0a0a0a; border: 1px solid #333; color: #eee; padding: 12px; border-radius: 6px; font-size: 13px; box-sizing: border-box; }
-        .update-btn { background: var(--accent); color: #000; border: none; padding: 18px; border-radius: 8px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 25px; text-transform: uppercase; }
+        /* Панель редактора как на твоих скринах */
+        .editor { width: 380px; background: #1a1a1a; padding: 25px; border-right: 2px solid #333; overflow-y: auto; box-sizing: border-box; }
+        label { display: block; font-size: 10px; color: #888; margin: 15px 0 5px; text-transform: uppercase; }
+        input, textarea, select { width: 100%; background: #000; border: 1px solid #444; color: #eee; padding: 12px; border-radius: 6px; margin-bottom: 10px; }
+        .btn-main { background: #ffcc00; color: #000; border: none; padding: 18px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
 
-        /* ПРЕДПРОСМОТР */
-        .preview { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #222, #000); }
-        .widget { background: #111; width: 440px; padding: 40px; border-radius: 30px; text-align: center; border: 1px solid #222; position: relative; }
+        /* Область виджета */
+        .preview { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: #0d0d0d; }
+        .card { background: #111; width: 440px; padding: 40px; border-radius: 35px; text-align: center; border: 1px solid #222; position: relative; }
 
-        /* ЯЗЫКИ */
-        .langs { position: absolute; top: 25px; right: 25px; display: flex; gap: 5px; }
-        .l-btn { background: #222; border: 1px solid #444; color: #666; font-size: 10px; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-        .l-btn.active { border-color: var(--accent); color: var(--accent); }
-
-        /* СИСТЕМА НАПОЛНЕНИЯ (МАСКА) */
-        .pig-area { 
+        /* КОНТЕЙНЕР СВИНКИ */
+        .pig-wrap { 
             position: relative; 
-            width: 300px; height: 200px; 
+            width: 300px; /* Фиксируем размер под картинку */
+            height: 200px; 
             margin: 0 auto 20px;
+            overflow: hidden; /* Песок не выйдет за границы этого блока */
         }
 
-        /* Слой золота с маской по форме свинки */
-        .gold-fill {
+        /* ПЕСОК (СЛОЙ 1 - СНИЗУ) */
+        .sand {
             position: absolute;
             bottom: 0; left: 0; width: 100%; height: 0%;
-            background: linear-gradient(to top, #bf953f, #fcf6ba, #b38728);
-            /* Маскируем золото формой свинки */
-            -webkit-mask-image: var(--pig-url);
-            mask-image: var(--pig-url);
-            -webkit-mask-size: contain;
-            -webkit-mask-repeat: no-repeat;
-            -webkit-mask-position: center;
-            transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--gold);
+            transition: height 0.8s ease-out;
             z-index: 1;
         }
 
-        /* Сама стеклянная свинка (поверх) */
-        .pig-glass {
+        /* СВИНКА (СЛОЙ 2 - СВЕРХУ) */
+        .pig-img {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             object-fit: contain;
-            z-index: 2;
+            z-index: 2; /* Картинка перекрывает песок */
             pointer-events: none;
         }
 
-        .score-txt { font-size: 56px; color: var(--accent); font-weight: 800; margin: 10px 0; }
-        .q-txt { font-size: 18px; color: #ccc; margin-bottom: 30px; min-height: 40px; }
-        .btn-row { display: flex; gap: 12px; justify-content: center; }
-        .game-btn { background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 12px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .score { font-size: 60px; color: #ffcc00; font-weight: 900; }
+        .btns { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .btn-bet { border: 2px solid #ffcc00; background: none; color: #ffcc00; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="editor">
-    <h2>Конструктор Игры</h2>
+    <h2 style="color:#ffcc00">КОНСТРУКТОР</h2>
     <label>Язык</label>
-    <select id="s-lang" onchange="updLang()">
-        <option value="RU">Русский</option><option value="DE">Deutsch</option><option value="EN">English</option>
-    </select>
-    <label>Ссылка на PNG (прозрачная)</label>
-    <input type="text" id="s-url" value="https://i.ibb.co/pX99S99/glass-pig.png">
-    <label>Данные (Вопрос | Варианты | Ответ)</label>
-    <textarea id="s-data" rows="3">Emil ... um neun Uhr gefühstückt.|ist, hat|1</textarea>
-    <label>Ставки</label>
-    <input type="text" id="s-bets" value="10, 25, 50">
-    <label>Максимум (100% песка)</label>
-    <input type="number" id="s-goal" value="200">
-    <button class="update-btn" onclick="init()">Применить настройки</button>
+    <select id="lang"><option>Русский</option><option>Deutsch</option><option>English</option></select>
+    
+    <label>Ссылка на PNG свинку</label>
+    <input type="text" id="url" value="https://i.ibb.co/pX99S99/glass-pig.png">
+    
+    <label>Цель (для 100% заполнения)</label>
+    <input type="number" id="goal" value="500">
+
+    <button class="btn-main" onclick="init()">ОБНОВИТЬ</button>
 </div>
 
 <div class="preview">
-    <div class="widget">
-        <div class="langs">
-            <div class="l-btn" id="l-de">DE</div><div class="l-btn" id="l-en">EN</div><div class="l-btn active" id="l-ru">RU</div>
+    <div class="card">
+        <div class="pig-wrap">
+            <div id="v-sand" class="sand"></div>
+            <img id="v-img" class="pig-img" src="">
         </div>
-        <div class="pig-area" id="v-area" style="--pig-url: url('https://i.ibb.co/pX99S99/glass-pig.png')">
-            <div id="v-gold" class="gold-fill"></div>
-            <img id="v-img" class="pig-glass" src="https://i.ibb.co/pX99S99/glass-pig.png">
+        <div class="score" id="v-score">0</div>
+        <div class="btns">
+            <button class="btn-bet" onclick="add(10)">10</button>
+            <button class="btn-bet" onclick="add(25)">25</button>
+            <button class="btn-bet" onclick="add(50)">50</button>
         </div>
-        <div id="v-lab" style="color:#555; font-size:12px;">Всего:</div>
-        <div class="score-txt" id="v-score">0</div>
-        <div class="q-txt" id="v-q"></div>
-        <div class="btn-row" id="v-btns"></div>
     </div>
 </div>
 
 <script>
-    let score = 0, goal = 200;
+    let currentScore = 0;
     function init() {
-        const url = document.getElementById('s-url').value;
-        const [q, opts, cor] = document.getElementById('s-data').value.split('|');
-        const bets = document.getElementById('s-bets').value.split(',');
-        goal = parseInt(document.getElementById('s-goal').value);
-
-        document.getElementById('v-img').src = url;
-        document.getElementById('v-area').style.setProperty('--pig-url', `url('${url}')`);
-        document.getElementById('v-q').innerText = q;
-        
-        const bBox = document.getElementById('v-btns');
-        bBox.innerHTML = '';
-        bets.forEach(v => {
-            const b = document.createElement('button');
-            b.className = 'game-btn';
-            b.innerText = v.trim();
-            b.onclick = () => { score += parseInt(v); updateUI(); };
-            bBox.appendChild(b);
-        });
-        score = 0; updateUI();
+        document.getElementById('v-img').src = document.getElementById('url').value;
+        currentScore = 0;
+        update();
     }
-
-    function updateUI() {
-        document.getElementById('v-score').innerText = score;
-        let p = Math.min(100, (score / goal) * 100);
-        document.getElementById('v-gold').style.height = p + '%';
+    function add(v) {
+        currentScore += v;
+        update();
     }
-
-    function updLang() {
-        const l = document.getElementById('s-lang').value;
-        document.querySelectorAll('.l-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('l-' + l.toLowerCase()).classList.add('active');
-        document.getElementById('v-lab').innerText = l === 'RU' ? 'Всего:' : (l === 'DE' ? 'Gesamt:' : 'Total:');
+    function update() {
+        const goal = document.getElementById('goal').value;
+        document.getElementById('v-score').innerText = currentScore;
+        let percent = Math.min(100, (currentScore / goal) * 100);
+        document.getElementById('v-sand').style.height = percent + '%';
     }
     init();
 </script>
