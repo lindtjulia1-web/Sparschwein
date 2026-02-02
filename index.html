@@ -2,14 +2,14 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Piggy Bank: Photo Realistic</title>
+    <title>Piggy Bank Builder v2</title>
     <style>
         :root { --accent: #ffcc00; --panel-bg: #161616; }
         body { background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        .editor { width: 400px; background: var(--panel-bg); padding: 20px; border-right: 2px solid #333; overflow-y: auto; box-sizing: border-box; }
+        .editor { width: 420px; background: var(--panel-bg); padding: 20px; border-right: 2px solid #333; overflow-y: auto; box-sizing: border-box; }
         h2 { color: var(--accent); font-size: 16px; text-transform: uppercase; margin: 0 0 20px; }
         label { display: block; font-size: 10px; color: #888; margin: 15px 0 5px; text-transform: uppercase; }
-        input, textarea { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 5px; font-size: 13px; }
+        input, textarea { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 5px; font-size: 13px; box-sizing: border-box; }
         .btn-build { background: var(--accent); color: #000; border: none; padding: 15px; border-radius: 8px; font-weight: bold; width: 100%; margin: 20px 0; cursor: pointer; }
         .preview { flex-grow: 1; display: flex; align-items: center; justify-content: center; background: #0d0d0d; }
         #final-code { height: 80px; background: #050505; color: #0f0; font-family: monospace; font-size: 10px; border: 1px dashed #555; }
@@ -18,25 +18,21 @@
 <body>
 
 <div class="editor">
-    <h2>⚙️ Конструктор</h2>
+    <h2>⚙️ Конструктор Игры</h2>
     
-    <label>URL Свинки (Прозрачный PNG)</label>
-    <input type="text" id="cfg-url" value="https://i.ibb.co/LzY8m3Z/glass-pig-final.png" placeholder="Вставь ссылку на PNG">
+    <label>Прямая ссылка на PNG (Свинка)</label>
+    <input type="text" id="cfg-url" value="https://img.genially.com/666ae277f4d337001522cf25/dd99430b-967b-402c-b51c-4b1464309f3e.png">
 
-    <label>Вопросы (Вопрос|Варианты|Верный)</label>
-    <textarea id="cfg-data" rows="5">Emil ... um neun Uhr gefühstückt.|ist,hat|1
-Elsa ... in die Schule gegangen|ist,hat|0
-Wir ... viel Sport gemacht|haben,sind|0</textarea>
+    <label>Данные (Вопрос|Варианты|Индекс верного)</label>
+    <textarea id="cfg-data" rows="4">Emil ... um neun Uhr gefühstückt.|ist,hat|1
+Wir ... im Park gelaufen|sind,haben|0</textarea>
     
-    <label>Награда / Штраф / Цель</label>
-    <div style="display:flex; gap:5px;">
-        <input type="number" id="cfg-plus" value="50">
-        <input type="number" id="cfg-minus" value="25">
-        <input type="number" id="cfg-goal" value="200">
-    </div>
+    <label>Цель (баллы для 100% песка)</label>
+    <input type="number" id="cfg-goal" value="200">
 
-    <button class="btn-build" onclick="generate()">ОБНОВИТЬ И СОЗДАТЬ IFRAME</button>
+    <button class="btn-build" onclick="generate()">ОБНОВИТЬ ПРЕДПРОСМОТР</button>
     
+    <label>Код для вставки (iFrame)</label>
     <textarea id="final-code" readonly onclick="this.select()"></textarea>
 </div>
 
@@ -45,8 +41,6 @@ Wir ... viel Sport gemacht|haben,sind|0</textarea>
 <script>
 function generate() {
     const goal = document.getElementById('cfg-goal').value;
-    const plus = document.getElementById('cfg-plus').value;
-    const minus = document.getElementById('cfg-minus').value;
     const imgUrl = document.getElementById('cfg-url').value;
     const rawData = document.getElementById('cfg-data').value.split('\n').filter(l => l.trim());
     const questions = rawData.map(line => {
@@ -60,83 +54,98 @@ function generate() {
 <head>
     <style>
         body { background: transparent; color: #fff; font-family: sans-serif; text-align: center; margin: 0; overflow: hidden; }
-        .container { position: relative; width: 320px; height: 220px; margin: 0 auto 20px; }
+        .game-card { background: #0c0c0c; padding: 30px; border-radius: 40px; width: 380px; margin: auto; position: relative; }
         
-        /* Слой с песком */
-        .sand-layer {
-            position: absolute;
-            bottom: 45px; /* Уровень дна свинки */
-            left: 50%;
-            transform: translateX(-50%);
-            width: 260px; /* Ширина живота */
-            background: linear-gradient(to top, #b8860b, #ffd700, #fceda4);
-            height: 0%;
-            transition: height 0.6s ease-in-out;
-            clip-path: path('M 255,75 C 255,65 245,60 235,60 L 220,35 L 190,20 C 170,5 140,0 110,0 C 50,0 0,30 -10,65 C -15,75 -20,70 -25,60 C -30,50 -35,60 -30,70 C -25,85 -10,95 0,100 C 0,125 5,150 20,150 C 35,150 40,135 45,125 L 155,125 C 160,135 165,150 180,150 C 195,150 200,125 200,110 C 220,110 240,105 255,90 L 255,75 Z');
+        /* Контейнер для свинки и песка */
+        .pig-container {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            margin: 0 auto 10px;
         }
 
-        /* Само изображение стеклянной свинки */
-        .pig-img {
+        /* Золотой песок с маской по форме свинки */
+        .sand {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: contain;
-            z-index: 2;
+            bottom: 25px; /* Корректировка под ножки */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            height: 0%; /* Начальное состояние */
+            background: linear-gradient(to top, #b8860b, #ffd700, #fff2ac);
+            transition: height 0.8s ease-out;
+            /* Точный контур стеклянной свинки */
+            clip-path: path('M245,95 c0-40-35-75-95-75 c-50,0-90,30-100,65 c-10,5-20,0-25-10 c-5-10-10,0-5,10 c5,15,20,25,30,30 c0,25,5,50,20,50 c15,0,20-15,25-25 h110 c5,10,10,25,25,25 c15,0,20-25,20-40 C220,125,245,120,245,95z');
+        }
+
+        .pig-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('${imgUrl}') no-repeat center;
+            background-size: contain;
+            z-index: 5;
             pointer-events: none;
         }
 
-        .score { font-size: 48px; color: #ffcc00; font-weight: bold; margin-top: 10px; }
-        .q-box { font-size: 18px; margin-bottom: 15px; min-height: 44px; }
-        .btn { background: transparent; border: 2px solid #ffcc00; color: #ffcc00; padding: 8px 20px; border-radius: 10px; cursor: pointer; margin: 5px; font-weight: bold; }
+        .score { font-size: 60px; color: #ffcc00; font-weight: bold; margin: 10px 0; }
+        .q-text { font-size: 18px; color: #ccc; margin-bottom: 20px; min-height: 44px; }
+        .btn { background: transparent; border: 2px solid #ffcc00; color: #ffcc00; padding: 12px 25px; border-radius: 12px; cursor: pointer; margin: 5px; font-weight: bold; font-size: 16px; transition: 0.2s; }
+        .btn:hover { background: rgba(255,204,0,0.1); }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="sand-layer" id="sand"></div>
-        <img src="${imgUrl}" class="pig-img">
+    <div class="game-card">
+        <div class="pig-container">
+            <div class="sand" id="sand-fill"></div>
+            <div class="pig-overlay"></div>
+        </div>
+
+        <div class="score" id="score">0</div>
+        <div class="q-text" id="question">Загрузка...</div>
+        <div id="answers"></div>
     </div>
 
-    <div class="score" id="score">0</div>
-    <div id="q-box" class="q-box"></div>
-    <div id="ans-box"></div>
-
     <script>
-        const qs = ${JSON.stringify(questions)};
-        let cur = 0, score = 0, goal = ${goal};
+        const questions = ${JSON.stringify(questions)};
+        let currentIdx = 0, totalScore = 0, goal = ${goal};
 
-        function update() {
-            if(cur >= qs.length) {
-                document.getElementById('q-box').innerText = "ГОТОВО!";
+        function updateUI() {
+            document.getElementById('score').innerText = totalScore;
+            
+            // Расчет высоты песка (макс ~75% высоты контейнера чтобы не залило уши)
+            const percent = Math.min(100, (totalScore / goal) * 100);
+            document.getElementById('sand-fill').style.height = (percent * 0.75) + "%";
+
+            if(currentIdx >= questions.length) {
+                document.getElementById('question').innerText = "ГОТОВО!";
+                document.getElementById('answers').innerHTML = "";
                 return;
             }
-            document.getElementById('score').innerText = score;
-            
-            // Наполнение
-            const pct = Math.min(100, (score / goal) * 100);
-            document.getElementById('sand').style.height = pct * 0.7 + "%";
 
-            document.getElementById('q-box').innerText = qs[cur].q;
-            const abox = document.getElementById('ans-box');
-            abox.innerHTML = "";
-            qs[cur].opts.forEach((t, i) => {
+            const q = questions[currentIdx];
+            document.getElementById('question').innerText = q.q;
+            const btnBox = document.getElementById('answers');
+            btnBox.innerHTML = "";
+
+            q.opts.forEach((opt, i) => {
                 const b = document.createElement('button');
                 b.className = 'btn';
-                b.innerText = t;
+                b.innerText = opt;
                 b.onclick = () => {
-                    if(i === qs[cur].cor) score += ${plus};
-                    else score = Math.max(0, score - ${minus});
-                    cur++;
-                    update();
+                    if(i === q.cor) totalScore += 50; 
+                    else totalScore = Math.max(0, totalScore - 25);
+                    currentIdx++;
+                    updateUI();
                 };
-                abox.appendChild(b);
+                btnBox.appendChild(b);
             });
         }
-        update();
+        updateUI();
     <\/script>
 </body>
 </html>`;
 
-    const finalIframe = `<iframe srcdoc='${widgetCode.replace(/'/g, "&apos;")}' width="100%" height="500" frameborder="0"></iframe>`;
+    const finalIframe = `<iframe srcdoc='${widgetCode.replace(/'/g, "&apos;")}' width="100%" height="600" frameborder="0"></iframe>`;
     document.getElementById('final-code').value = finalIframe;
     document.getElementById('preview-area').innerHTML = finalIframe;
 }
