@@ -2,269 +2,217 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <title>KGB Game Corp: Sparschwein Editor</title>
     <style>
-        :root {
-            --gold: #f9e076;
-            --gold-deep: #bf953f;
-            --error-red: #ff5252;
-            --glass-stroke: rgba(255, 255, 255, 0.25);
-        }
-        body { background: #0a0a0a; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-
-        .game-card {
-            width: 380px; background: #111; border-radius: 45px; padding: 35px;
-            text-align: center; border: 1px solid #222; box-shadow: 0 40px 120px rgba(0,0,0,0.9);
-            position: relative;
-        }
-
-        .lang-switch { position: absolute; top: 25px; right: 35px; display: flex; gap: 8px; z-index: 20; }
-        .lang-btn {
-            background: #1a1a1a; border: 1px solid #333; color: #555;
-            font-size: 10px; padding: 4px 10px; cursor: pointer; border-radius: 6px; transition: 0.3s;
-        }
-        .lang-btn.active { border-color: var(--gold); color: var(--gold); background: #221e0a; }
-
-        .pig-container { position: relative; width: 300px; height: 220px; margin: 0 auto; }
-        .pig-svg { width: 100%; height: 100%; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); overflow: visible; }
+        :root { --accent: #f9e076; --bg: #0d0d0f; --panel: #16161a; --border: #2d2d33; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: #e1e1e6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        #sand-rect { 
-            transition: y 1.5s ease-in-out, height 1.5s ease-in-out;
-            filter: url(#sand-texture); /* Улучшенная текстура песка */
-        }
-
-        /* Эффект объемного стекла */
-        .glass-body { fill: rgba(255, 255, 255, 0.03); stroke: rgba(255, 255, 255, 0.15); stroke-width: 1; }
-        .glass-edge { fill: none; stroke: rgba(255, 255, 255, 0.3); stroke-width: 0.5; }
+        /* Sidebar (Интерфейс KGB) */
+        .sidebar { width: 380px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; scrollbar-width: thin; }
         
-        @keyframes flash {
-            0% { opacity: 0.3; }
-            50% { opacity: 1; filter: brightness(1.5) drop-shadow(0 0 15px white); }
-            100% { opacity: 0.3; }
-        }
-        .glass-glint { animation: flash 0.8s ease-out; }
+        .section-tag { font-size: 10px; text-transform: uppercase; color: var(--accent); letter-spacing: 1.5px; font-weight: 800; margin: 20px 0 10px; display: flex; align-items: center; gap: 8px; }
+        .section-tag::after { content:''; flex:1; height:1px; background: rgba(249, 224, 118, 0.1); }
 
-        .falling-grain { position: absolute; width: 4px; height: 4px; background: #ffe680; border-radius: 50%; z-index: 10; pointer-events: none; }
-        .leak-grain { position: absolute; width: 3px; height: 3px; background: #555; border-radius: 50%; z-index: 10; pointer-events: none; }
-        .confetti { position: absolute; width: 8px; height: 8px; z-index: 100; pointer-events: none; border-radius: 2px; }
+        .q-card { background: #1f1f27; border: 1px solid var(--border); padding: 15px; border-radius: 12px; margin-bottom: 15px; position: relative; }
+        .btn-del { position: absolute; top: 10px; right: 10px; color: #ff5252; font-size: 10px; cursor: pointer; font-weight: bold; }
+        
+        label { display: block; font-size: 10px; color: #888; text-transform: uppercase; margin-top: 10px; font-weight: 800; }
+        input, select { width: 100%; background: #111; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 8px; margin-top: 5px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--accent); }
 
-        .score { font-size: 58px; color: var(--gold); font-weight: bold; margin: 10px 0; text-shadow: 0 0 20px rgba(249, 224, 118, 0.2); }
-        .q-text { min-height: 80px; font-size: 18px; color: #ddd; margin: 15px 0; line-height: 1.4; display: flex; align-items: center; justify-content: center; }
-        
-        .btn-group { display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        .row { display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap; }
-        
-        .btn {
-            background: transparent; border: 1px solid var(--gold); color: var(--gold);
-            padding: 12px 24px; border-radius: 14px; cursor: pointer; font-weight: bold; transition: 0.2s;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(249, 224, 118, 0.4); }
-        .btn-ans { border-color: #333; color: #fff; width: 45%; font-size: 12px; padding: 10px; }
+        .btn-add { background: transparent; border: 1px dashed #444; color: #888; padding: 12px; border-radius: 10px; width: 100%; cursor: pointer; margin-top: 10px; font-weight: bold; }
+        .btn-add:hover { border-color: var(--accent); color: var(--accent); }
 
-        .feedback { font-size: 14px; font-weight: bold; margin-bottom: 10px; min-height: 20px; }
-        .hidden { display: none; }
-        
-        .shake { animation: shake 0.4s; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
-        }
+        /* Preview Zone */
+        .preview-zone { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #050505; position: relative; }
+        #ifr-wrap { border: 12px solid #222; border-radius: 45px; overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,0.7); background: #000; }
+        iframe { border: none; width: 100%; height: 100%; }
+
+        .sidebar-footer { padding: 20px; background: #111; border-top: 1px solid var(--border); }
+        .btn-main { background: var(--accent); color: #000; border: none; padding: 16px; width: 100%; border-radius: 14px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Modal */
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 40px; }
+        .modal-body { background: #1a1a20; padding: 30px; border-radius: 25px; width: 100%; max-width: 800px; border: 1px solid var(--accent); }
+        textarea { width: 100%; height: 350px; background: #000; color: var(--accent); font-family: 'Fira Code', monospace; padding: 15px; border-radius: 12px; font-size: 11px; }
     </style>
 </head>
 <body>
 
-<div class="game-card">
-    <div class="lang-switch">
-        <button class="lang-btn active" onclick="setLang('ru', this)">RU</button>
-        <button class="lang-btn" onclick="setLang('en', this)">EN</button>
-        <button class="lang-btn" onclick="setLang('de', this)">DE</button>
+<div class="sidebar">
+    <div class="sidebar-header"><h2 style="margin:0; font-size:18px;">SPARSCHWEIN <span style="font-weight:100; opacity:0.5">PRO</span></h2></div>
+    <div class="sidebar-content">
+        
+        <div class="section-tag">Параметры Виджета</div>
+        <div style="display:flex; gap:10px">
+            <div style="flex:1"><label>Ширина</label><input type="number" id="pw" value="380"></div>
+            <div style="flex:1"><label>Высота</label><input type="number" id="ph" value="620"></div>
+        </div>
+        <label>Фон (URL картинки)</label>
+        <input type="text" id="pbg" placeholder="Вставьте прямую ссылку на изображение">
+
+        <div class="section-tag">Вопросы и Ответы</div>
+        <div id="q-list">
+            <div class="q-card">
+                <span class="btn-del" onclick="this.parentElement.remove()">✕ УДАЛИТЬ</span>
+                <label>Текст вопроса</label>
+                <input type="text" class="q-txt" value="Как переводится 'Haben'?">
+                <label>Варианты (Первый всегда правильный!)</label>
+                <input type="text" class="q-ans" value="Иметь, Быть, Делать, Идти">
+            </div>
+        </div>
+        <button class="btn-add" onclick="addQ()">+ ДОБАВИТЬ ВОПРОС</button>
+
+        <div class="section-tag">Настройки игры</div>
+        <label>Цель (очков)</label>
+        <input type="number" id="pgoal" value="500">
+        <label>Язык</label>
+        <select id="plang"><option value="ru">Русский</option><option value="en">English</option><option value="de">Deutsch</option></select>
+
     </div>
-
-    <div class="pig-container" id="pig-box">
-        <svg class="pig-svg" id="main-pig" viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <filter id="sand-texture" x="0" y="0" width="100%" height="100%">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="noise" />
-                    <feDiffuseLighting in="noise" lighting-color="#f9e076" surfaceScale="2">
-                        <feDistantLight azimuth="45" elevation="60" />
-                    </feDiffuseLighting>
-                    <feComposite operator="in" in2="SourceGraphic" />
-                </filter>
-
-                <radialGradient id="glass-grad" cx="50%" cy="40%" r="50%">
-                    <stop offset="0%" stop-color="rgba(255,255,255,0.12)" />
-                    <stop offset="100%" stop-color="rgba(255,255,255,0.02)" />
-                </radialGradient>
-
-                <linearGradient id="gold-fill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#fcf6ba" />
-                    <stop offset="50%" stop-color="#f9e076" />
-                    <stop offset="100%" stop-color="#bf953f" />
-                </linearGradient>
-
-                <mask id="pig-mask">
-                    <path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="white" />
-                </mask>
-            </defs>
-
-            <path id="pig-body" d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" 
-                  fill="url(#glass-grad)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
-
-            <g mask="url(#pig-mask)">
-                <rect id="sand-rect" x="50" y="190" width="250" height="0" fill="url(#gold-fill)" />
-            </g>
-
-            <path class="glass-edge" d="M60,100 L45,100 C42,100 40,103 40,110 C40,117 42,120 45,120 L60,120" stroke-width="1.5" />
-            <ellipse class="glass-edge" cx="40" cy="110" rx="3" ry="10" />
-
-            <path class="glass-edge" d="M105,62 L100,40 L125,52" stroke-width="1.5" stroke-linejoin="round" />
-            <path class="glass-edge" d="M165,52 L175,35 L185,50" stroke-width="1.5" stroke-linejoin="round" />
-
-            <path class="glass-edge" d="M290,125 C310,120 315,140 305,145 C295,150 290,135 300,130 C305,128 310,132 308,138" stroke-width="1.2" />
-
-            <path class="glass-body" d="M110,190 C110,210 90,210 90,190" stroke-width="2" />
-            <path class="glass-body" d="M140,195 C140,215 120,215 120,195" stroke-width="2" />
-            <path class="glass-body" d="M220,195 C220,215 200,215 200,195" stroke-width="2" />
-            <path class="glass-body" d="M250,185 C250,205 230,205 230,185" stroke-width="2" />
-
-            <ellipse cx="170" cy="50" rx="20" ry="3" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
-            <rect x="155" y="48" width="30" height="4" rx="2" fill="rgba(0,0,0,0.3)" />
-        </svg>
+    <div class="sidebar-footer">
+        <button class="btn-main" onclick="refresh()">ОБНОВИТЬ ПРЕВЬЮ</button>
+        <button class="btn-main" onclick="showCode()" style="margin-top:10px; background:#222; color:#fff; border: 1px solid #333;">ПОЛУЧИТЬ КОД</button>
     </div>
+</div>
 
-    <div id="diff-tag" style="font-size: 10px; color: #444; margin-top: 10px; letter-spacing: 2px;">LEVEL: SELECT</div>
-    <div class="score" id="total-val">0</div>
-    <div id="question-box">
-        <div class="q-text" id="question">Выберите сложность:</div>
-        <div id="diff-screen" class="btn-group">
-            <div class="row"><button class="btn" onclick="initGame('easy')">EASY</button><button class="btn" onclick="initGame('hard')">HARD</button></div>
-        </div>
-        <div id="bet-screen" class="hidden">
-            <div class="row"><button class="btn" onclick="askQuestion(10)">10</button><button class="btn" onclick="askQuestion(25)">25</button><button class="btn" onclick="askQuestion(50)">50</button></div>
-        </div>
-        <div id="ans-screen" class="hidden"><div class="row" id="ans-list"></div></div>
-        <div id="res-screen" class="hidden">
-            <div id="res-msg" class="feedback"></div>
-            <button class="btn" id="next-btn" onclick="nextAction()"></button>
-            <button class="btn hidden" id="restart-btn" onclick="location.reload()">RESTART</button>
-        </div>
+<div class="preview-zone">
+    <div id="ifr-wrap"><iframe id="ifr"></iframe></div>
+</div>
+
+<div id="modal">
+    <div class="modal-body">
+        <h3 style="margin-top:0; color:var(--accent)">Код для вставки в Genially</h3>
+        <textarea id="res-code" readonly onclick="this.select()"></textarea>
+        <button class="btn-main" onclick="document.getElementById('modal').style.display='none'" style="margin-top:20px">ЗАКРЫТЬ</button>
     </div>
 </div>
 
 <script>
-    let score = 0, difficulty = 'easy', currentBet = 0, curLang = 'ru', qIdx = 0, isGameOver = false;
-    const MAX_SCORE = 500, PIG_BOTTOM = 190;
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function addQ() {
+    const d = document.createElement('div'); d.className = 'q-card';
+    d.innerHTML = `<span class="btn-del" onclick="this.parentElement.remove()">✕ УДАЛИТЬ</span><label>Текст вопроса</label><input type="text" class="q-txt"><label>Варианты</label><input type="text" class="q-ans">`;
+    document.getElementById('q-list').appendChild(d);
+}
 
-    function playTone(freq, type, duration, vol) {
-        const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + duration);
-    }
+function buildHTML() {
+    const questions = [];
+    document.querySelectorAll('.q-card').forEach(c => {
+        const t = c.querySelector('.q-txt').value;
+        const a = c.querySelector('.q-ans').value.split(',').map(s=>s.trim());
+        if(t && a.length >= 2) questions.push({q:t, a:a});
+    });
 
-    const data = {
-        ru: { next: "ДАЛЕЕ", win: "ВЕРНО!", loss: "УТЕЧКА ПЕСКА...", finish: "ЗОЛОТОЕ ИЗОБИЛИЕ!",
-            easy: [{q:"Ich ... (haben) ein Haus.", a:["habe","hast","hat","haben"], c:0},{q:"Du ... (sein) schön.", a:["bist","ist","sind","bin"], c:0},{q:"Wir ... (gehen) nach Hause.", a:["gehen","gehst","geht","gegangen"], c:0},{q:"Er ... (essen) Apfel.", a:["isst","essen","esst","esse"], c:0},{q:"Sie ... (trinken) Wasser.", a:["trinkt","trinken","trinkst","getrunken"], c:0}],
-            hard: [{q:"Если бы я был богат (Konjunktiv II)...", a:["Wäre ich reich","Ich bin reich","Ich war reich","Würde я reich"], c:0},{q:"Я бы пошел (würde-form)...", a:["Ich würde gehen","Ich werde gehen","Ich bin gegangen","Ich gehe"], c:0},{q:"Несмотря на дождь...", a:["Trotz des Regens","Wegen dem Regen","Bei dem Regen","Trotz dem Regen"], c:0},{q:"Я жду тебя (Präposition)...", a:["Ich warте auf dich","Ich warte für dich","Ich warте dich","Ich warте an dich"], c:0},{q:"Она сказала, что придет...", a:["..., dass sie приходит","..., weil sie kommt","..., ob она kommt","..., когда sie приходит"], c:0}]
-        },
-        en: { next: "NEXT", win: "CORRECT!", loss: "SAND LEAK...", finish: "GOLDEN VICTORY!",
-            easy: [{q:"I ... (be) a student.", a:["am","is","are","be"], c:0},{q:"They ... (play) football.", a:["play","plays","playing","played"], c:0},{q:"She ... (like) pizza.", a:["likes","like","liking","liked"], c:0},{q:"We ... (go) to school.", a:["go","goes","going","gone"], c:0},{q:"He ... (have) a dog.", a:["has","have","having","had"], c:0}],
-            hard: [{q:"If I ... you, I would go.", a:["were","was","am","be"], c:0},{q:"She ... here for 5 years.", a:["has been","is","was","has being"], c:0},{q:"By tomorrow, I ... it.", a:["will have done","will do","did","have done"], c:0},{q:"I look forward to ... you.", a:["seeing","see","to see","seen"], c:0},{q:"Hardly ... when it rain.", a:["had I left","I left","I have left","did I leave"], c:0}]
-        },
-        de: { next: "WEITER", win: "RICHTIG!", loss: "SANDVERLUST...", finish: "GOLDENER SIEG!",
-            easy: [{q:"Ich ... (lernen) Deutsch.", a:["lerne","lernst","lernt","lernen"], c:0},{q:"Das ... (sein) gut.", a:["ist","sind","bin","seid"], c:0},{q:"Mein Vater ... (arbeiten).", a:["arbeitet","arbeiten","arbeitest","gearbeitet"], c:0},{q:"Das Wetter ... (sein) kalt.", a:["ist","sind","war","wäre"], c:0},{q:"Wo ... (wohnen) du?", a:["wohnst","wohnen","wohnt","wohnte"], c:0}],
-            hard: [{q:"Nachdem er ... (essen), ging er.", a:["gegessen hatte","aß","essen","hat gegessen"], c:0},{q:"Das Haus, ... ich wohne.", a:["in dem","das","welches","worin"], c:0},{q:"Stатт ... (helfen), schlief er.", a:["zu helfen","hilft","helfen","geholfen"], c:0},{q:"Je mehr, ... besser.", a:["desto","als","wie","umso"], c:0},{q:"Er tut so, als ... er reich.", a:["wäre","ist","sei","war"], c:0}]
-        }
+    const config = {
+        bg: document.getElementById('pbg').value,
+        goal: document.getElementById('pgoal').value,
+        lang: document.getElementById('plang').value
     };
 
-    function initGame(d) { if (audioCtx.state === 'suspended') audioCtx.resume(); difficulty = d; qIdx = 0; document.getElementById('diff-tag').innerText = `LEVEL: ${d.toUpperCase()}`; document.getElementById('diff-screen').classList.add('hidden'); showBetScreen(); }
-    function showBetScreen() { if(isGameOver) return; document.getElementById('res-screen').classList.add('hidden'); document.getElementById('bet-screen').classList.remove('hidden'); document.getElementById('question').innerText = (curLang === 'ru' ? "Выберите ставку:" : "Choose bet:"); }
-    function askQuestion(bet) { currentBet = bet; document.getElementById('bet-screen').classList.add('hidden'); const q = data[curLang][difficulty][qIdx]; document.getElementById('question').innerText = q.q; const list = document.getElementById('ans-list'); list.innerHTML = ''; q.a.forEach((txt, i) => { list.innerHTML += `<button class="btn btn-ans" onclick="checkAnswer(${i})">${txt}</button>`; }); document.getElementById('ans-screen').classList.remove('hidden'); }
+    // Генерируем код виджета (Ваша логика + ТЗ)
+    return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root { --gold: #f9e076; --gold-d: #bf953f; }
+        body { background: #0a0a0a url('${config.bg}') center/cover; margin:0; font-family: 'Segoe UI', Tahoma, sans-serif; height: 100vh; display:flex; align-items:center; justify-content:center; }
+        .game-card { width: 320px; background: rgba(15,15,18,0.9); padding: 30px; border-radius: 45px; border: 1px solid #333; backdrop-filter: blur(15px); text-align:center; box-shadow: 0 30px 60px rgba(0,0,0,0.8); color:#fff; position: relative; }
+        .pig-box { position: relative; width: 280px; height: 180px; margin: 0 auto; }
+        #sand-rect { transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .score { font-size: 48px; color: var(--gold); font-weight: 900; margin: 10px 0; text-shadow: 0 0 20px rgba(249,224,118,0.3); }
+        .q-area { min-height: 70px; font-size: 18px; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; line-height: 1.3; }
+        .btn-bet { background: #1a1a1e; border: 1px solid #444; color: var(--gold); padding: 10px 15px; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; flex: 1; }
+        .btn-bet:hover { border-color: var(--gold); background: #25252b; }
+        .btn-ans { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 14px; border-radius: 15px; width: 100%; margin-bottom: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; }
+        .btn-ans:hover { background: var(--gold); color: #000; }
+        .grain { position: absolute; width: 3px; height: 3px; background: var(--gold); border-radius: 50%; pointer-events: none; z-index: 10; }
+    </style>
+</head>
+<body>
+<div class="game-card">
+    <div class="pig-box" id="pbox">
+        <svg viewBox="0 0 320 220" style="width:100%; height:100%">
+            <defs>
+                <mask id="m"><path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="white"/></mask>
+                <linearGradient id="g" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="var(--gold-d)"/><stop offset="100%" stop-color="var(--gold)"/></linearGradient>
+            </defs>
+            <g mask="url(#m)"><rect id="sand-rect" x="50" y="190" width="250" height="0" fill="url(#g)"/></g>
+            <path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+        </svg>
+    </div>
+    <div class="score" id="sv">0</div>
+    <div class="q-area" id="qt"></div>
+    <div id="ui"></div>
+</div>
+<script>
+    let score=0, qidx=0, bet=0, qs=\${JSON.stringify(questions)};
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    function beep(f){ const o=ctx.createOscillator(), g=ctx.createGain(); o.frequency.value=f; g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.5); o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+0.5); }
 
-    function checkAnswer(idx) {
-        const isCorrect = idx === data[curLang][difficulty][qIdx].c;
-        document.getElementById('ans-screen').classList.add('hidden');
-        if(isCorrect) {
-            score += currentBet;
-            playTone(880, 'sine', 0.1, 0.2); setTimeout(() => playTone(1320, 'sine', 0.2, 0.1), 100);
-            dropSandEffect();
-            triggerGlint(); 
-            document.getElementById('res-msg').style.color = "var(--gold)";
-        } else {
-            score = Math.max(0, score - currentBet);
-            playTone(150, 'sawtooth', 0.3, 0.1);
-            leakSandEffect();
-            document.getElementById('res-msg').style.color = "var(--error-red)";
+    function step1(){
+        if(qidx >= qs.length) { document.getElementById('qt').innerText="FINISH!"; return; }
+        document.getElementById('qt').innerText = qs[qidx].q;
+        const ui = document.getElementById('ui'); ui.innerHTML = '<p style="font-size:11px; color:#666; text-transform:uppercase; margin-bottom:10px">Выберите ставку</p><div style="display:flex; gap:8px"></div>';
+        [10, 25, 50, 100].forEach(v => {
+            const b = document.createElement('button'); b.className='btn-bet'; b.innerText=v;
+            b.onclick = () => { bet=v; step2(); };
+            ui.querySelector('div').appendChild(b);
+        });
+    }
+
+    function step2(){
+        const ui = document.getElementById('ui'); ui.innerHTML = '';
+        const corr = qs[qidx].a[0];
+        [...qs[qidx].a].sort(()=>Math.random()-0.5).forEach(t => {
+            const b = document.createElement('button'); b.className='btn-ans'; b.innerText=t;
+            b.onclick = () => {
+                if(t === corr) { score = Math.min(${config.goal}, score + bet); beep(880); drop(); }
+                else { score = Math.max(0, score - bet); beep(220); }
+                upd(); qidx++; setTimeout(step1, 1200);
+            };
+            ui.appendChild(b);
+        });
+    }
+
+    function upd(){
+        document.getElementById('sv').innerText = score;
+        const h = (score / ${config.goal}) * 140;
+        const r = document.getElementById('sand-rect');
+        r.setAttribute('y', 190 - h); r.setAttribute('height', h);
+    }
+
+    function drop(){
+        for(let i=0; i<15; i++){
+            const g = document.createElement('div'); g.className='grain';
+            g.style.left = (140 + Math.random()*40)+'px'; g.style.top='40px';
+            document.getElementById('pbox').appendChild(g);
+            g.animate([{transform:'translateY(0)'},{transform:'translateY(120px)', opacity:0}], 1000).onfinish=()=>g.remove();
         }
-        document.getElementById('total-val').innerText = score;
-        document.getElementById('res-msg').innerText = isCorrect ? data[curLang].win : data[curLang].loss;
-        document.getElementById('next-btn').innerText = data[curLang].next;
-        document.getElementById('res-screen').classList.remove('hidden');
-        updateSandLevel();
     }
+    step1();
+<\/script></body></html>`;
+}
 
-    function triggerGlint() {
-        const pig = document.getElementById('main-pig');
-        pig.classList.add('glass-glint');
-        setTimeout(() => pig.classList.remove('glass-glint'), 800);
-    }
-
-    function nextAction() { qIdx++; if (qIdx >= data[curLang][difficulty].length) { qIdx = 0; showBetScreen(); } else { showBetScreen(); } }
+function refresh() {
+    const w = document.getElementById('pw').value, h = document.getElementById('ph').value;
+    const wrap = document.getElementById('ifr-wrap');
+    wrap.style.width = w + "px"; wrap.style.height = h + "px";
     
-    function dropSandEffect() {
-        const container = document.getElementById('pig-box');
-        for(let i=0; i<15; i++) {
-            setTimeout(() => {
-                const grain = document.createElement('div'); grain.className = 'falling-grain';
-                grain.style.left = (160 + Math.random() * 20) + 'px'; grain.style.top = '50px';
-                container.appendChild(grain);
-                grain.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: `translate(${Math.random()*40-20}px, 100px)`, opacity: 0 }], { duration: 1000 }).onfinish = () => grain.remove();
-            }, i * 40);
-        }
-    }
+    const blob = new Blob([buildHTML()], {type: 'text/html'});
+    document.getElementById('ifr').src = URL.createObjectURL(blob);
+}
 
-    function leakSandEffect() {
-        document.getElementById('pig-box').classList.add('shake');
-        setTimeout(() => document.getElementById('pig-box').classList.remove('shake'), 400);
-        const container = document.getElementById('pig-box');
-        for(let i=0; i<10; i++) {
-            const grain = document.createElement('div'); grain.className = 'leak-grain';
-            grain.style.left = (120 + Math.random() * 80) + 'px'; grain.style.top = '190px';
-            container.appendChild(grain);
-            grain.animate([{ opacity: 1 }, { transform: 'translateY(50px)', opacity: 0 }], 600).onfinish = () => grain.remove();
-        }
-    }
+function showCode() {
+    const w = document.getElementById('pw').value, h = document.getElementById('ph').value;
+    const html = buildHTML().replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    document.getElementById('res-code').value = `<iframe width="${w}" height="${h}" srcdoc="${html}" frameborder="0" scrolling="no" style="border:none;overflow:hidden;"></iframe>`;
+    document.getElementById('modal').style.display = 'flex';
+}
 
-    function updateSandLevel() {
-        const sand = document.getElementById('sand-rect');
-        const fillHeight = Math.min(140, (score / MAX_SCORE) * 140);
-        sand.setAttribute('y', PIG_BOTTOM - fillHeight);
-        sand.setAttribute('height', fillHeight);
-        document.getElementById('main-pig').style.filter = `drop-shadow(0 0 ${score/20}px rgba(249, 224, 118, 0.4))`;
-        if (score >= MAX_SCORE) finishGame();
-    }
-
-    function finishGame() {
-        isGameOver = true;
-        playTone(523.25, 'sine', 0.2, 0.2); setTimeout(() => playTone(659.25, 'sine', 0.2, 0.2), 150); setTimeout(() => playTone(783.99, 'sine', 0.4, 0.3), 300);
-        for(let i=0; i<60; i++) {
-            const c = document.createElement('div'); c.className = 'confetti';
-            c.style.left = Math.random() * 100 + '%'; c.style.top = '-10px';
-            c.style.backgroundColor = ['#f9e076', '#bf953f', '#fff', '#aa771c'][Math.floor(Math.random()*4)];
-            document.body.appendChild(c);
-            c.animate([{ transform: 'translateY(0) rotate(0deg)', opacity: 1 }, { transform: `translate(${Math.random()*300-150}px, 110vh) rotate(${Math.random()*720}deg)`, opacity: 0 }], { duration: 3000 + Math.random()*2000 }).onfinish = () => c.remove();
-        }
-        document.getElementById('next-btn').classList.add('hidden');
-        document.getElementById('restart-btn').classList.remove('hidden');
-        document.getElementById('res-msg').innerText = data[curLang].finish;
-        document.getElementById('question').innerText = "🏆";
-    }
-
-    function setLang(l, btn) { curLang = l; document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); if(!isGameOver) { document.getElementById('next-btn').innerText = data[curLang].next; } }
+window.onload = refresh;
 </script>
 </body>
 </html>
