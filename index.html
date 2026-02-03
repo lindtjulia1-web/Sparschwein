@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>KGB Editor: Pirate & Multi-Lang</title>
+    <title>KGB Gold Pile Editor</title>
     <style>
         :root { --accent: #f9e076; --bg: #0e0e10; --panel: #18181b; --border: #2d2d33; --green: #4caf50; --red: #f44336; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
@@ -21,9 +21,6 @@
         .inp-correct { border-color: var(--green); background: rgba(76, 175, 80, 0.1); }
         .inp-wrong { border-color: var(--red); background: rgba(244, 67, 54, 0.1); }
 
-        .check-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 12px; color: var(--accent); cursor: pointer; }
-        .check-row input { width: auto; margin: 0; }
-
         .btn { background: #333; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .btn-main { background: var(--accent); color: #000; margin-top: 20px; text-transform: uppercase; }
 
@@ -39,36 +36,46 @@
 
 <div class="sidebar">
     <div class="sidebar-content">
-        <h2>Настройки Виджета</h2>
+        <h2>Стиль текста</h2>
+        <label>Шрифт</label>
+        <select id="fontFamily">
+            <option value="'Segoe UI', sans-serif">Standard (Sans)</option>
+            <option value="'Georgia', serif">Classic (Serif)</option>
+            <option value="'Courier New', monospace">Retro (Mono)</option>
+            <option value="'Impact', sans-serif">Bold (Impact)</option>
+            <option value="'Comic Sans MS', cursive">Casual</option>
+        </select>
+
+        <h2>Размер окна</h2>
         <div class="size-grid">
             <div><label>Ширина</label><input type="number" id="width" value="400" oninput="resizePreview()"></div>
             <div><label>Высота</label><input type="number" id="height" value="600" oninput="resizePreview()"></div>
         </div>
 
-        <label>Язык интерфейса</label>
+        <label>Язык</label>
         <select id="lang">
             <option value="ru">Русский</option>
             <option value="en">English</option>
             <option value="de">Deutsch</option>
         </select>
 
-        <label class="check-row">
-            <input type="checkbox" id="isPirate"> 🏴‍☠️ Пиратские монеты
+        <label style="display:flex; align-items:center; gap:10px; margin-top:10px; font-size:12px;">
+            <input type="checkbox" id="isPirate" style="width:auto"> 🏴‍☠️ Пиратские монеты
         </label>
 
-        <label>Фон (URL)</label>
-        <input type="text" id="bg-url" value="" placeholder="https://...">
-
-        <h2>Вопросы</h2>
+        <h2>Контент</h2>
         <div id="q-container"></div>
         <button class="btn" onclick="addQ()">+ Добавить вопрос</button>
 
         <label>Цель (очков)</label>
         <input type="number" id="goal" value="500">
+        
+        <label>Фон (URL)</label>
+        <input type="text" id="bg-url" value="" placeholder="https://...">
     </div>
     <div style="padding: 20px; border-top: 1px solid #333;">
         <button class="btn btn-main" onclick="updatePreview()">Обновить Превью</button>
-        <button class="btn" onclick="getGeniallyCode()" style="background:#00d4ff; color:#000">ПОЛУЧИТЬ КОД IFRAME</button>
+        <button class="btn" onclick="getGeniallyCode()" style="background:#00d4ff; color:#000">ПОЛУЧИТЬ КОД</button>
     </div>
 </div>
 
@@ -97,7 +104,7 @@ function addQ(qText = "", correct = "", wrongs = ["", "", ""]) {
         <label>Вопрос</label><input type="text" class="inp-q" value="${qText}">
         <label style="color:var(--green)">✓ Правильный</label>
         <input type="text" class="inp-correct" value="${correct}">
-        <label style="color:var(--red)">× Неправильные (через запятую)</label>
+        <label style="color:var(--red)">× Неправильные</label>
         <input type="text" class="inp-wrong" value="${wrongs.join(', ')}">
     `;
     document.getElementById('q-container').appendChild(div);
@@ -117,6 +124,7 @@ function buildInnerGame() {
         goal: document.getElementById('goal').value, 
         lang: document.getElementById('lang').value,
         pirate: document.getElementById('isPirate').checked,
+        font: document.getElementById('fontFamily').value,
         data: qs 
     };
 
@@ -124,34 +132,32 @@ function buildInnerGame() {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root{--gold:#f9e076;--gold-d:#bf953f}
-        body { margin:0; height:100vh; overflow:hidden; font-family:sans-serif; background:#000; color:#fff; display: flex; align-items: center; justify-content: center; }
+        body { margin:0; height:100vh; overflow:hidden; font-family:${cfg.font}; background:#000; color:#fff; display: flex; align-items: center; justify-content: center; }
         .bg{position:fixed;inset:0;background:url('${cfg.bg}') center/cover;opacity:0.6;z-index:-1}
-        #game-root { width: 360px; height: 600px; position: relative; transform-origin: center center; display: flex; flex-direction: column; justify-content: center; }
-        .card { width: 100%; height: 100%; box-sizing: border-box; background: rgba(20,20,25,0.95); border-radius: 35px; padding: 25px; border: 1px solid #333; text-align: center; box-shadow: 0 20px 50px #000; display: flex; flex-direction: column; justify-content: center; }
-        .pig { width: 100%; height: 180px; margin: 0 auto 10px; position: relative; }
-        #sand { transition: all 1s ease }
-        .score { font-size: 44px; color: var(--gold); font-weight: 800; margin: 5px 0; }
-        .q-box { min-height: 80px; font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
-        .btn { border: 1px solid #444; background: #1a1a1a; color: #ccc; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; }
-        .btn-ans { width: 100%; border: 1px solid var(--gold); color: var(--gold); background: none; margin-bottom: 8px; }
-        .coin { position: absolute; width: 24px; height: 24px; background: var(--gold); border: 2px solid var(--gold-d); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #744b00; pointer-events: none; z-index: 10; }
-        .grain { position: absolute; width: 4px; height: 4px; background: var(--gold); border-radius: 50%; pointer-events: none; }
+        #game-root { width: 360px; height: 600px; position: relative; transform-origin: center center; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; box-sizing: border-box; }
+        .card { width: 100%; height: 100%; background: rgba(20,20,25,0.95); border-radius: 35px; padding: 25px; border: 1px solid #333; text-align: center; box-shadow: 0 20px 50px #000; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        
+        /* ГОРКА ЗОЛОТА */
+        .gold-area { flex: 1; position: relative; overflow: hidden; margin-bottom: 10px; display:flex; align-items:flex-end; justify-content:center; }
+        .pile-svg { width: 100%; height: 100px; transition: height 0.5s ease; fill: url(#goldGrad); }
+        
+        .score { font-size: 44px; color: var(--gold); font-weight: 800; margin: 10px 0; z-index: 5; }
+        .q-box { min-height: 80px; font-size: 20px; margin-bottom: 15px; z-index: 5; display: flex; align-items: center; justify-content: center; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; z-index: 5; }
+        .btn { border: 1px solid #444; background: #1a1a1a; color: #ccc; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: inherit; }
+        .btn-ans { width: 100%; border: 1px solid var(--gold); color: var(--gold); background: none; margin-bottom: 8px; font-size: 16px; }
+        .coin-drop { position: absolute; font-size: 24px; pointer-events: none; z-index: 10; }
     </style></head><body>
     <div class="bg"></div>
     <div id="game-root">
         <div class="card">
-            <div class="pig" id="p">
-                <svg viewBox="0 0 320 220" style="width:100%; height:100%">
-                    <defs>
-                        <mask id="m"><path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="white"/></mask>
-                        <linearGradient id="g" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="var(--gold-d)"/><stop offset="100%" stop-color="var(--gold)"/></linearGradient>
-                    </defs>
-                    <g mask="url(#m)"><rect id="sand" x="50" y="190" width="250" height="0" fill="url(#g)"/></g>
-                    <path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+            <div class="score" id="s">0</div>
+            <div class="gold-area" id="g-area">
+                <svg class="pile-svg" viewBox="0 0 300 100" preserveAspectRatio="none">
+                    <defs><linearGradient id="goldGrad" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#bf953f"/><stop offset="100%" stop-color="#f9e076"/></linearGradient></defs>
+                    <path id="gold-pile" d="M0,100 Q150,100 300,100 L300,100 L0,100 Z" />
                 </svg>
             </div>
-            <div class="score" id="s">0</div>
             <div class="q-box" id="qt"></div>
             <div id="ctrl"></div>
         </div>
@@ -184,31 +190,33 @@ function buildInnerGame() {
         [...cfg.data[qi].a].sort(()=>Math.random()-.5).forEach(o=>{
             const b=document.createElement('button'); b.className='btn btn-ans'; b.innerText=o;
             b.onclick=()=>{
-                if(o===cfg.data[qi].a[0]){ sc=Math.min(cfg.goal,sc+bt); spawnMoney(); }else{ sc=Math.max(0,sc-bt); }
-                upd(); qi++; setTimeout(init,1000);
+                if(o===cfg.data[qi].a[0]){ sc=Math.min(cfg.goal, sc+bt); dropCoins(); } 
+                else { sc=Math.max(0, sc-bt); clearPile(); }
+                upd(); qi++; setTimeout(init, 1000);
             };
             c.appendChild(b);
         })
     };
     function upd(){
         document.getElementById('s').innerText=sc;
-        const h=(sc/cfg.goal)*140;
-        const r=document.getElementById('sand');
-        r.setAttribute('height',h); r.setAttribute('y',190-h);
-    };
-    function spawnMoney(){
-        const p=document.getElementById('p');
-        for(let i=0; i<(cfg.pirate ? 3 : 15); i++){
-            const el = document.createElement('div');
-            if(cfg.pirate) {
-                el.className = 'coin'; el.innerHTML = '☠️';
-                el.style.left = (p.clientWidth/2 - 12)+'px';
-            } else {
-                el.className = 'grain';
-                el.style.left = (p.clientWidth/2 - 20 + Math.random()*40)+'px';
-            }
-            el.style.top = '0px'; p.appendChild(el);
-            el.animate([{transform:'translateY(0)'},{transform:'translateY(140px)',opacity:0}], 800).onfinish=()=>el.remove();
+        const pct = (sc/cfg.goal);
+        const h = pct * 100;
+        // Имитация роста горы золота
+        document.getElementById('gold-pile').setAttribute('d', \`M0,100 Q150,\${100-h*2} 300,100 L300,100 L0,100 Z\`);
+    }
+    function clearPile() {
+        if(sc === 0) document.getElementById('gold-pile').setAttribute('d', "M0,100 Q150,100 300,100 L300,100 L0,100 Z");
+    }
+    function dropCoins(){
+        const area = document.getElementById('g-area');
+        for(let i=0; i<8; i++){
+            const c = document.createElement('div');
+            c.className = 'coin-drop';
+            c.innerHTML = cfg.pirate ? '☠️' : '🪙';
+            c.style.left = (Math.random() * 80 + 10) + '%';
+            c.style.top = '-50px';
+            area.appendChild(c);
+            c.animate([{top:'-50px', opacity:1},{top:'80%', opacity:0}], {duration: 600 + Math.random()*400}).onfinish=()=>c.remove();
         }
     }
     <\/script></body></html>`;
@@ -225,7 +233,7 @@ function getGeniallyCode() {
     document.getElementById('code-modal').style.display = 'flex';
 }
 
-window.onload = () => { addQ("Capital of France?", "Paris", ["Lyon", "Marseille", "Berlin"]); updatePreview(); };
+window.onload = () => { addQ("2 + 2 = ?", "4", ["3", "5", "22"]); updatePreview(); };
 </script>
 </body>
 </html>
