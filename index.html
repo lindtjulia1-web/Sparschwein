@@ -7,71 +7,90 @@
         :root { --accent: #f9e076; --bg: #0d0d0f; --panel: #16161a; --border: #2d2d33; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: #e1e1e6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        .sidebar { width: 380px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
+        /* Стили Редактора */
+        .sidebar { width: 400px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 25px; }
+        h2 { font-size: 14px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
         
-        .q-card { background: #1f1f27; border: 1px solid var(--border); padding: 15px; border-radius: 12px; margin-bottom: 15px; }
-        label { display: block; font-size: 10px; color: #888; text-transform: uppercase; margin-top: 10px; font-weight: 800; }
-        input { width: 100%; background: #111; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 8px; margin-top: 5px; box-sizing: border-box; }
+        .q-card { background: #1f1f27; border: 1px solid var(--border); padding: 15px; border-radius: 12px; margin-bottom: 15px; position: relative; }
+        .btn-del { position: absolute; top: 10px; right: 10px; color: #ff5252; cursor: pointer; font-size: 10px; font-weight: bold; }
+        
+        label { display: block; font-size: 10px; color: #888; text-transform: uppercase; margin-top: 12px; font-weight: 800; }
+        input, select { width: 100%; background: #111; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 8px; margin-top: 5px; box-sizing: border-box; outline: none; }
         
         .preview-zone { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; }
-        #ifr-wrap { border: 10px solid #222; border-radius: 45px; overflow: hidden; background: #050505; transition: 0.3s; }
+        #phone-frame { border: 10px solid #222; border-radius: 45px; overflow: hidden; background: #050505; box-shadow: 0 50px 100px rgba(0,0,0,0.8); }
         iframe { border: none; width: 100%; height: 100%; }
 
-        .btn-main { background: var(--accent); color: #000; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        .btn-main { background: var(--accent); color: #000; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: 800; cursor: pointer; text-transform: uppercase; margin-top: 15px; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <div class="sidebar-content">
-        <h2 style="color:var(--accent); font-size:14px; letter-spacing:1px">РЕДАКТОР КОПИЛКИ</h2>
+        <h2>Piggy Bank Editor</h2>
         
-        <label>Размеры (Ш x В)</label>
+        <label>Размеры виджета</label>
         <div style="display:flex; gap:10px">
             <input type="number" id="pw" value="380">
             <input type="number" id="ph" value="620">
         </div>
 
-        <label>Вопросы (Формат: Вопрос | Верный, Ошибка, Ошибка, Ошибка)</label>
-        <textarea id="qs-input" style="width:100%; height:150px; background:#111; color:#fff; border:1px solid #333; border-radius:8px; padding:10px; font-size:12px; margin-top:5px;">Berlin ist die Hauptstadt von... | Deutschland, Frankreich, Polen, Italien
-2 + 2 * 2 = ? | 6, 4, 8, 10</textarea>
+        <label>Фон (URL картинки)</label>
+        <input type="text" id="pbg" placeholder="Вставьте ссылку на фон">
 
-        <label>Цель (Баллы)</label>
+        <div id="q-list">
+            <div class="q-card">
+                <span class="btn-del" onclick="this.parentElement.remove()">УДАЛИТЬ</span>
+                <label>Вопрос</label>
+                <input type="text" class="q-txt" value="Ich ... (haben) ein Haus">
+                <label>Варианты (Первый - ВЕРНЫЙ)</label>
+                <input type="text" class="q-ans" value="habe, hast, hat, haben">
+            </div>
+        </div>
+        <button class="btn-main" style="background:#222; color:#888" onclick="addQ()">+ Добавить вопрос</button>
+
+        <label>Цель (баллы)</label>
         <input type="number" id="pgoal" value="500">
-
-        <button class="btn-main" onclick="refresh()">ОБНОВИТЬ ИГРУ</button>
+        
+        <button class="btn-main" onclick="refresh()">Обновить Превью</button>
     </div>
 </div>
 
 <div class="preview-zone">
-    <div id="ifr-wrap"><iframe id="ifr"></iframe></div>
+    <div id="phone-frame"><iframe id="ifr"></iframe></div>
 </div>
 
 <script>
+function addQ() {
+    const d = document.createElement('div'); d.className = 'q-card';
+    d.innerHTML = `<span class="btn-del" onclick="this.parentElement.remove()">УДАЛИТЬ</span><label>Вопрос</label><input type="text" class="q-txt"><label>Варианты</label><input type="text" class="q-ans">`;
+    document.getElementById('q-list').appendChild(d);
+}
+
 function buildHTML() {
-    const lines = document.getElementById('qs-input').value.split('\n');
-    const questions = lines.map(line => {
-        const parts = line.split('|');
-        if(parts.length < 2) return null;
-        return { q: parts[0].trim(), a: parts[1].split(',').map(s=>s.trim()) };
-    }).filter(x => x);
+    const qs = [];
+    document.querySelectorAll('.q-card').forEach(c => {
+        const t = c.querySelector('.q-txt').value, a = c.querySelector('.q-ans').value.split(',').map(s=>s.trim());
+        if(t && a.length > 1) qs.push({q:t, a:a});
+    });
 
-    const goal = document.getElementById('pgoal').value;
+    const config = { bg: document.getElementById('pbg').value, goal: document.getElementById('pgoal').value };
 
-    const gameCode = `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <style>
         :root { --gold: #f9e076; --gold-d: #bf953f; }
-        body { background: #0a0a0a; margin:0; font-family: 'Segoe UI', sans-serif; height: 100vh; display:flex; align-items:center; justify-content:center; color:#fff; overflow:hidden; }
-        .card { width: 320px; background: #111; padding: 30px; border-radius: 40px; border: 1px solid #222; text-align:center; }
+        body { background: #0a0a0a url('${config.bg}') center/cover; margin:0; font-family: sans-serif; height: 100vh; display:flex; align-items:center; justify-content:center; color:#fff; overflow:hidden; }
+        .card { width: 330px; background: rgba(15,15,18,0.9); padding: 30px; border-radius: 40px; border:1px solid #333; backdrop-filter: blur(10px); text-align:center; }
         .pig { position: relative; width: 280px; height: 180px; margin: 0 auto; }
         #sand-rect { transition: all 1s ease; }
-        .score { font-size: 40px; color: var(--gold); font-weight: 800; margin: 10px 0; }
-        .q-text { min-height: 60px; font-size: 18px; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; }
-        .btn-bet { background: #1a1a1e; border: 1px solid #444; color: var(--gold); padding: 10px; border-radius: 10px; cursor: pointer; font-weight: bold; flex: 1; }
+        .score { font-size: 44px; color: var(--gold); font-weight: 800; margin: 10px 0; }
+        .q-area { min-height: 70px; font-size: 18px; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; }
+        .btn-bet { background: #1a1a1e; border: 1px solid #444; color: var(--gold); padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; flex: 1; }
         .btn-ans { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 12px; border-radius: 12px; width: 100%; margin-bottom: 8px; cursor: pointer; font-weight: bold; }
         .btn-ans:hover { background: var(--gold); color: #000; }
         .grain { position: absolute; width: 3px; height: 3px; background: var(--gold); border-radius: 50%; pointer-events: none; }
@@ -80,7 +99,7 @@ function buildHTML() {
 <body>
 <div class="card">
     <div class="pig" id="pbox">
-        <svg viewBox="0 0 320 220">
+        <svg viewBox="0 0 320 220" style="width:100%">
             <defs>
                 <mask id="m"><path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="white"/></mask>
                 <linearGradient id="g" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="var(--gold-d)"/><stop offset="100%" stop-color="var(--gold)"/></linearGradient>
@@ -90,47 +109,40 @@ function buildHTML() {
         </svg>
     </div>
     <div class="score" id="sv">0</div>
-    <div class="q-text" id="qt"></div>
+    <div class="q-area" id="qt"></div>
     <div id="ui"></div>
 </div>
 <script>
-    let s=0, qi=0, bet=0, qs = \${JSON.stringify(questions)};
-    const goal = ${goal};
-
-    function step1(){
-        if(qi >= qs.length) { document.getElementById('qt').innerText="FINISH!"; return; }
+    let s=0, qi=0, bet=0, qs=\${JSON.stringify(qs)};
+    function init(){
+        if(qi >= qs.length) { document.getElementById('qt').innerText="ФИНИШ!"; return; }
         document.getElementById('qt').innerText = qs[qi].q;
-        const ui = document.getElementById('ui');
-        ui.innerHTML = '<div style="display:flex; gap:5px"></div>';
+        const ui = document.getElementById('ui'); ui.innerHTML = '<p style="font-size:10px; color:#888; margin-bottom:10px">ВЫБЕРИТЕ СТАВКУ</p><div style="display:flex; gap:5px"></div>';
         [10, 25, 50, 100].forEach(v => {
             const b = document.createElement('button'); b.className='btn-bet'; b.innerText=v;
-            b.onclick = () => { bet=v; step2(); };
+            b.onclick = () => { bet=v; showAns(); };
             ui.querySelector('div').appendChild(b);
         });
     }
-
-    function step2(){
+    function showAns(){
         const ui = document.getElementById('ui'); ui.innerHTML = '';
         const corr = qs[qi].a[0];
-        const shuffled = [...qs[qi].a].sort(()=>Math.random()-0.5);
-        shuffled.forEach(t => {
+        [...qs[qi].a].sort(()=>Math.random()-0.5).forEach(t => {
             const b = document.createElement('button'); b.className='btn-ans'; b.innerText=t;
             b.onclick = () => {
-                if(t === corr) { s += bet; drop(); }
-                else { s = Math.max(0, s - bet); }
-                upd(); qi++; setTimeout(step1, 1000);
+                if(t === corr) { s = Math.min(${config.goal}, s+bet); drop(); }
+                else { s = Math.max(0, s-bet); }
+                upd(); qi++; setTimeout(init, 1000);
             };
             ui.appendChild(b);
         });
     }
-
     function upd(){
         document.getElementById('sv').innerText = s;
-        const h = Math.min(140, (s/goal)*140);
+        const h = (s / ${config.goal}) * 140;
         const r = document.getElementById('sand-rect');
         r.setAttribute('y', 190-h); r.setAttribute('height', h);
     }
-
     function drop(){
         for(let i=0; i<15; i++){
             const g = document.createElement('div'); g.className='grain';
@@ -139,22 +151,16 @@ function buildHTML() {
             g.animate([{transform:'translateY(0)'},{transform:'translateY(120px)', opacity:0}], 1000).onfinish=()=>g.remove();
         }
     }
-    step1();
+    init();
 <\/script></body></html>`;
-
-    return gameCode;
 }
 
 function refresh() {
     const w = document.getElementById('pw').value, h = document.getElementById('ph').value;
-    const wrap = document.getElementById('ifr-wrap');
-    wrap.style.width = w + "px"; wrap.style.height = h + "px";
-    
-    const doc = buildHTML();
-    const ifr = document.getElementById('ifr');
-    ifr.srcdoc = doc; // Используем srcdoc для мгновенной загрузки
+    const f = document.getElementById('phone-frame');
+    f.style.width = w + "px"; f.style.height = h + "px";
+    document.getElementById('ifr').srcdoc = buildHTML();
 }
-
 window.onload = refresh;
 </script>
 </body>
