@@ -2,269 +2,141 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <title>Редактор: Копилка уверенности v1.0</title>
     <style>
-        :root {
-            --gold: #f9e076;
-            --gold-deep: #bf953f;
-            --error-red: #ff5252;
-            --glass-stroke: rgba(255, 255, 255, 0.25);
-        }
-        body { background: #0a0a0a; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-
-        .game-card {
-            width: 380px; background: #111; border-radius: 45px; padding: 35px;
-            text-align: center; border: 1px solid #222; box-shadow: 0 40px 120px rgba(0,0,0,0.9);
-            position: relative;
-        }
-
-        .lang-switch { position: absolute; top: 25px; right: 35px; display: flex; gap: 8px; z-index: 20; }
-        .lang-btn {
-            background: #1a1a1a; border: 1px solid #333; color: #555;
-            font-size: 10px; padding: 4px 10px; cursor: pointer; border-radius: 6px; transition: 0.3s;
-        }
-        .lang-btn.active { border-color: var(--gold); color: var(--gold); background: #221e0a; }
-
-        .pig-container { position: relative; width: 300px; height: 220px; margin: 0 auto; }
-        .pig-svg { width: 100%; height: 100%; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); overflow: visible; }
-        
-        #sand-rect { 
-            transition: y 1.5s ease-in-out, height 1.5s ease-in-out;
-            filter: url(#sand-texture); /* Улучшенная текстура песка */
-        }
-
-        /* Эффект объемного стекла */
-        .glass-body { fill: rgba(255, 255, 255, 0.03); stroke: rgba(255, 255, 255, 0.15); stroke-width: 1; }
-        .glass-edge { fill: none; stroke: rgba(255, 255, 255, 0.3); stroke-width: 0.5; }
-        
-        @keyframes flash {
-            0% { opacity: 0.3; }
-            50% { opacity: 1; filter: brightness(1.5) drop-shadow(0 0 15px white); }
-            100% { opacity: 0.3; }
-        }
-        .glass-glint { animation: flash 0.8s ease-out; }
-
-        .falling-grain { position: absolute; width: 4px; height: 4px; background: #ffe680; border-radius: 50%; z-index: 10; pointer-events: none; }
-        .leak-grain { position: absolute; width: 3px; height: 3px; background: #555; border-radius: 50%; z-index: 10; pointer-events: none; }
-        .confetti { position: absolute; width: 8px; height: 8px; z-index: 100; pointer-events: none; border-radius: 2px; }
-
-        .score { font-size: 58px; color: var(--gold); font-weight: bold; margin: 10px 0; text-shadow: 0 0 20px rgba(249, 224, 118, 0.2); }
-        .q-text { min-height: 80px; font-size: 18px; color: #ddd; margin: 15px 0; line-height: 1.4; display: flex; align-items: center; justify-content: center; }
-        
-        .btn-group { display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        .row { display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap; }
-        
-        .btn {
-            background: transparent; border: 1px solid var(--gold); color: var(--gold);
-            padding: 12px 24px; border-radius: 14px; cursor: pointer; font-weight: bold; transition: 0.2s;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(249, 224, 118, 0.4); }
-        .btn-ans { border-color: #333; color: #fff; width: 45%; font-size: 12px; padding: 10px; }
-
-        .feedback { font-size: 14px; font-weight: bold; margin-bottom: 10px; min-height: 20px; }
-        .hidden { display: none; }
-        
-        .shake { animation: shake 0.4s; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f12; color: #fff; margin: 0; display: flex; height: 100vh; }
+        .sidebar { width: 350px; background: #18181c; padding: 20px; border-right: 1px solid #333; overflow-y: auto; box-sizing: border-box; }
+        h2 { color: #ffcc00; font-size: 16px; text-transform: uppercase; margin-bottom: 20px; border-bottom: 2px solid #ffcc00; padding-bottom: 10px;}
+        label { display: block; font-size: 11px; color: #aaa; margin-top: 15px; font-weight: bold; text-transform: uppercase; }
+        input, select { width: 100%; background: #26262e; border: 1px solid #3e3e42; color: #fff; padding: 10px; border-radius: 6px; margin-top: 5px; box-sizing: border-box; outline: none; }
+        .btn-main { background: #ffcc00; color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn-main:hover { background: #ffe066; transform: translateY(-2px); }
+        .preview { flex: 1; display: flex; align-items: center; justify-content: center; background: #050505; flex-direction: column; }
+        #ifr-container { border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); background: #111; }
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 999; }
+        .modal-box { background: #1a1a1e; padding: 30px; border-radius: 15px; width: 600px; text-align: center; border: 1px solid #ffcc00; }
+        #output-code { width: 100%; height: 200px; background: #000; color: #ffcc00; font-family: 'Consolas', monospace; font-size: 12px; margin: 15px 0; padding: 10px; resize: none; border: 1px solid #333; }
     </style>
 </head>
 <body>
 
-<div class="game-card">
-    <div class="lang-switch">
-        <button class="lang-btn active" onclick="setLang('ru', this)">RU</button>
-        <button class="lang-btn" onclick="setLang('en', this)">EN</button>
-        <button class="lang-btn" onclick="setLang('de', this)">DE</button>
+<div class="sidebar">
+    <h2>Настройка Копилки</h2>
+    
+    <label>GitHub Репозиторий</label>
+    <input type="text" id="gh-url" value="https://lindtjulia1-web.github.io/Sparschwein/">
+    
+    <label>Язык по умолчанию</label>
+    <select id="def-lang">
+        <option value="RU">Русский</option>
+        <option value="EN">English</option>
+        <option value="DE">Deutsch</option>
+    </select>
+
+    <label>Размер виджета (Ш x В)</label>
+    <div style="display:flex; gap:10px;">
+        <input type="number" id="pw" value="500">
+        <input type="number" id="ph" value="500">
     </div>
 
-    <div class="pig-container" id="pig-box">
-        <svg class="pig-svg" id="main-pig" viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <filter id="sand-texture" x="0" y="0" width="100%" height="100%">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="noise" />
-                    <feDiffuseLighting in="noise" lighting-color="#f9e076" surfaceScale="2">
-                        <feDistantLight azimuth="45" elevation="60" />
-                    </feDiffuseLighting>
-                    <feComposite operator="in" in2="SourceGraphic" />
-                </filter>
+    <label>Начальный уровень песка (0-100%)</label>
+    <input type="range" id="sand-level" min="0" max="100" value="20">
 
-                <radialGradient id="glass-grad" cx="50%" cy="40%" r="50%">
-                    <stop offset="0%" stop-color="rgba(255,255,255,0.12)" />
-                    <stop offset="100%" stop-color="rgba(255,255,255,0.02)" />
-                </radialGradient>
+    <button class="btn-main" onclick="refresh()">ОБНОВИТЬ ПРЕДПРОСМОТР</button>
+    <button class="btn-main" style="background:#333; color:#fff;" onclick="openCode()">ПОЛУЧИТЬ КОД</button>
+</div>
 
-                <linearGradient id="gold-fill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#fcf6ba" />
-                    <stop offset="50%" stop-color="#f9e076" />
-                    <stop offset="100%" stop-color="#bf953f" />
-                </linearGradient>
+<div class="preview">
+    <div id="ifr-container"><iframe id="ifr" frameborder="0"></iframe></div>
+    <p style="color: #555; margin-top: 15px; font-size: 12px;">Предпросмотр активен</p>
+</div>
 
-                <mask id="pig-mask">
-                    <path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="white" />
-                </mask>
-            </defs>
-
-            <path id="pig-body" d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" 
-                  fill="url(#glass-grad)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
-
-            <g mask="url(#pig-mask)">
-                <rect id="sand-rect" x="50" y="190" width="250" height="0" fill="url(#gold-fill)" />
-            </g>
-
-            <path class="glass-edge" d="M60,100 L45,100 C42,100 40,103 40,110 C40,117 42,120 45,120 L60,120" stroke-width="1.5" />
-            <ellipse class="glass-edge" cx="40" cy="110" rx="3" ry="10" />
-
-            <path class="glass-edge" d="M105,62 L100,40 L125,52" stroke-width="1.5" stroke-linejoin="round" />
-            <path class="glass-edge" d="M165,52 L175,35 L185,50" stroke-width="1.5" stroke-linejoin="round" />
-
-            <path class="glass-edge" d="M290,125 C310,120 315,140 305,145 C295,150 290,135 300,130 C305,128 310,132 308,138" stroke-width="1.2" />
-
-            <path class="glass-body" d="M110,190 C110,210 90,210 90,190" stroke-width="2" />
-            <path class="glass-body" d="M140,195 C140,215 120,215 120,195" stroke-width="2" />
-            <path class="glass-body" d="M220,195 C220,215 200,215 200,195" stroke-width="2" />
-            <path class="glass-body" d="M250,185 C250,205 230,205 230,185" stroke-width="2" />
-
-            <ellipse cx="170" cy="50" rx="20" ry="3" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
-            <rect x="155" y="48" width="30" height="4" rx="2" fill="rgba(0,0,0,0.3)" />
-        </svg>
-    </div>
-
-    <div id="diff-tag" style="font-size: 10px; color: #444; margin-top: 10px; letter-spacing: 2px;">LEVEL: SELECT</div>
-    <div class="score" id="total-val">0</div>
-    <div id="question-box">
-        <div class="q-text" id="question">Выберите сложность:</div>
-        <div id="diff-screen" class="btn-group">
-            <div class="row"><button class="btn" onclick="initGame('easy')">EASY</button><button class="btn" onclick="initGame('hard')">HARD</button></div>
-        </div>
-        <div id="bet-screen" class="hidden">
-            <div class="row"><button class="btn" onclick="askQuestion(10)">10</button><button class="btn" onclick="askQuestion(25)">25</button><button class="btn" onclick="askQuestion(50)">50</button></div>
-        </div>
-        <div id="ans-screen" class="hidden"><div class="row" id="ans-list"></div></div>
-        <div id="res-screen" class="hidden">
-            <div id="res-msg" class="feedback"></div>
-            <button class="btn" id="next-btn" onclick="nextAction()"></button>
-            <button class="btn hidden" id="restart-btn" onclick="location.reload()">RESTART</button>
-        </div>
+<div id="modal">
+    <div class="modal-box">
+        <h3 style="margin:0; color:#ffcc00">Код для вставки в Genially:</h3>
+        <textarea id="output-code" readonly onclick="this.select()"></textarea>
+        <button class="btn-main" onclick="document.getElementById('modal').style.display='none'">ЗАКРЫТЬ</button>
     </div>
 </div>
 
 <script>
-    let score = 0, difficulty = 'easy', currentBet = 0, curLang = 'ru', qIdx = 0, isGameOver = false;
-    const MAX_SCORE = 500, PIG_BOTTOM = 190;
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function buildWidgetHTML() {
+    const gh = document.getElementById('gh-url').value;
+    const lang = document.getElementById('def-lang').value;
+    const sand = document.getElementById('sand-level').value;
 
-    function playTone(freq, type, duration, vol) {
-        const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
-        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(); osc.stop(audioCtx.currentTime + duration);
-    }
+    return `<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { margin: 0; height: 100vh; background: #111; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif; color: white; overflow: hidden; }
+        .pig-container { position: relative; width: 300px; height: 250px; }
+        .pig-svg { width: 100%; height: 100%; fill: none; stroke: #ffcc00; stroke-width: 2; z-index: 2; position: relative; }
+        .sand-container { position: absolute; bottom: 45px; left: 50px; width: 200px; height: 140px; overflow: hidden; clip-path: ellipse(45% 45% at 50% 50%); z-index: 1; }
+        .sand { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, #d4af37, #ffcc00); transition: height 1s ease-in-out; height: ${sand}% ; }
+        .controls { margin-top: 20px; display: flex; gap: 10px; }
+        .btn-lang { padding: 5px 10px; background: #222; border: 1px solid #ffcc00; color: #ffcc00; cursor: pointer; border-radius: 4px; font-size: 12px; }
+        .btn-lang.active { background: #ffcc00; color: #000; }
+        #score { font-size: 48px; font-weight: bold; margin: 10px 0; color: #ffcc00; text-shadow: 0 0 10px rgba(255,204,0,0.5); }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button class="btn-lang \${'${lang}'==='RU'?'active':''}" onclick="setL('RU')">RU</button>
+        <button class="btn-lang \${'${lang}'==='EN'?'active':''}" onclick="setL('EN')">EN</button>
+        <button class="btn-lang \${'${lang}'==='DE'?'active':''}" onclick="setL('DE')">DE</button>
+    </div>
 
-    const data = {
-        ru: { next: "ДАЛЕЕ", win: "ВЕРНО!", loss: "УТЕЧКА ПЕСКА...", finish: "ЗОЛОТОЕ ИЗОБИЛИЕ!",
-            easy: [{q:"Ich ... (haben) ein Haus.", a:["habe","hast","hat","haben"], c:0},{q:"Du ... (sein) schön.", a:["bist","ist","sind","bin"], c:0},{q:"Wir ... (gehen) nach Hause.", a:["gehen","gehst","geht","gegangen"], c:0},{q:"Er ... (essen) Apfel.", a:["isst","essen","esst","esse"], c:0},{q:"Sie ... (trinken) Wasser.", a:["trinkt","trinken","trinkst","getrunken"], c:0}],
-            hard: [{q:"Если бы я был богат (Konjunktiv II)...", a:["Wäre ich reich","Ich bin reich","Ich war reich","Würde я reich"], c:0},{q:"Я бы пошел (würde-form)...", a:["Ich würde gehen","Ich werde gehen","Ich bin gegangen","Ich gehe"], c:0},{q:"Несмотря на дождь...", a:["Trotz des Regens","Wegen dem Regen","Bei dem Regen","Trotz dem Regen"], c:0},{q:"Я жду тебя (Präposition)...", a:["Ich warте auf dich","Ich warte für dich","Ich warте dich","Ich warте an dich"], c:0},{q:"Она сказала, что придет...", a:["..., dass sie приходит","..., weil sie kommt","..., ob она kommt","..., когда sie приходит"], c:0}]
-        },
-        en: { next: "NEXT", win: "CORRECT!", loss: "SAND LEAK...", finish: "GOLDEN VICTORY!",
-            easy: [{q:"I ... (be) a student.", a:["am","is","are","be"], c:0},{q:"They ... (play) football.", a:["play","plays","playing","played"], c:0},{q:"She ... (like) pizza.", a:["likes","like","liking","liked"], c:0},{q:"We ... (go) to school.", a:["go","goes","going","gone"], c:0},{q:"He ... (have) a dog.", a:["has","have","having","had"], c:0}],
-            hard: [{q:"If I ... you, I would go.", a:["were","was","am","be"], c:0},{q:"She ... here for 5 years.", a:["has been","is","was","has being"], c:0},{q:"By tomorrow, I ... it.", a:["will have done","will do","did","have done"], c:0},{q:"I look forward to ... you.", a:["seeing","see","to see","seen"], c:0},{q:"Hardly ... when it rain.", a:["had I left","I left","I have left","did I leave"], c:0}]
-        },
-        de: { next: "WEITER", win: "RICHTIG!", loss: "SANDVERLUST...", finish: "GOLDENER SIEG!",
-            easy: [{q:"Ich ... (lernen) Deutsch.", a:["lerne","lernst","lernt","lernen"], c:0},{q:"Das ... (sein) gut.", a:["ist","sind","bin","seid"], c:0},{q:"Mein Vater ... (arbeiten).", a:["arbeitet","arbeiten","arbeitest","gearbeitet"], c:0},{q:"Das Wetter ... (sein) kalt.", a:["ist","sind","war","wäre"], c:0},{q:"Wo ... (wohnen) du?", a:["wohnst","wohnen","wohnt","wohnte"], c:0}],
-            hard: [{q:"Nachdem er ... (essen), ging er.", a:["gegessen hatte","aß","essen","hat gegessen"], c:0},{q:"Das Haus, ... ich wohne.", a:["in dem","das","welches","worin"], c:0},{q:"Stатт ... (helfen), schlief er.", a:["zu helfen","hilft","helfen","geholfen"], c:0},{q:"Je mehr, ... besser.", a:["desto","als","wie","umso"], c:0},{q:"Er tut so, als ... er reich.", a:["wäre","ist","sei","war"], c:0}]
+    <div class="pig-container">
+        <svg class="pig-svg" viewBox="0 0 200 150">
+            <path d="M100,20 C50,20 10,50 10,85 C10,120 50,140 100,140 C150,140 190,120 190,85 C190,50 150,20 100,20 M170,70 L185,60 M30,140 L40,155 M160,140 L150,155" />
+        </svg>
+        <div class="sand-container">
+            <div id="sand-fill" class="sand"></div>
+        </div>
+    </div>
+
+    <div id="score">${sand}0</div>
+    <div id="label">УВЕРЕННОСТЬ</div>
+
+    <script>
+        const texts = {
+            RU: { label: "УВЕРЕННОСТЬ" },
+            EN: { label: "CONFIDENCE" },
+            DE: { label: "ZUVERSICHT" }
+        };
+        function setL(l) {
+            document.querySelectorAll('.btn-lang').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('label').innerText = texts[l].label;
         }
-    };
+        // Здесь можно добавить логику подгрузки данных из репозитория ${gh}
+    <\/script>
+</body>
+</html>`;
+}
 
-    function initGame(d) { if (audioCtx.state === 'suspended') audioCtx.resume(); difficulty = d; qIdx = 0; document.getElementById('diff-tag').innerText = `LEVEL: ${d.toUpperCase()}`; document.getElementById('diff-screen').classList.add('hidden'); showBetScreen(); }
-    function showBetScreen() { if(isGameOver) return; document.getElementById('res-screen').classList.add('hidden'); document.getElementById('bet-screen').classList.remove('hidden'); document.getElementById('question').innerText = (curLang === 'ru' ? "Выберите ставку:" : "Choose bet:"); }
-    function askQuestion(bet) { currentBet = bet; document.getElementById('bet-screen').classList.add('hidden'); const q = data[curLang][difficulty][qIdx]; document.getElementById('question').innerText = q.q; const list = document.getElementById('ans-list'); list.innerHTML = ''; q.a.forEach((txt, i) => { list.innerHTML += `<button class="btn btn-ans" onclick="checkAnswer(${i})">${txt}</button>`; }); document.getElementById('ans-screen').classList.remove('hidden'); }
+function refresh() {
+    const w = document.getElementById('pw').value, h = document.getElementById('ph').value;
+    const container = document.getElementById('ifr-container');
+    const ifr = document.getElementById('ifr');
+    container.style.width = w + "px";
+    container.style.height = h + "px";
+    ifr.style.width = "100%";
+    ifr.style.height = "100%";
+    const blob = new Blob([buildWidgetHTML()], {type: 'text/html'});
+    ifr.src = URL.createObjectURL(blob);
+}
 
-    function checkAnswer(idx) {
-        const isCorrect = idx === data[curLang][difficulty][qIdx].c;
-        document.getElementById('ans-screen').classList.add('hidden');
-        if(isCorrect) {
-            score += currentBet;
-            playTone(880, 'sine', 0.1, 0.2); setTimeout(() => playTone(1320, 'sine', 0.2, 0.1), 100);
-            dropSandEffect();
-            triggerGlint(); 
-            document.getElementById('res-msg').style.color = "var(--gold)";
-        } else {
-            score = Math.max(0, score - currentBet);
-            playTone(150, 'sawtooth', 0.3, 0.1);
-            leakSandEffect();
-            document.getElementById('res-msg').style.color = "var(--error-red)";
-        }
-        document.getElementById('total-val').innerText = score;
-        document.getElementById('res-msg').innerText = isCorrect ? data[curLang].win : data[curLang].loss;
-        document.getElementById('next-btn').innerText = data[curLang].next;
-        document.getElementById('res-screen').classList.remove('hidden');
-        updateSandLevel();
-    }
-
-    function triggerGlint() {
-        const pig = document.getElementById('main-pig');
-        pig.classList.add('glass-glint');
-        setTimeout(() => pig.classList.remove('glass-glint'), 800);
-    }
-
-    function nextAction() { qIdx++; if (qIdx >= data[curLang][difficulty].length) { qIdx = 0; showBetScreen(); } else { showBetScreen(); } }
-    
-    function dropSandEffect() {
-        const container = document.getElementById('pig-box');
-        for(let i=0; i<15; i++) {
-            setTimeout(() => {
-                const grain = document.createElement('div'); grain.className = 'falling-grain';
-                grain.style.left = (160 + Math.random() * 20) + 'px'; grain.style.top = '50px';
-                container.appendChild(grain);
-                grain.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: `translate(${Math.random()*40-20}px, 100px)`, opacity: 0 }], { duration: 1000 }).onfinish = () => grain.remove();
-            }, i * 40);
-        }
-    }
-
-    function leakSandEffect() {
-        document.getElementById('pig-box').classList.add('shake');
-        setTimeout(() => document.getElementById('pig-box').classList.remove('shake'), 400);
-        const container = document.getElementById('pig-box');
-        for(let i=0; i<10; i++) {
-            const grain = document.createElement('div'); grain.className = 'leak-grain';
-            grain.style.left = (120 + Math.random() * 80) + 'px'; grain.style.top = '190px';
-            container.appendChild(grain);
-            grain.animate([{ opacity: 1 }, { transform: 'translateY(50px)', opacity: 0 }], 600).onfinish = () => grain.remove();
-        }
-    }
-
-    function updateSandLevel() {
-        const sand = document.getElementById('sand-rect');
-        const fillHeight = Math.min(140, (score / MAX_SCORE) * 140);
-        sand.setAttribute('y', PIG_BOTTOM - fillHeight);
-        sand.setAttribute('height', fillHeight);
-        document.getElementById('main-pig').style.filter = `drop-shadow(0 0 ${score/20}px rgba(249, 224, 118, 0.4))`;
-        if (score >= MAX_SCORE) finishGame();
-    }
-
-    function finishGame() {
-        isGameOver = true;
-        playTone(523.25, 'sine', 0.2, 0.2); setTimeout(() => playTone(659.25, 'sine', 0.2, 0.2), 150); setTimeout(() => playTone(783.99, 'sine', 0.4, 0.3), 300);
-        for(let i=0; i<60; i++) {
-            const c = document.createElement('div'); c.className = 'confetti';
-            c.style.left = Math.random() * 100 + '%'; c.style.top = '-10px';
-            c.style.backgroundColor = ['#f9e076', '#bf953f', '#fff', '#aa771c'][Math.floor(Math.random()*4)];
-            document.body.appendChild(c);
-            c.animate([{ transform: 'translateY(0) rotate(0deg)', opacity: 1 }, { transform: `translate(${Math.random()*300-150}px, 110vh) rotate(${Math.random()*720}deg)`, opacity: 0 }], { duration: 3000 + Math.random()*2000 }).onfinish = () => c.remove();
-        }
-        document.getElementById('next-btn').classList.add('hidden');
-        document.getElementById('restart-btn').classList.remove('hidden');
-        document.getElementById('res-msg').innerText = data[curLang].finish;
-        document.getElementById('question').innerText = "🏆";
-    }
-
-    function setLang(l, btn) { curLang = l; document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); if(!isGameOver) { document.getElementById('next-btn').innerText = data[curLang].next; } }
+function openCode() {
+    const html = buildWidgetHTML().replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    const w = document.getElementById('pw').value;
+    const h = document.getElementById('ph').value;
+    document.getElementById('output-code').value = `<iframe width="${w}" height="${h}" srcdoc="${html}" frameborder="0" scrolling="no" style="border:none; overflow:hidden;"></iframe>`;
+    document.getElementById('modal').style.display = 'flex';
+}
+window.onload = refresh;
 </script>
 </body>
 </html>
