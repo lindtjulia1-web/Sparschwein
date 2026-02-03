@@ -36,7 +36,6 @@
         .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         input[type="color"] { padding: 2px; height: 38px; cursor: pointer; border-radius: 10px; }
 
-        /* Анимация билборда для превью */
         @keyframes billboard {
             0% { filter: brightness(1) drop-shadow(0 0 2px var(--shad)); }
             50% { filter: brightness(1.5) drop-shadow(0 0 15px var(--shad)); }
@@ -87,7 +86,6 @@
 
         <h2>Алгоритмы</h2>
         <label class="check-row"><input type="checkbox" id="randomOrder"><span>Рандомный порядок вопросов</span></label>
-        <label class="check-row"><input type="checkbox" id="autoFillWrongs" checked><span>Авто-ложные ответы</span></label>
 
         <h2>Размер виджета</h2>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -150,23 +148,14 @@ function hexToRgba(hex, alpha) {
 }
 
 function buildInnerGame() {
-    const rawQs = [];
-    const allCorrectAnswers = [];
+    const finalQs = [];
     document.querySelectorAll('.sidebar-content .card').forEach(card => {
         const q = card.querySelector('.inp-q').value;
         const correct = card.querySelector('.inp-correct').value.trim();
         const wrongs = card.querySelector('.inp-wrong').value.split(',').map(s => s.trim()).filter(s => s !== "");
-        if(q && correct) { rawQs.push({ q, correct, wrongs }); allCorrectAnswers.push(correct); }
-    });
-
-    const autoFill = document.getElementById('autoFillWrongs').checked;
-    const finalQs = rawQs.map(item => {
-        let currentWrongs = [...item.wrongs];
-        if(autoFill && currentWrongs.length === 0) {
-            let others = allCorrectAnswers.filter(a => a !== item.correct).sort(() => Math.random() - 0.5);
-            currentWrongs = others.slice(0, 2);
+        if(q && correct) { 
+            finalQs.push({ q, a: [correct, ...wrongs] }); 
         }
-        return { q: item.q, a: [item.correct, ...currentWrongs] };
     });
 
     if(document.getElementById('randomOrder').checked) finalQs.sort(() => Math.random() - 0.5);
