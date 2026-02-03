@@ -105,3 +105,137 @@
             font-size: 42px;
             font-weight: bold;
             color: var(--gold);
+            margin: 15px 0 5px;
+            text-shadow: 0 0 15px rgba(249, 224, 118, 0.3);
+        }
+
+        .status-text {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 20px;
+            min-height: 20px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 10px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .action-btn:hover {
+            background: var(--gold);
+            color: black;
+            transform: translateY(-2px);
+        }
+
+        .reset-btn {
+            margin-top: 10px;
+            background: #333;
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="widget">
+    <div class="lang-select">
+        <button class="lang-btn active" onclick="setLang('ru', this)">RU</button>
+        <button class="lang-btn" onclick="setLang('en', this)">EN</button>
+        <button class="lang-btn" onclick="setLang('de', this)">DE</button>
+    </div>
+
+    <div class="pig-container">
+        <svg class="pig-svg" viewBox="0 0 200 150">
+            <path d="M100,20 C150,20 190,50 190,90 C190,130 150,145 100,145 C50,145 10,130 10,90 C10,50 50,20 100,20 M180,80 L195,75 M30,50 Q20,40 10,50" />
+            <circle cx="160" cy="80" r="3" fill="white" />
+        </svg>
+        <div class="sand-mask">
+            <div id="sand" class="sand-level"></div>
+        </div>
+    </div>
+
+    <div class="score" id="val">0</div>
+    <div class="status-text" id="status">Золотой запас</div>
+
+    <div id="controls" class="btn-group">
+        <button class="action-btn" onclick="add(10)">10</button>
+        <button class="action-btn" onclick="add(25)">25</button>
+        <button class="action-btn" onclick="add(50)">50</button>
+    </div>
+
+    <button id="reset" class="reset-btn hidden" onclick="reset()">Еще раз</button>
+</div>
+
+<script>
+    let score = 0;
+    const target = 300;
+    let currentLang = 'ru';
+
+    const i18n = {
+        ru: { status: "Золотой запас", full: "КОПИЛКА ПОЛНА!", reset: "ЕЩЕ РАЗ" },
+        en: { status: "Gold Reserve", full: "PIGGY IS FULL!", reset: "RESTART" },
+        de: { status: "Goldreserven", full: "SPARSCHWEIN IST VOLL!", reset: "NEUSTART" }
+    };
+
+    function setLang(lang, btn) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateUI();
+    }
+
+    function add(n) {
+        score += n;
+        if (score >= target) {
+            score = target;
+            document.getElementById('controls').classList.add('hidden');
+            document.getElementById('reset').classList.remove('hidden');
+        }
+        updateUI();
+    }
+
+    function reset() {
+        score = 0;
+        document.getElementById('controls').classList.remove('hidden');
+        document.getElementById('reset').classList.add('hidden');
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('val').innerText = score;
+        const percent = (score / target) * 100;
+        document.getElementById('sand').style.height = percent + '%';
+        
+        const label = document.getElementById('status');
+        const btnReset = document.getElementById('reset');
+        
+        if (score >= target) {
+            label.innerText = i18n[currentLang].full;
+            label.style.color = '#f9e076';
+        } else {
+            label.innerText = i18n[currentLang].status;
+            label.style.color = '#888';
+        }
+        btnReset.innerText = i18n[currentLang].reset;
+    }
+</script>
+
+</body>
+</html>
