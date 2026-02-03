@@ -46,6 +46,9 @@
             <option value="'Acme', sans-serif">Acme</option>
             <option value="'Actor', sans-serif">Actor</option>
         </select>
+        
+        <label>Размер шрифта (px)</label>
+        <input type="range" id="fontSize" min="12" max="32" step="1" value="20">
 
         <h2>Размер виджета</h2>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -129,6 +132,7 @@ function buildInnerGame() {
         goal: parseInt(document.getElementById('goal').value), 
         lang: document.getElementById('lang').value,
         font: document.getElementById('fontFamily').value,
+        fontSize: document.getElementById('fontSize').value,
         qColor: document.getElementById('qColor').value,
         btnColor: document.getElementById('btnColor').value,
         btnRgba: hexToRgba(document.getElementById('btnColor').value, document.getElementById('btnAlpha').value),
@@ -144,19 +148,25 @@ function buildInnerGame() {
         body { margin:0; height:100vh; overflow:hidden; font-family:${cfg.font}; background:#000; color:#fff; display: flex; align-items: center; justify-content: center; }
         .bg{position:fixed;inset:0;background:url('${cfg.bg}') center/cover;opacity:0.6;z-index:-1}
         #game-root { width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; padding: 15px; box-sizing: border-box; }
-        
-        /* Прозрачный фон карточки */
         .main-card { flex: 1; background: transparent; display: flex; flex-direction: column; position: relative; overflow: hidden; }
-        
         .score { font-size: 44px; color: ${cfg.btnColor}; font-weight: 800; text-align: center; margin-bottom: 5px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        
         #pile-container { flex: 1; position: relative; margin-bottom: 10px; border-bottom: 2px solid ${cfg.btnRgba}; overflow: hidden; }
         .coin { position: absolute; font-size: 26px; pointer-events: none; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.6)); }
         
-        .q-text { font-size: 20px; min-height: 50px; text-align: center; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; color: ${cfg.qColor}; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .q-text { 
+            font-size: ${cfg.fontSize}px; 
+            min-height: 50px; 
+            text-align: center; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin-bottom: 10px; 
+            color: ${cfg.qColor}; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8); 
+        }
+        
         .grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
         
-        /* Редактируемые кнопки */
         .btn-ans, .btn-stake { 
             border: 1.5px solid ${cfg.btnColor}; 
             background: ${cfg.btnRgba}; 
@@ -165,7 +175,7 @@ function buildInnerGame() {
             border-radius: 12px; 
             cursor: pointer; 
             font-family: inherit; 
-            font-size: 16px; 
+            font-size: ${Math.max(14, cfg.fontSize - 4)}px; 
             transition: 0.2s; 
             font-weight: bold;
         }
@@ -186,7 +196,7 @@ function buildInnerGame() {
     <script>
     const cfg = JSON.parse(decodeURIComponent("${encodeURIComponent(JSON.stringify(cfg))}"));
     let score=0, qi=0, currentStake=0;
-    const emoji = '🪙'; // Всегда золотой дублон
+    const emoji = '🪙';
     const dict = {
         ru: { stake: 'Выберите ставку', next: 'Следующий вопрос', finish: 'ФИНИШ' },
         en: { stake: 'Choose your stake', next: 'Next question', finish: 'FINISH' },
@@ -208,12 +218,10 @@ function buildInnerGame() {
 
     function showQuestion() {
         if(qi >= cfg.data.length) {
-            document.getElementById('ui-label').style.color = cfg.qColor;
             document.getElementById('ui-label').innerText = dict.finish;
             document.getElementById('ctrl').innerHTML = '';
             return;
         }
-        document.getElementById('ui-label').style.color = cfg.qColor;
         document.getElementById('ui-label').innerText = cfg.data[qi].q;
         const c = document.getElementById('ctrl');
         c.innerHTML = '';
