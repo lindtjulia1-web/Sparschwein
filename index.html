@@ -25,16 +25,20 @@
 
         .pig-container { position: relative; width: 300px; height: 220px; margin: 0 auto; }
 
-        .pig-svg { width: 100%; height: 100%; filter: drop-shadow(0 0 10px rgba(249, 224, 118, 0.1)); }
+        .pig-svg { width: 100%; height: 100%; filter: drop-shadow(0 0 10px rgba(249, 224, 118, 0.1)); transition: 0.5s; }
         
-        /* Анимация золотого градиента */
-        #sand-rect { transition: y 1.5s ease-in-out, height 1.5s ease-in-out; }
+        #sand-rect { 
+            transition: y 1.5s ease-in-out, height 1.5s ease-in-out;
+            filter: url(#shimmer);
+        }
 
         .falling-grain { position: absolute; width: 4px; height: 4px; background: var(--gold); border-radius: 50%; z-index: 10; pointer-events: none; }
         .leak-grain { position: absolute; width: 3px; height: 3px; background: #555; border-radius: 50%; z-index: 10; pointer-events: none; }
+        
+        .confetti { position: absolute; width: 8px; height: 8px; z-index: 100; pointer-events: none; border-radius: 2px; }
 
         .score { font-size: 58px; color: var(--gold); font-weight: bold; margin: 10px 0; text-shadow: 0 0 20px rgba(249, 224, 118, 0.2); }
-        .q-text { min-height: 60px; font-size: 18px; color: #ddd; margin: 15px 0; line-height: 1.4; }
+        .q-text { min-height: 80px; font-size: 18px; color: #ddd; margin: 15px 0; line-height: 1.4; display: flex; align-items: center; justify-content: center; }
         
         .btn-group { display: flex; flex-direction: column; gap: 10px; align-items: center; }
         .row { display: flex; gap: 10px; justify-content: center; width: 100%; }
@@ -42,8 +46,9 @@
         .btn {
             background: transparent; border: 1px solid var(--gold); color: var(--gold);
             padding: 12px 24px; border-radius: 14px; cursor: pointer; font-weight: bold; transition: 0.2s;
+            text-transform: uppercase; letter-spacing: 1px;
         }
-        .btn:hover { background: var(--gold); color: #000; }
+        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(249, 224, 118, 0.4); }
         .btn-ans { border-color: #333; color: #fff; width: 100%; }
 
         .feedback { font-size: 14px; font-weight: bold; margin-bottom: 10px; min-height: 20px; }
@@ -67,7 +72,7 @@
     </div>
 
     <div class="pig-container" id="pig-box">
-        <svg class="pig-svg" viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
+        <svg class="pig-svg" id="main-pig" viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <mask id="pig-mask">
                     <path d="M160,55 C240,55 280,85 280,120 C280,155 235,185 160,185 C85,185 40,155 40,120 C40,85 80,55 160,55" fill="white" />
@@ -77,48 +82,56 @@
                     <stop offset="50%" stop-color="#fcf6ba" />
                     <stop offset="100%" stop-color="#aa771c" />
                 </linearGradient>
+                <filter id="shimmer">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" result="noise">
+                        <animate attributeName="baseFrequency" values="0.8;0.85;0.8" dur="2s" repeatCount="indefinite" />
+                    </feTurbulence>
+                    <feComposite operator="in" in="noise" in2="SourceGraphic" />
+                </filter>
             </defs>
 
             <g mask="url(#pig-mask)">
                 <rect id="sand-rect" x="0" y="185" width="320" height="0" fill="url(#gold-grad)" />
             </g>
 
-            <path d="M160,55 C240,55 280,85 280,120 C280,155 235,185 160,185 C85,185 40,155 40,120 C40,85 80,55 160,55" 
+            <path id="pig-outline" d="M160,55 C240,55 280,85 280,120 C280,155 235,185 160,185 C85,185 40,155 40,120 C40,85 80,55 160,55" 
                   fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" />
             
             <rect x="145" y="52" width="30" height="4" rx="2" fill="rgba(255,255,255,0.4)" />
-            
             <path d="M100,185 L95,205 M220,185 L225,205" stroke="rgba(255,255,255,0.2)" stroke-width="3" stroke-linecap="round" />
             <circle cx="285" cy="120" r="8" stroke="rgba(255,255,255,0.2)" fill="none" />
         </svg>
     </div>
 
-    <div id="diff-tag" style="font-size: 10px; color: #444; margin-top: 10px; letter-spacing: 2px;">LEVEL: EASY</div>
+    <div id="diff-tag" style="font-size: 10px; color: #444; margin-top: 10px; letter-spacing: 2px;">LEVEL: SELECT</div>
     <div class="score" id="total-val">0</div>
-    <div class="q-text" id="question">Выберите сложность:</div>
+    <div id="question-box">
+        <div class="q-text" id="question">Выберите сложность:</div>
 
-    <div id="diff-screen" class="btn-group">
-        <div class="row">
-            <button class="btn" onclick="initGame('easy')">EASY</button>
-            <button class="btn" onclick="initGame('hard')">HARD</button>
+        <div id="diff-screen" class="btn-group">
+            <div class="row">
+                <button class="btn" onclick="initGame('easy')">EASY</button>
+                <button class="btn" onclick="initGame('hard')">HARD</button>
+            </div>
         </div>
-    </div>
 
-    <div id="bet-screen" class="hidden">
-        <div class="row">
-            <button class="btn" onclick="askQuestion(10)">10</button>
-            <button class="btn" onclick="askQuestion(25)">25</button>
-            <button class="btn" onclick="askQuestion(50)">50</button>
+        <div id="bet-screen" class="hidden">
+            <div class="row">
+                <button class="btn" onclick="askQuestion(10)">10</button>
+                <button class="btn" onclick="askQuestion(25)">25</button>
+                <button class="btn" onclick="askQuestion(50)">50</button>
+            </div>
         </div>
-    </div>
 
-    <div id="ans-screen" class="hidden">
-        <div class="btn-group" id="ans-list"></div>
-    </div>
+        <div id="ans-screen" class="hidden">
+            <div class="btn-group" id="ans-list"></div>
+        </div>
 
-    <div id="res-screen" class="hidden">
-        <div id="res-msg" class="feedback"></div>
-        <button class="btn" id="next-btn" onclick="showBetScreen()"></button>
+        <div id="res-screen" class="hidden">
+            <div id="res-msg" class="feedback"></div>
+            <button class="btn" id="next-btn" onclick="nextAction()"></button>
+            <button class="btn hidden" id="restart-btn" onclick="location.reload()">RESTART</button>
+        </div>
     </div>
 </div>
 
@@ -128,9 +141,9 @@
     let currentBet = 0;
     let curLang = 'ru';
     let qIdx = 0;
+    let isGameOver = false;
     const MAX_SCORE = 500;
-    const PIG_BOTTOM = 185; // Нижняя точка свинки в SVG
-    const PIG_TOP = 55;     // Верхняя точка
+    const PIG_BOTTOM = 185;
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
@@ -148,20 +161,70 @@
     }
 
     const data = {
-        ru: { next: "ДАЛЕЕ", win: "ВЕРНО! ПЕСОК ДОБАВЛЕН", loss: "ОШИБКА! УТЕЧКА...", easy: [{q:"Ich ... (haben) ein Haus.", a:["habe","hast"], c:0}], hard: [{q:"Wäre ich богатым...", a:["Wäre ich","Ich bin"], c:0}] },
-        en: { next: "NEXT", win: "CORRECT! GOLD ADDED", loss: "WRONG! LEAKING...", easy: [{q:"I ... (have) a car.", a:["have","has"], c:0}], hard: [{q:"If I were you...", a:["Wäre ich","I am"], c:0}] },
-        de: { next: "WEITER", win: "RICHTIG! GOLD HINZU", loss: "FALSCH! LECK...", easy: [{q:"Ich ... (haben) Zeit.", a:["habe","hast"], c:0}], hard: [{q:"Wäre ich reich...", a:["Wäre ich","Ich bin"], c:0}] }
+        ru: { 
+            next: "ДАЛЕЕ", win: "ВЕРНО!", loss: "УТЕЧКА ПЕСКА...", finish: "ЗОЛОТОЕ ИЗОБИЛИЕ!",
+            easy: [
+                {q:"Ich ... (haben) ein Haus.", a:["habe","hast"], c:0},
+                {q:"Du ... (sein) schön.", a:["bist","sind"], c:0},
+                {q:"Wir ... (gehen) nach Hause.", a:["gehen","gehst"], c:0},
+                {q:"Er ... (essen) Apfel.", a:["isst","essen"], c:0},
+                {q:"Sie ... (trinken) Wasser.", a:["trinkt","trinken"], c:0}
+            ],
+            hard: [
+                {q:"Если бы я был богат (Konjunktiv II)...", a:["Wäre ich reich","Ich bin reich"], c:0},
+                {q:"Я бы пошел (würde-form)...", a:["Ich würde gehen","Ich werde gehen"], c:0},
+                {q:"Несмотря на дождь...", a:["Trotz des Regens","Wegen dem Regen"], c:0},
+                {q:"Я жду тебя (Präposition)...", a:["Ich warte auf dich","Ich warte für dich"], c:0},
+                {q:"Она сказала, что придет...", a:["..., dass sie kommt","..., weil sie kommt"], c:0}
+            ]
+        },
+        en: { 
+            next: "NEXT", win: "CORRECT!", loss: "SAND LEAK...", finish: "GOLDEN VICTORY!",
+            easy: [
+                {q:"I ... (be) a student.", a:["am","is"], c:0},
+                {q:"They ... (play) football.", a:["play","plays"], c:0},
+                {q:"She ... (like) pizza.", a:["likes","like"], c:0},
+                {q:"We ... (go) to school.", a:["go","goes"], c:0},
+                {q:"He ... (have) a dog.", a:["has","have"], c:0}
+            ],
+            hard: [
+                {q:"If I ... you, I would go.", a:["were","was"], c:0},
+                {q:"She ... here for 5 years.", a:["has been","is"], c:0},
+                {q:"By tomorrow, I ... it.", a:["will have done","will do"], c:0},
+                {q:"I look forward to ... you.", a:["seeing","see"], c:0},
+                {q:"Hardly ... when it rain.", a:["had I left","I left"], c:0}
+            ]
+        },
+        de: { 
+            next: "WEITER", win: "RICHTIG!", loss: "SANDVERLUST...", finish: "GOLDENER SIEG!",
+            easy: [
+                {q:"Ich ... (lernen) Deutsch.", a:["lerne","lernst"], c:0},
+                {q:"Das ... (sein) gut.", a:["ist","sind"], c:0},
+                {q:"Mein Vater ... (arbeiten).", a:["arbeitet","arbeiten"], c:0},
+                {q:"Das Wetter ... (sein) kalt.", a:["ist","sind"], c:0},
+                {q:"Wo ... (wohnen) du?", a:["wohnst","wohnen"], c:0}
+            ],
+            hard: [
+                {q:"Nachdem er ... (essen), ging er.", a:["gegessen hatte","aß"], c:0},
+                {q:"Das Haus, ... ich wohne.", a:["in dem","das"], c:0},
+                {q:"Statt ... (helfen), schlief er.", a:["zu helfen","hilft"], c:0},
+                {q:"Je mehr, ... besser.", a:["desto","als"], c:0},
+                {q:"Er tut так, als ... er reich.", a:["wäre","ist"], c:0}
+            ]
+        }
     };
 
     function initGame(d) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         difficulty = d;
+        qIdx = 0;
         document.getElementById('diff-tag').innerText = `LEVEL: ${d.toUpperCase()}`;
         document.getElementById('diff-screen').classList.add('hidden');
         showBetScreen();
     }
 
     function showBetScreen() {
+        if(isGameOver) return;
         document.getElementById('res-screen').classList.add('hidden');
         document.getElementById('bet-screen').classList.remove('hidden');
         document.getElementById('question').innerText = (curLang === 'ru' ? "Выберите ставку:" : "Choose bet:");
@@ -204,6 +267,25 @@
         updateSandLevel();
     }
 
+    function nextAction() {
+        qIdx++;
+        // Если вопросы в текущем уровне кончились
+        if (qIdx >= data[curLang][difficulty].length) {
+            if (difficulty === 'easy') {
+                difficulty = 'hard';
+                qIdx = 0;
+                document.getElementById('diff-tag').innerText = `LEVEL: BONUS HARD`;
+                showBetScreen();
+            } else {
+                // Если кончились и в харде, но золото не набрано - повторяем хард рандомно или по кругу
+                qIdx = 0;
+                showBetScreen();
+            }
+        } else {
+            showBetScreen();
+        }
+    }
+
     function dropSandEffect() {
         const container = document.getElementById('pig-box');
         for(let i=0; i<15; i++) {
@@ -237,17 +319,49 @@
 
     function updateSandLevel() {
         const sand = document.getElementById('sand-rect');
-        const fillHeight = Math.min(130, (score / MAX_SCORE) * 130); // 130 - высота тела свинки
-        
-        // Меняем координату Y и высоту прямоугольника
+        const fillHeight = Math.min(130, (score / MAX_SCORE) * 130);
         sand.setAttribute('y', PIG_BOTTOM - fillHeight);
         sand.setAttribute('height', fillHeight);
+
+        document.getElementById('pig-outline').style.stroke = `rgba(249, 224, 118, ${0.2 + (score/MAX_SCORE)})`;
+        document.getElementById('main-pig').style.filter = `drop-shadow(0 0 ${score/20}px rgba(249, 224, 118, 0.4))`;
+
+        if (score >= MAX_SCORE) finishGame();
+    }
+
+    function finishGame() {
+        isGameOver = true;
+        playTone(523.25, 'sine', 0.2, 0.2);
+        setTimeout(() => playTone(659.25, 'sine', 0.2, 0.2), 150);
+        setTimeout(() => playTone(783.99, 'sine', 0.4, 0.3), 300);
+        
+        for(let i=0; i<60; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            c.style.left = Math.random() * 100 + '%';
+            c.style.top = '-10px';
+            c.style.backgroundColor = ['#f9e076', '#bf953f', '#fff', '#aa771c'][Math.floor(Math.random()*4)];
+            document.body.appendChild(c);
+            c.animate([
+                { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                { transform: `translate(${Math.random()*300-150}px, 110vh) rotate(${Math.random()*720}deg)`, opacity: 0 }
+            ], { duration: 3000 + Math.random()*2000 }).onfinish = () => c.remove();
+        }
+
+        document.getElementById('next-btn').classList.add('hidden');
+        document.getElementById('restart-btn').classList.remove('hidden');
+        document.getElementById('res-msg').innerText = data[curLang].finish;
+        document.getElementById('question').innerText = "🏆";
     }
 
     function setLang(l, btn) {
         curLang = l;
         document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        // Обновляем текст кнопки, если она видна
+        if(!isGameOver) {
+             document.getElementById('next-btn').innerText = data[curLang].next;
+        }
     }
 </script>
 </body>
