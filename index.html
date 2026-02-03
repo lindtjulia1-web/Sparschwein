@@ -11,15 +11,12 @@
         .sidebar-content { flex: 1; overflow-y: auto; padding: 25px; }
         h2 { color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; margin: 25px 0 10px; border-left: 3px solid var(--accent); padding-left: 10px; }
         
-        /* Мягкие углы для карточек вопросов */
         .card { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 15px; border-radius: 20px; margin-bottom: 15px; position: relative; }
         .del-btn { position: absolute; top: 12px; right: 15px; color: var(--red); cursor: pointer; font-weight: bold; font-size: 11px; }
         
         .sidebar-content label { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; margin-top: 8px; }
-        /* Закругленные поля ввода */
         .sidebar-content input, .sidebar-content select { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 12px; margin-top: 5px; box-sizing: border-box; outline: none; }
         
-        /* Закругленные кнопки в панели управления */
         .btn { background: #3d3d45; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 15px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
         
         .btn-main { background: #ffb347; color: #000; margin-top: 20px; } 
@@ -29,7 +26,6 @@
         .btn-code:hover { background: #66cc66; }
 
         .preview { flex: 1; background: #0c0c0e; display: flex; align-items: center; justify-content: center; }
-        /* Окно превью с мягкими углами */
         #device-wrapper { border: 1px solid #333; background: #000; position: relative; overflow: hidden; border-radius: 30px; }
         iframe { width: 100%; height: 100%; border: none; }
         
@@ -177,7 +173,6 @@ function buildInnerGame() {
         
         .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         
-        /* Мягкие закругленные кнопки в самой игре */
         .btn-ans, .btn-stake { 
             border: 1.5px solid ${cfg.btnColor}; 
             background: ${cfg.btnRgba}; 
@@ -213,7 +208,17 @@ function buildInnerGame() {
         de: { stake: 'Wähle deinen Einsatz', next: 'Nächste Frage', finish: 'ENDE' }
     }[cfg.lang];
 
+    function showFinish() {
+        document.getElementById('ui-label').innerText = dict.finish;
+        document.getElementById('ctrl').innerHTML = '';
+    }
+
     function showStakes() {
+        // Проверка конца игры перенесена сюда для надежности
+        if(qi >= cfg.data.length) {
+            showFinish();
+            return;
+        }
         document.getElementById('ui-label').innerText = dict.stake;
         const c = document.getElementById('ctrl');
         c.innerHTML = '';
@@ -227,11 +232,6 @@ function buildInnerGame() {
     }
 
     function showQuestion() {
-        if(qi >= cfg.data.length) {
-            document.getElementById('ui-label').innerText = dict.finish;
-            document.getElementById('ctrl').innerHTML = '';
-            return;
-        }
         document.getElementById('ui-label').innerText = cfg.data[qi].q;
         const c = document.getElementById('ctrl');
         c.innerHTML = '';
@@ -249,7 +249,13 @@ function buildInnerGame() {
                 }
                 document.getElementById('s').innerText = score;
                 qi++;
-                setTimeout(showStakes, 800);
+                
+                // Проверяем: если вопросы кончились, сразу финиш, иначе - ставки
+                if(qi >= cfg.data.length) {
+                    setTimeout(showFinish, 800);
+                } else {
+                    setTimeout(showStakes, 800);
+                }
             };
             c.appendChild(b);
         });
