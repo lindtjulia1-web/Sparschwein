@@ -2,161 +2,133 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Teacher Panel: Копилка уверенности</title>
+    <title>Sparschwein Admin Panel</title>
     <style>
-        :root { --accent: #f9e076; --bg: #0f0f12; --panel: #18181c; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        :root { --accent: #f9e076; --bg: #0d0d0f; --card: #16161a; --border: #2d2d33; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #e1e1e6; margin: 0; display: flex; height: 100vh; }
         
-        /* Боковая панель с прокруткой */
-        .sidebar { width: 400px; background: var(--panel); border-right: 1px solid #333; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid #333; }
-        .sidebar-content { padding: 20px; overflow-y: auto; flex: 1; }
-        
-        h2 { color: var(--accent); font-size: 16px; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
-        h3 { font-size: 12px; color: var(--accent); text-transform: uppercase; margin: 20px 0 10px 0; border-left: 3px solid var(--accent); padding-left: 10px; opacity: 0.8; }
-        
-        .field-group { margin-bottom: 15px; }
-        label { display: block; font-size: 11px; color: #888; margin-bottom: 5px; font-weight: bold; text-transform: uppercase; }
-        input, select, textarea { width: 100%; background: #26262e; border: 1px solid #3e3e42; color: #fff; padding: 10px; border-radius: 8px; box-sizing: border-box; outline: none; transition: 0.3s; font-size: 13px; }
-        input:focus, textarea:focus { border-color: var(--accent); }
-        textarea { height: 80px; resize: vertical; font-family: monospace; }
-        
-        .btn-group { padding: 20px; background: #121216; border-top: 1px solid #333; }
-        .btn { background: var(--accent); color: #000; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 12px; width: 100%; margin-bottom: 8px; }
-        .btn:hover { background: #fff; transform: translateY(-2px); }
-        .btn-secondary { background: #333; color: #fff; }
+        /* Sidebar Navigation */
+        .nav { width: 70px; background: #08080a; border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 20px; }
+        .nav-icon { width: 40px; height: 40px; border-radius: 12px; background: #1a1a20; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #555; transition: 0.3s; }
+        .nav-icon.active { background: var(--accent); color: #000; }
 
-        /* Зона превью */
-        .preview-zone { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #050505; position: relative; }
-        #ifr-container { background: #111; border-radius: 40px; box-shadow: 0 30px 100px rgba(0,0,0,0.8); overflow: hidden; border: 1px solid #222; }
+        /* Panel Content */
+        .sidebar { width: 400px; background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+        .sidebar-header { padding: 25px; border-bottom: 1px solid var(--border); }
+        .sidebar-scroll { flex: 1; overflow-y: auto; padding: 25px; scrollbar-width: thin; }
+        
+        h2 { font-size: 18px; margin: 0; color: #fff; letter-spacing: 0.5px; }
+        .section-title { font-size: 11px; text-transform: uppercase; color: var(--accent); letter-spacing: 1.5px; margin: 25px 0 15px 0; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .section-title::after { content: ''; flex: 1; height: 1px; background: rgba(249, 224, 118, 0.2); }
+
+        .input-box { margin-bottom: 20px; }
+        label { display: block; font-size: 12px; color: #8a8a93; margin-bottom: 8px; }
+        input, select, textarea { width: 100%; background: #1f1f27; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 10px; font-size: 14px; outline: none; transition: 0.2s; box-sizing: border-box; }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(249,224,118,0.1); }
+        
+        .row { display: flex; gap: 10px; }
+        .btn { background: var(--accent); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.3s; font-size: 13px; text-transform: uppercase; }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn-code { background: #2d2d33; color: #fff; margin-top: 10px; }
+
+        /* Preview Area */
+        .preview { flex: 1; background: #050505; display: flex; align-items: center; justify-content: center; position: relative; }
+        .device-mock { background: #111; border: 8px solid #222; border-radius: 40px; box-shadow: 0 50px 100px rgba(0,0,0,0.5); overflow: hidden; }
         iframe { width: 100%; height: 100%; border: none; }
-
-        /* Модалка с кодом */
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 999; padding: 20px; }
-        .modal-content { background: #1a1a1e; padding: 30px; border-radius: 20px; width: 100%; max-width: 800px; border: 1px solid var(--accent); }
-        #final-code { width: 100%; height: 300px; background: #000; color: #f9e076; font-family: monospace; padding: 15px; border-radius: 10px; border: 1px solid #333; font-size: 11px; margin-bottom: 15px; }
+        
+        /* Modal */
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+        .modal-box { background: #1a1a1e; padding: 30px; border-radius: 20px; width: 100%; max-width: 700px; border: 1px solid var(--border); }
+        code-area { display: block; background: #000; color: #f9e076; padding: 15px; border-radius: 10px; font-family: monospace; white-space: pre-wrap; font-size: 12px; height: 300px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #333; }
     </style>
 </head>
 <body>
 
+<div class="nav">
+    <div class="nav-icon active">⚙️</div>
+    <div class="nav-icon">📁</div>
+    <div class="nav-icon">📊</div>
+</div>
+
 <div class="sidebar">
     <div class="sidebar-header">
-        <h2>Настройки (Teacher Panel)</h2>
+        <h2>Настройка Копилки</h2>
     </div>
-    <div class="sidebar-content">
-        <h3>📁 Контент</h3>
-        <div class="field-group">
-            <label>Тексты заданий (JSON формат)</label>
-            <textarea id="c-questions">[{"q":"Ich ... (haben) ein Haus","a":["habe","hast","hat","haben"],"c":0}]</textarea>
+    <div class="sidebar-scroll">
+        <div class="section-title">Контент</div>
+        <div class="input-box">
+            <label>Тексты заданий (JSON)</label>
+            <textarea id="qs" style="height: 120px;">[{"q":"2+2*2?","a":["4","6","8"],"c":1}]</textarea>
         </div>
-        <div class="field-group">
+        <div class="input-box">
             <label>Тип заданий</label>
-            <select id="c-type">
+            <select id="qtype">
                 <option value="choice">Выбор варианта</option>
-                <option value="oral">Устно (самопроверка)</option>
+                <option value="oral">Устный ответ</option>
                 <option value="error">Поиск ошибки</option>
             </select>
         </div>
 
-        <h3>⚙️ Механика</h3>
-        <div class="field-group">
-            <label>Ставки (мин / макс)</label>
-            <div style="display:flex; gap:5px;">
-                <input type="number" id="m-min" value="10">
-                <input type="number" id="m-max" value="50">
+        <div class="section-title">Механика</div>
+        <div class="row">
+            <div class="input-box">
+                <label>Мин. ставка</label>
+                <input type="number" id="mmin" value="10">
+            </div>
+            <div class="input-box">
+                <label>Макс. ставка</label>
+                <input type="number" id="mmax" value="100">
             </div>
         </div>
-        <div class="field-group">
-            <label>Штрафы при ошибке</label>
-            <select id="m-penalty">
-                <option value="on">Включены (утечка песка)</option>
-                <option value="off">Отключены</option>
-            </select>
-        </div>
-        <div class="field-group">
-            <label>Режим игры</label>
-            <select id="m-mode">
-                <option value="risk">Режим риска (азарт)</option>
-                <option value="learn">Режим обучения (спокойный)</option>
-            </select>
+        <div class="input-box">
+            <label>Штрафы (утечка песка)</label>
+            <select id="penalty"><option value="on">Вкл</option><option value="off">Выкл</option></select>
         </div>
 
-        <h3>📈 Прогресс</h3>
-        <div class="field-group">
-            <label>Цель (размер копилки)</label>
-            <input type="number" id="p-max" value="500">
-        </div>
-        <div class="field-group">
-            <label>Режим прогресса</label>
-            <select id="p-team">
-                <option value="ind">Индивидуальный</option>
-                <option value="team">Командный банк</option>
-            </select>
+        <div class="section-title">Прогресс</div>
+        <div class="input-box">
+            <label>Размер копилки (MAX)</label>
+            <input type="number" id="pmax" value="500">
         </div>
 
-        <h3>💬 Фидбек</h3>
-        <div class="field-group">
-            <label>Звуковые эффекты</label>
-            <select id="f-sound">
-                <option value="on">Включены</option>
-                <option value="off">Выключены</option>
-            </select>
-        </div>
-        <div class="field-group">
-            <label>Текст при победе</label>
-            <input type="text" id="f-win" value="ЗОЛОТОЕ ИЗОБИЛИЕ!">
-        </div>
-
-        <h3>🎨 Интерфейс</h3>
-        <div class="field-group">
-            <label>Язык интерфейса</label>
-            <select id="i-lang">
+        <div class="section-title">Интерфейс</div>
+        <div class="input-box">
+            <label>Язык</label>
+            <select id="lang">
                 <option value="ru">Русский</option>
                 <option value="en">English</option>
                 <option value="de">Deutsch</option>
             </select>
         </div>
-        <div class="field-group">
-            <label>Цвет песка</label>
-            <input type="color" id="i-color" value="#f9e076">
-        </div>
     </div>
-
-    <div class="btn-group">
-        <button class="btn" onclick="updatePreview()">Обновить превью</button>
-        <button class="btn btn-secondary" onclick="showCode()">Получить код для Genially</button>
+    
+    <div style="padding: 25px; background: #111; border-top: 1px solid var(--border);">
+        <button class="btn" onclick="update()">Обновить превью</button>
+        <button class="btn btn-code" onclick="showCode()">Получить код</button>
     </div>
 </div>
 
-<div class="preview-zone">
-    <div id="ifr-container">
-        <iframe id="preview-ifr"></iframe>
+<div class="preview">
+    <div class="device-mock" style="width: 380px; height: 580px;">
+        <iframe id="ifr"></iframe>
     </div>
 </div>
 
 <div id="modal">
-    <div class="modal-content">
-        <h3 style="margin-top:0;">Код виджета готов:</h3>
-        <textarea id="final-code" readonly onclick="this.select()"></textarea>
+    <div class="modal-box">
+        <h3 style="margin-top:0">Код для Genially (Insert -> Others)</h3>
+        <code-area id="code-res"></code-area>
         <button class="btn" onclick="document.getElementById('modal').style.display='none'">Закрыть</button>
     </div>
 </div>
 
 <script>
-function generateWidgetHTML() {
-    // Собираем все настройки из панелей
-    const config = {
-        questions: document.getElementById('c-questions').value,
-        type: document.getElementById('c-type').value,
-        min: document.getElementById('m-min').value,
-        max: document.getElementById('m-max').value,
-        penalty: document.getElementById('m-penalty').value,
-        mode: document.getElementById('m-mode').value,
-        pMax: document.getElementById('p-max').value,
-        sound: document.getElementById('f-sound').value,
-        winText: document.getElementById('f-win').value,
-        lang: document.getElementById('i-lang').value,
-        sandColor: document.getElementById('i-color').value
+function buildWidget() {
+    const conf = {
+        qs: document.getElementById('qs').value,
+        lang: document.getElementById('lang').value,
+        pmax: document.getElementById('pmax').value,
+        penalty: document.getElementById('penalty').value
     };
 
     return `<!DOCTYPE html>
@@ -164,117 +136,66 @@ function generateWidgetHTML() {
 <head>
     <meta charset="UTF-8">
     <style>
-        :root { --gold: \${config.sandColor}; --glass: rgba(255,255,255,0.2); }
-        body { background: #0a0a0a; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; color: #fff; }
-        .game-card { width: 360px; background: #111; border-radius: 40px; padding: 30px; text-align: center; border: 1px solid #222; position: relative; }
-        .score { font-size: 50px; color: var(--gold); font-weight: bold; margin: 10px 0; }
-        .q-text { min-height: 80px; font-size: 18px; margin: 15px 0; display:flex; align-items:center; justify-content:center; }
-        .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin: 5px; transition: 0.2s; }
-        .btn:hover { background: var(--gold); color: #000; }
-        .pig-box { position: relative; width: 300px; height: 200px; margin: 0 auto; }
-        .pig-svg { width: 100%; height: 100%; overflow: visible; }
-        #sand-rect { transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .hidden { display: none; }
-        .falling-grain { position: absolute; width: 3px; height: 3px; background: var(--gold); border-radius: 50%; pointer-events: none; }
+        :root { --gold: #f9e076; --bg: #0a0a0a; }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
+        .card { width: 340px; text-align: center; }
+        .pig-box { position: relative; width: 280px; height: 200px; margin: 0 auto; }
+        #sand { transition: all 1s ease; }
+        .score { font-size: 40px; color: var(--gold); font-weight: bold; margin: 10px 0; }
+        .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 10px; border-radius: 8px; cursor: pointer; margin: 5px; width: 80%; }
     </style>
 </head>
 <body>
-<div class="game-card">
-    <div class="pig-box" id="pbox">
-        <svg class="pig-svg" viewBox="0 0 320 220">
-            <defs>
-                <mask id="pm"><path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="white"/></mask>
-            </defs>
-            <g mask="url(#pm)"><rect id="sand-rect" x="50" y="190" width="250" height="0" fill="var(--gold)"/></g>
-            <path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="none" stroke="var(--glass)" stroke-width="2"/>
-            <path d="M60,100 L45,100 C42,100 40,103 40,110 C40,117 42,120 45,120 L60,120 M110,190 C110,210 90,210 90,190 M250,185 C250,205 230,205 230,185" stroke="var(--glass)" fill="none" />
-        </svg>
+    <div class="card">
+        <div class="pig-box">
+            <svg viewBox="0 0 200 150" style="width:100%; height:100%">
+                <mask id="m"><path d="M30,80 C30,40 170,40 170,80 C170,120 30,120 30,80" fill="white"/></mask>
+                <rect id="sand" x="0" y="120" width="200" height="0" fill="var(--gold)" mask="url(#m)"/>
+                <path d="M30,80 C30,40 170,40 170,80 C170,120 30,120 30,80" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+            </svg>
+        </div>
+        <div class="score" id="s">0</div>
+        <div id="q"></div>
+        <div id="ans"></div>
     </div>
-    <div class="score" id="sv">0</div>
-    <div id="game-ui">
-        <div class="q-text" id="qt">Загрузка...</div>
-        <div id="ans-box"></div>
-    </div>
-</div>
-
-<script>
-    const config = {
-        qs: \${config.questions},
-        pMax: \${config.pMax},
-        penalty: '\${config.penalty}',
-        winTxt: '\${config.winText}',
-        snd: '\${config.sound}'
-    };
-    let score = 0, qIdx = 0;
-
-    function init() {
-        showQ();
-    }
-
-    function showQ() {
-        const q = config.qs[qIdx];
-        document.getElementById('qt').innerText = q.q;
-        const box = document.getElementById('ans-box');
-        box.innerHTML = '';
-        q.a.forEach((ans, i) => {
-            const b = document.createElement('button');
-            b.className = 'btn';
-            b.innerText = ans;
-            b.onclick = () => check(i);
-            box.appendChild(b);
-        });
-    }
-
-    function check(i) {
-        const correct = i === config.qs[qIdx].c;
-        if(correct) {
-            score += 50; 
-            dropSand();
-        } else if(config.penalty === 'on') {
-            score = Math.max(0, score - 20);
+    <script>
+        let score = 0, idx = 0, qs = \${conf.qs};
+        function show() {
+            const item = qs[idx];
+            document.getElementById('q').innerText = item.q;
+            const ab = document.getElementById('ans'); ab.innerHTML = '';
+            item.a.forEach((a, i) => {
+                const b = document.createElement('button'); b.className='btn'; b.innerText=a;
+                b.onclick = () => {
+                    if(i === item.c) { score += 50; } 
+                    else if('\${conf.penalty}'==='on') { score = Math.max(0, score-20); }
+                    update(); idx = (idx+1)%qs.length; show();
+                };
+                ab.appendChild(b);
+            });
         }
-        updatePig();
-        qIdx = (qIdx + 1) % config.qs.length;
-        showQ();
-    }
-
-    function updatePig() {
-        document.getElementById('sv').innerText = score;
-        const h = Math.min(140, (score/config.pMax)*140);
-        document.getElementById('sand-rect').setAttribute('y', 190 - h);
-        document.getElementById('sand-rect').setAttribute('height', h);
-    }
-
-    function dropSand() {
-        for(let i=0; i<15; i++) {
-            const g = document.createElement('div'); g.className='falling-grain';
-            g.style.left = (150 + Math.random()*20)+'px'; g.style.top='50px';
-            document.getElementById('pbox').appendChild(g);
-            g.animate([{transform:'translateY(0)'},{transform:'translateY(120px)',opacity:0}], 1000).onfinish=()=>g.remove();
+        function update() {
+            document.getElementById('s').innerText = score;
+            const h = (score / \${conf.pmax}) * 60;
+            document.getElementById('sand').setAttribute('y', 120 - h);
+            document.getElementById('sand').setAttribute('height', h);
         }
-    }
-    init();
-<\/script>
-</body>
-</html>`;
+        show();
+    <\/script>
+</body></html>`;
 }
 
-function updatePreview() {
-    const ifr = document.getElementById('preview-ifr');
-    const container = document.getElementById('ifr-container');
-    container.style.width = '400px';
-    container.style.height = '550px';
-    const blob = new Blob([generateWidgetHTML()], {type: 'text/html'});
-    ifr.src = URL.createObjectURL(blob);
+function update() {
+    const blob = new Blob([buildWidget()], {type: 'text/html'});
+    document.getElementById('ifr').src = URL.createObjectURL(blob);
 }
 
 function showCode() {
-    const html = generateWidgetHTML().replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-    document.getElementById('final-code').value = `<iframe width="400" height="550" srcdoc="\${html}" frameborder="0" scrolling="no" style="border:none;overflow:hidden;"></iframe>`;
+    const code = buildWidget().replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    document.getElementById('code-res').innerText = `<iframe width="380" height="580" srcdoc="\${code}" frameborder="0" scrolling="no" style="border:none;overflow:hidden;"></iframe>`;
     document.getElementById('modal').style.display = 'flex';
 }
-
-window.onload = updatePreview;
+window.onload = update;
 </script>
 </body>
 </html>
