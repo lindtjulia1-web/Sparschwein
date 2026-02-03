@@ -2,77 +2,111 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root {
             --gold: #f9e076;
-            --gold-glow: rgba(249, 224, 118, 0.5);
-            --bg-dark: #121212;
-            --card-bg: #1e1e1e;
+            --gold-deep: #bf953f;
+            --bg-dark: #0a0a0a;
+            --card-bg: #111111;
+            --btn-bg: #1a1a1a;
+            --text-gray: #888;
         }
 
         body { 
-            background: #000; margin: 0; display: flex; justify-content: center; align-items: center; 
-            height: 100vh; font-family: 'Segoe UI', Roboto, sans-serif; color: white;
+            background: var(--bg-dark); 
+            margin: 0; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            color: white;
+            overflow: hidden;
         }
 
-        .widget-card {
-            width: 400px; background: var(--card-bg); border-radius: 32px; padding: 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.6); position: relative;
+        .game-card {
+            width: 400px; 
+            background: var(--card-bg); 
+            border-radius: 40px; 
+            padding: 30px;
+            border: 1px solid #222;
+            box-shadow: 0 30px 100px rgba(0,0,0,0.8);
+            position: relative;
         }
 
-        /* Дисплей со свинкой */
-        .pig-screen {
-            background: #111; border-radius: 20px; padding: 20px; position: relative;
-            border: 1px solid #333; height: 240px; margin-bottom: 20px;
+        /* Языки сверху справа */
+        .lang-switch { 
+            position: absolute; 
+            top: 25px; 
+            right: 30px; 
+            display: flex; 
+            gap: 5px; 
         }
-
-        .pig-svg { width: 100%; height: 180px; filter: drop-shadow(0 0 8px var(--gold-glow)); }
-
-        .score-box { position: absolute; bottom: 20px; left: 20px; text-align: left; }
-        .score-label { font-size: 12px; color: #888; text-transform: uppercase; }
-        .score-value { font-size: 42px; font-weight: bold; color: var(--gold); line-height: 1; }
-
-        /* Кнопки языков */
-        .lang-bar { position: absolute; top: 15px; right: 15px; display: flex; gap: 6px; }
-        .lang-btn { 
-            background: #2a2a2a; border: none; color: #666; padding: 5px 10px; 
-            border-radius: 6px; font-size: 11px; cursor: pointer; transition: 0.2s;
+        .lang-btn {
+            background: var(--btn-bg); border: 1px solid #333; color: var(--text-gray);
+            font-size: 10px; padding: 4px 8px; cursor: pointer; border-radius: 5px; transition: 0.3s;
         }
-        .lang-btn.active { background: var(--gold); color: #000; font-weight: bold; }
+        .lang-btn.active { color: var(--gold); border-color: var(--gold); background: #221e0a; }
 
-        /* Интерфейс игры */
-        .game-info { text-align: center; margin-bottom: 20px; min-height: 45px; font-size: 16px; color: #ccc; }
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        
-        .btn {
-            background: #282828; border: 1px solid #3d3d3d; color: #eee; padding: 14px;
-            border-radius: 12px; cursor: pointer; font-size: 14px; transition: 0.2s;
+        /* Контейнер со свинкой */
+        .pig-section {
+            height: 220px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-top: 20px;
         }
-        .btn:hover { border-color: var(--gold); background: #333; }
-        
-        .btn-gold { 
-            grid-column: span 2; background: var(--gold); color: #000; 
-            font-weight: bold; border: none; margin-top: 10px;
+        .pig-svg { width: 280px; height: 180px; overflow: visible; filter: drop-shadow(0 0 10px rgba(249, 224, 118, 0.2)); }
+
+        /* Счет слева внизу под свинкой */
+        .score-container {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            text-align: left;
+        }
+        .score-label { font-size: 10px; color: var(--text-gray); text-transform: uppercase; letter-spacing: 1px; }
+        .score-value { font-size: 38px; font-weight: bold; color: var(--gold); line-height: 1; }
+
+        /* Текстовые блоки */
+        .question-area { margin-top: 20px; text-align: center; }
+        .q-text { min-height: 60px; font-size: 18px; color: #efefef; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; }
+        .feedback { min-height: 20px; font-size: 13px; font-weight: bold; margin-bottom: 15px; letter-spacing: 0.5px; }
+
+        /* Кнопки ответов */
+        .ans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn-ans {
+            background: var(--btn-bg); border: 1px solid #333; color: #ccc;
+            padding: 14px; border-radius: 12px; cursor: pointer; font-size: 13px; transition: 0.2s;
+        }
+        .btn-ans:hover { border-color: var(--gold); color: white; background: #222; }
+
+        .btn-next { 
+            grid-column: span 2; background: var(--gold); color: black; font-weight: bold; 
+            border: none; padding: 12px; border-radius: 12px; cursor: pointer; margin-top: 10px;
         }
 
         .hidden { display: none; }
+
+        /* Анимация песка */
+        #sand-rect { transition: all 1s ease-in-out; }
     </style>
 </head>
 <body>
 
-<div class="widget-card">
-    <div class="lang-bar">
-        <button class="lang-btn active" onclick="changeLang('ru', this)">RU</button>
-        <button class="lang-btn" onclick="changeLang('en', this)">EN</button>
-        <button class="lang-btn" onclick="changeLang('de', this)">DE</button>
+<div class="game-card">
+    <div class="lang-switch">
+        <button class="lang-btn active" onclick="setLang('ru', this)">RU</button>
+        <button class="lang-btn" onclick="setLang('en', this)">EN</button>
+        <button class="lang-btn" onclick="setLang('de', this)">DE</button>
     </div>
 
-    <div class="pig-screen">
+    <div class="pig-section">
         <svg class="pig-svg" viewBox="0 0 300 200">
             <defs>
-                <filter id="sand-texture">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" result="noise" />
+                <filter id="grain">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" />
                     <feComposite operator="in" in2="SourceGraphic" />
                 </filter>
                 <mask id="pig-mask">
@@ -81,130 +115,124 @@
             </defs>
             
             <path d="M230,60 C270,60 290,90 290,120 C290,150 260,180 210,185 L205,195 L185,195 L190,185 L120,185 L125,195 L105,195 L100,185 C50,180 20,150 20,120 C20,90 50,60 100,60 C100,40 130,30 150,30 C170,30 200,40 200,60 Z" 
-                  fill="none" stroke="#f9e076" stroke-width="2" />
+                  fill="none" stroke="var(--gold)" stroke-width="2.5" opacity="0.8" />
             
+            <rect x="80" y="80" width="140" height="80" fill="rgba(255,255,255,0.03)" stroke="rgba(249,224,118,0.2)" rx="5" />
+
             <g mask="url(#pig-mask)">
-                <rect id="sand-fill" x="0" y="200" width="300" height="0" fill="#f9e076" filter="url(#sand-texture)" style="transition: all 0.8s ease;" />
+                <rect id="sand-rect" x="0" y="200" width="300" height="0" fill="var(--gold)" filter="url(#grain)" />
             </g>
 
-            <circle cx="250" cy="95" r="3" fill="#f9e076" />
-            <path d="M20,120 L12,120" stroke="#f9e076" stroke-width="2" /> 
-        </svg>
+            <circle cx="240" cy="95" r="3" fill="var(--gold)" /> <path d="M20,120 L10,120" stroke="var(--gold)" stroke-width="2" /> </svg>
 
-        <div class="score-box">
+        <div class="score-container">
             <div class="score-label">score</div>
-            <div class="score-value" id="score-num">0</div>
+            <div class="score-value" id="total-val">0</div>
         </div>
     </div>
 
-    <div id="game-ui">
-        <div class="game-info" id="status-text">Выберите сложность:</div>
-        
-        <div id="screen-diff" class="btn-group">
-            <button class="btn" onclick="setDiff('easy')">EASY</button>
-            <button class="btn" onclick="setDiff('hard')">HARD</button>
+    <div class="question-area">
+        <div class="q-text" id="question">Выберите сложность:</div>
+        <div id="feedback" class="feedback"></div>
+
+        <div id="diff-screen" class="ans-grid">
+            <button class="btn-ans" onclick="initGame('easy')">EASY</button>
+            <button class="btn-ans" onclick="initGame('hard')">HARD</button>
         </div>
 
-        <div id="screen-bet" class="btn-group hidden">
-            <button class="btn" onclick="startQuestion(10)">10</button>
-            <button class="btn" onclick="startQuestion(25)">25</button>
-            <button class="btn" onclick="startQuestion(50)">50</button>
+        <div id="bet-screen" class="ans-grid hidden">
+            <button class="btn-ans" onclick="askQuestion(10)">10</button>
+            <button class="btn-ans" onclick="askQuestion(25)">25</button>
+            <button class="btn-ans" onclick="askQuestion(50)">50</button>
         </div>
 
-        <div id="screen-ans" class="btn-group hidden"></div>
+        <div id="ans-screen" class="ans-grid hidden"></div>
 
-        <div id="screen-res" class="hidden">
-            <button class="btn btn-gold" onclick="resetToBet()">ДАЛЕЕ</button>
+        <div id="res-screen" class="hidden">
+            <button class="btn-next" id="next-btn" onclick="nextAction()">ДАЛЕЕ</button>
         </div>
     </div>
 </div>
 
 <script>
-    let score = 0;
-    let curLang = 'ru';
-    let curDiff = 'easy';
-    let curBet = 0;
+    let score = 0, curLang = 'ru', difficulty = 'easy', currentBet = 0, qIdx = 0;
+    const MAX_SCORE = 500;
 
     const gameData = {
         ru: {
-            easy: [{ q: "Ich ... (haben) ein Buch.", a: ["habe", "hast", "hat"], c: 0 }],
-            hard: [{ q: "Wenn я ... (быть) богатым...", a: ["wäre", "bin", "war"], c: 0 }]
+            win: "ВЕРНО!", loss: "ОШИБКА!", next: "ДАЛЕЕ",
+            easy: [{q: "Ich ... (haben) ein Haus.", a: ["habe", "hast", "hat", "haben"], c: 0}]
         },
         en: {
-            easy: [{ q: "I ... (be) happy.", a: ["am", "is", "are"], c: 0 }],
-            hard: [{ q: "If I ... (be) rich...", a: ["were", "was", "am"], c: 0 }]
+            win: "CORRECT!", loss: "WRONG!", next: "NEXT",
+            easy: [{q: "I ... (be) a student.", a: ["am", "is", "are", "be"], c: 0}]
         },
         de: {
-            easy: [{ q: "Ich ... (sein) hier.", a: ["bin", "bist", "ist"], c: 0 }],
-            hard: [{ q: "Gestern ... (gehen) ich.", a: ["ging", "gehe", "gegangen"], c: 0 }]
+            win: "RICHTIG!", loss: "FALSCH!", next: "WEITER",
+            easy: [{q: "Ich ... (sein) hier.", a: ["bin", "bist", "ist", "sind"], c: 0}]
         }
     };
 
-    const phrases = {
-        ru: { bet: "Выберите ставку:", win: "ВЕРНО!", loss: "ОШИБКА!", next: "ДАЛЕЕ" },
-        en: { bet: "Choose bet:", win: "CORRECT!", loss: "WRONG!", next: "NEXT" },
-        de: { bet: "Wähle Einsatz:", win: "RICHTIG!", loss: "FALSCH!", next: "WEITER" }
-    };
-
-    function updateVisuals() {
-        document.getElementById('score-num').innerText = score;
-        const sand = document.getElementById('sand-fill');
-        const level = Math.min(score / 5, 100); // 500 очков = full
-        sand.setAttribute('height', level * 2);
-        sand.setAttribute('y', 200 - (level * 2));
+    function initGame(d) {
+        difficulty = d;
+        document.getElementById('diff-screen').classList.add('hidden');
+        showBetScreen();
     }
 
-    function changeLang(lang, btn) {
-        curLang = lang;
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        location.reload(); // Для простоты сброса состояния
+    function showBetScreen() {
+        document.getElementById('bet-screen').classList.remove('hidden');
+        document.getElementById('res-screen').classList.add('hidden');
+        document.getElementById('feedback').innerText = "";
+        document.getElementById('question').innerText = curLang === 'ru' ? "Выберите ставку:" : "Choose your bet:";
     }
 
-    function setDiff(d) {
-        curDiff = d;
-        document.getElementById('screen-diff').classList.add('hidden');
-        document.getElementById('screen-bet').classList.remove('hidden');
-        document.getElementById('status-text').innerText = phrases[curLang].bet;
-    }
-
-    function startQuestion(bet) {
-        curBet = bet;
-        document.getElementById('screen-bet').classList.add('hidden');
-        const screenAns = document.getElementById('screen-ans');
-        screenAns.classList.remove('hidden');
-        screenAns.innerHTML = '';
-
-        const qData = gameData[curLang][curDiff][0];
-        document.getElementById('status-text').innerText = qData.q;
-
-        qData.a.forEach((text, i) => {
-            const b = document.createElement('button');
-            b.className = 'btn';
-            b.innerText = text;
-            b.onclick = () => checkAns(i);
-            screenAns.appendChild(b);
+    function askQuestion(bet) {
+        currentBet = bet;
+        document.getElementById('bet-screen').classList.add('hidden');
+        const qObj = gameData[curLang].easy[0]; // Для примера берем первый вопрос
+        document.getElementById('question').innerText = qObj.q;
+        
+        const ansScreen = document.getElementById('ans-screen');
+        ansScreen.innerHTML = '';
+        ansScreen.classList.remove('hidden');
+        
+        qObj.a.forEach((text, i) => {
+            ansScreen.innerHTML += `<button class="btn-ans" onclick="checkAnswer(${i})">${text}</button>`;
         });
     }
 
-    function checkAns(idx) {
-        const correct = gameData[curLang][curDiff][0].c;
-        const isWin = idx === correct;
+    function checkAnswer(idx) {
+        const isCorrect = idx === 0;
+        if(isCorrect) score += currentBet; else score = Math.max(0, score - currentBet);
         
-        if(isWin) score += curBet; else score = Math.max(0, score - curBet);
+        document.getElementById('ans-screen').classList.add('hidden');
+        document.getElementById('res-screen').classList.remove('hidden');
         
-        document.getElementById('screen-ans').classList.add('hidden');
-        document.getElementById('screen-res').classList.remove('hidden');
-        document.getElementById('status-text').innerText = isWin ? phrases[curLang].win : phrases[curLang].loss;
-        updateVisuals();
+        const f = document.getElementById('feedback');
+        f.innerText = isCorrect ? gameData[curLang].win : gameData[curLang].loss;
+        f.style.color = isCorrect ? "var(--gold)" : "#ff5252";
+        
+        updateSand();
     }
 
-    function resetToBet() {
-        document.getElementById('screen-res').classList.add('hidden');
-        document.getElementById('screen-bet').classList.remove('hidden');
-        document.getElementById('status-text').innerText = phrases[curLang].bet;
+    function updateSand() {
+        document.getElementById('total-val').innerText = score;
+        const sand = document.getElementById('sand-rect');
+        const fillHeight = (score / MAX_SCORE) * 160;
+        sand.setAttribute('y', 200 - fillHeight);
+        sand.setAttribute('height', fillHeight);
+    }
+
+    function nextAction() {
+        showBetScreen();
+    }
+
+    function setLang(l, btn) {
+        curLang = l;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('next-btn').innerText = gameData[curLang].next;
     }
 </script>
-
 </body>
 </html>
