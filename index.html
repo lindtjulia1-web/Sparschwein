@@ -14,13 +14,17 @@
         .card { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 15px; border-radius: 12px; margin-bottom: 15px; position: relative; }
         .del-btn { position: absolute; top: 10px; right: 10px; color: var(--red); cursor: pointer; font-weight: bold; font-size: 11px; }
         
-        /* Стили для меток и инпутов, размер которых будет меняться */
         .sidebar-content label { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; margin-top: 8px; }
         .sidebar-content input, .sidebar-content select { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 8px; margin-top: 5px; box-sizing: border-box; outline: none; }
         
         .btn { background: #3d3d45; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-        .btn-main { background: var(--accent); color: #000; margin-top: 20px; }
-        .btn-code { background: #00d4ff; color: #000; margin-top: 8px; }
+        
+        /* Измененные цвета кнопок на пастельные */
+        .btn-main { background: #ffb347; color: #000; margin-top: 20px; } /* Пастельный оранжевый */
+        .btn-main:hover { background: #ffa02e; }
+        
+        .btn-code { background: #77dd77; color: #000; margin-top: 8px; } /* Пастельный зеленый */
+        .btn-code:hover { background: #66cc66; }
 
         .preview { flex: 1; background: #0c0c0e; display: flex; align-items: center; justify-content: center; }
         #device-wrapper { border: 1px solid #333; background: #000; position: relative; overflow: hidden; }
@@ -48,8 +52,8 @@
             <option value="'Actor', sans-serif">Actor</option>
         </select>
         
-        <label>Размер шрифта (px)</label>
-        <input type="range" id="fontSize" min="12" max="32" step="1" value="20" oninput="updateSidebarFont(this.value)">
+        <label>Размер шрифта в игре (px)</label>
+        <input type="range" id="fontSize" min="12" max="32" step="1" value="20">
 
         <h2>Размер виджета</h2>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -98,16 +102,6 @@
 </div>
 
 <script>
-// Функция для изменения шрифта в самом редакторе
-function updateSidebarFont(val) {
-    const container = document.getElementById('main-sidebar-content');
-    // Меняем размер текста в инпутах и селекторах
-    const elements = container.querySelectorAll('input:not([type="range"]):not([type="color"]), select, .inp-q, .inp-correct, .inp-wrong');
-    elements.forEach(el => {
-        el.style.fontSize = val + 'px';
-    });
-}
-
 function addQ(qText = "", correct = "", wrongs = ["", ""]) {
     const div = document.createElement('div');
     div.className = 'card';
@@ -120,8 +114,6 @@ function addQ(qText = "", correct = "", wrongs = ["", ""]) {
         <input type="text" class="inp-wrong" value="${wrongs.join(', ')}">
     `;
     document.getElementById('q-container').appendChild(div);
-    // Применяем текущий размер шрифта к новому вопросу
-    updateSidebarFont(document.getElementById('fontSize').value);
 }
 
 function hexToRgba(hex, alpha) {
@@ -302,7 +294,6 @@ function getGeniallyCode() {
 
 window.onload = () => { 
     addQ("Сколько золотых в сундуке?", "100", ["50", "200"]); 
-    updateSidebarFont(document.getElementById('fontSize').value);
     updatePreview(); 
 };
 </script>
