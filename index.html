@@ -3,21 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        :root { --accent: #ffcc00; }
-        body { background: transparent; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        :root { 
+            --gold-sand: linear-gradient(to top, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); 
+            --bg: #0b0b0d;
+        }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background: transparent; color: #fff; overflow: hidden; }
         
-        .widget { position: relative; width: 400px; text-align: center; }
+        .widget-container {
+            width: 380px; margin: 10px auto; padding: 20px;
+            background: rgba(20, 20, 20, 0.95); border-radius: 30px;
+            border: 2px solid #444; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
 
-        /* Переключатель языков */
-        .langs { position: absolute; top: 0; right: 0; display: flex; gap: 5px; z-index: 10; }
-        .l-btn { background: rgba(255,255,255,0.1); border: 1px solid #444; color: #ccc; font-size: 10px; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-        .l-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(255,204,0,0.1); }
+        /* Языковой переключатель */
+        .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
+        .lang-btn { 
+            background: #222; border: 1px solid #555; color: #aaa; 
+            padding: 4px 8px; cursor: pointer; border-radius: 5px; font-size: 10px;
+        }
+        .lang-btn.active { border-color: #f9e076; color: #f9e076; }
 
-        .pig-box { position: relative; width: 300px; height: 220px; margin: 0 auto; }
+        /* Емкость с песком */
+        .glass-container { position: relative; width: 220px; height: 160px; margin: 0 auto 15px; }
+        
+        .sand-fill { 
+            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+            width: 140px; background: var(--gold-sand); 
+            transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1; border-radius: 0 0 50px 50px;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
 
-        /* Золотой песок */
-        .sand {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to top, #b8860b, #ffd700, #fff2ac);
-            /* Используем маску, чтобы песок был только внутри контура */
-            -webkit-mask: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAADICAYAAABS39xVAAAACXBIWXMAAAsTAAALEwEAmpwYAAAKT2lDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjanVNnVFPpFj333vRCSMEYQC95EpaQC4SUE1BA6ID0YwEjOSJNcWUAweCBgeSBAbiLGP4u4EAFG8GByQEBABG9Zw9WpAf7ua9hdx96S/vO/dfn61dd7v16d865m2Bae89U6aoAtAtF6Dw0M0r66Gw0H9K9AByoABRQASUwvP6A/Ej3Y8Y8Y0CQYAsiID8EqBBSKjY7Y5ky6y0s/67L7+TM79Y/R2IDmE8U5EOCm08Sssay7pE/j949RzD+97+69y05+7H8A80Gk836D6B0M6X39H83o80G078Y6I0E0AAOCN7FkAAX8C4AsIuIJBABMA+4L2Q0y8Xv2zY3Y6+T++E/Y/KjI+MvYx8K01S/2U7s5H4Yp/vP/O0m19pX8v7Vf9037/8OAfE47mQ7zS3/31u9+8u6Hj/P7u5O6D/o/o89v15v9/X6u6C6v3u36H/r7u7v++7+9/9e3+7/e98v+3v/t/79/3+/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/v/7/
+        /* Текстура песка */
+        .sand-fill::after {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.15;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        .glass-img { position: relative; width: 100%; height: 100%; object-fit: contain; z-index: 2; pointer-events: none; }
+
+        .score { font-size: 36px; color: #f9e076; font-weight: bold; margin: 10px 0; text-shadow: 0 0 15px rgba(212,175,55,0.5); }
+        
+        .controls { display: flex; justify-content: center; gap: 10px; }
+        .btn { 
+            background: #1a1a1a; border: 1px solid #d4af37; color: #d4af37; 
+            padding: 10px 20px; font-size: 16px; cursor: pointer; 
+            border-radius: 12px; transition: 0.2s;
+        }
+        .btn:hover { background: #d4af37; color: #000; transform: translateY(-2px); }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="widget-container">
+    <div class="lang-bar">
+        <button class="lang-btn active" onclick="changeLang('ru', this)">RU</button>
+        <button class="lang-btn" onclick="changeLang('en', this)">EN</button>
+        <button class="lang-btn" onclick="changeLang('de', this)">DE</button>
+    </div>
+
+    <div class="glass-container">
+        <div id="sand" class="sand-fill" style="height: 0%"></div>
+        <img class="glass-img" src="https://i.ibb.co/pX99S99/glass-pig.png">
+    </div>
+
+    <div class="score" id="score-display">0</div>
+    <p id="label-text" style="color: #888; margin-top: 0; font-size: 14px;">Золотой запас</p>
+
+    <div id="bet-btns" class="controls">
+        <button class="btn" onclick="addSand(10)">10</button>
+        <button class="btn" onclick="addSand(25)">25</button>
+        <button class="btn" onclick="addSand(50)">50</button>
+    </div>
+</div>
+
+<script>
+    let currentScore = 0;
+    const maxCapacity = 250;
+
+    const texts = {
+        ru: { label: "Золотой запас" },
+        en: { label: "Golden Reserve" },
+        de: { label: "Goldreserven" }
+    };
+
+    function changeLang(lang, btn) {
+        document.getElementById('label-text').innerText = texts[lang].label;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function addSand(amount) {
+        currentScore += amount;
+        updateWidget();
+    }
+
+    function updateWidget() {
+        document.getElementById('score-display').innerText = currentScore;
+        
+        // Расчет высоты песка (макс 70% от высоты контейнера)
+        let fillPercent = Math.min(70, (currentScore / maxCapacity) * 70);
+        document.getElementById('sand').style.height = fillPercent + '%';
+        
+        // Эффект легкого «свечения» при наполнении
+        if (currentScore >= maxCapacity) {
+            document.getElementById('sand').style.boxShadow = "0 0 30px #f9e076";
+        }
+    }
+</script>
+</body>
+</html>
