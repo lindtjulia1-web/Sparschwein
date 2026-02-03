@@ -2,9 +2,9 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>KGB Editor: Auto-Scale Edition</title>
+    <title>KGB Editor: Correct Answer Fixed</title>
     <style>
-        :root { --accent: #f9e076; --bg: #0e0e10; --panel: #18181b; --border: #2d2d33; }
+        :root { --accent: #f9e076; --bg: #0e0e10; --panel: #18181b; --border: #2d2d33; --green: #4caf50; --red: #f44336; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
         /* Sidebar */
@@ -21,7 +21,14 @@
         .del-btn { position: absolute; top: 8px; right: 8px; color: #ff4444; font-size: 18px; cursor: pointer; }
         
         label { display: block; font-size: 10px; color: #888; text-transform: uppercase; margin-top: 8px; font-weight: bold; }
-        input, select { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 6px; margin-top: 4px; box-sizing: border-box; outline: none; }
+        input, select { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 6px; margin-top: 4px; box-sizing: border-box; outline: none; transition: 0.2s; }
+        input:focus { border-color: #777; }
+
+        /* Стили для полей ответов */
+        .inp-correct { border-color: var(--green); background: rgba(76, 175, 80, 0.1); }
+        .inp-correct:focus { border-color: #6f6; box-shadow: 0 0 5px rgba(76, 175, 80, 0.5); }
+        .inp-wrong { border-color: var(--red); background: rgba(244, 67, 54, 0.1); }
+        .inp-wrong:focus { border-color: #f66; box-shadow: 0 0 5px rgba(244, 67, 54, 0.5); }
 
         .btn { background: #333; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .btn-main { background: var(--accent); color: #000; margin-top: 20px; text-transform: uppercase; }
@@ -29,7 +36,7 @@
         /* Preview Area */
         .preview { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
         
-        /* Рамка устройства теперь ресайзится свободно, как окно Genially */
+        /* Рамка устройства */
         #device-wrapper {
             border: 2px dashed #444; 
             background: #111; 
@@ -47,7 +54,7 @@
 
 <div class="sidebar">
     <div class="sidebar-content">
-        <h2>Размер Окна (Тест)</h2>
+        <h2>Размер (для теста)</h2>
         <div class="size-grid">
             <div><label>Ширина</label><input type="number" id="width" value="400" oninput="resizePreview()"></div>
             <div><label>Высота</label><input type="number" id="height" value="600" oninput="resizePreview()"></div>
@@ -83,7 +90,7 @@
 
 <div class="preview">
     <div id="device-wrapper"><iframe id="ifr"></iframe></div>
-    <div style="position: absolute; bottom: 10px; color: #555; font-size: 10px;">Меняйте размеры в меню, чтобы проверить адаптивность</div>
+    <div style="position: absolute; bottom: 10px; color: #555; font-size: 10px;">Проверяйте адаптивность, меняя цифры слева</div>
 </div>
 
 <div id="code-modal">
@@ -107,20 +114,43 @@ function setPreset(w, h) {
     resizePreview();
 }
 
-function addQ(qText = "", answers = ["", "", "", ""]) {
+// --- ИЗМЕНЕНИЕ: Функция добавления вопроса теперь создает 2 поля для ответов ---
+function addQ(qText = "", correct = "", wrongs = ["", "", ""]) {
     const div = document.createElement('div');
     div.className = 'card';
-    div.innerHTML = `<span class="del-btn" onclick="this.parentElement.remove()">×</span><label>Вопрос</label><input type="text" class="inp-q" value="${qText}"><label>Ответы</label><input type="text" class="inp-a" value="${answers.join(', ')}">`;
+    div.innerHTML = `
+        <span class="del-btn" onclick="this.parentElement.remove()">×</span>
+        <label>Вопрос</label>
+        <input type="text" class="inp-q" value="${qText}">
+        
+        <label style="color:var(--green)">✓ Правильный ответ</label>
+        <input type="text" class="inp-correct" value="${correct}" placeholder="Напишите верный ответ здесь">
+        
+        <label style="color:var(--red)">× Неправильные (через запятую)</label>
+        <input type="text" class="inp-wrong" value="${wrongs.join(', ')}" placeholder="Ошибка1, Ошибка2, Ошибка3">
+    `;
     document.getElementById('q-container').appendChild(div);
 }
 
+// --- Сборка данных: теперь берет из разных полей и объединяет ---
 function buildInnerGame() {
     const qs = [];
     document.querySelectorAll('.card').forEach(card => {
         const q = card.querySelector('.inp-q').value;
-        const aRaw = card.querySelector('.inp-a').value;
-        if(q && aRaw) qs.push({ q: q, a: aRaw.split(',').map(s => s.trim()) });
+        const correct = card.querySelector('.inp-correct').value.trim();
+        const wrongRaw = card.querySelector('.inp-wrong').value;
+        
+        // Фильтруем пустые значения
+        const wrongList = wrongRaw.split(',').map(s => s.trim()).filter(s => s !== "");
+
+        if(q && correct) {
+            // ВАЖНО: Мы ставим правильный ответ первым в массив.
+            // Игра знает: "Индекс 0 = Правильный".
+            // Игрок этого не знает, потому что игра сама перемешивает кнопки.
+            qs.push({ q: q, a: [correct, ...wrongList] });
+        }
     });
+    
     const cfg = { 
         bg: document.getElementById('bg-url').value, 
         goal: document.getElementById('goal').value, 
@@ -128,37 +158,30 @@ function buildInnerGame() {
         data: qs 
     };
 
-    // В коде ниже я добавляю <div id="game-root"> и скрипт scaleGame(), который зумит этот див
+    // --- КОД ИГРЫ (Остался прежним, работает отлично) ---
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root{--gold:#f9e076;--gold-d:#bf953f}
         body {
             margin:0; height:100vh; overflow:hidden; font-family:sans-serif; background:#000; color:#fff;
-            display: flex; align-items: center; justify-content: center; /* Центрируем игру */
+            display: flex; align-items: center; justify-content: center;
         }
         .bg{position:fixed;inset:0;background:url('${cfg.bg}') center/cover;opacity:0.6;z-index:-1}
         
-        /* Основной контейнер игры фиксированного "дизайнерского" размера */
         #game-root {
             width: 360px;
             height: 600px;
             position: relative;
-            transform-origin: center center; /* Зумим от центра */
+            transform-origin: center center;
             display: flex; flex-direction: column; justify-content: center;
         }
 
         .card {
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            background: rgba(20,20,25,0.95);
-            border-radius: 35px;
-            padding: 25px;
-            border: 1px solid #333;
-            text-align: center;
-            box-shadow: 0 20px 50px #000;
-            display: flex; flex-direction: column; justify-content: center; /* Распределяем контент */
+            width: 100%; height: 100%; box-sizing: border-box;
+            background: rgba(20,20,25,0.95); border-radius: 35px; padding: 25px;
+            border: 1px solid #333; text-align: center; box-shadow: 0 20px 50px #000;
+            display: flex; flex-direction: column; justify-content: center;
         }
         
         .pig { width: 100%; max-width: 280px; height: 180px; margin: 0 auto 10px; position: relative; flex-shrink: 0; }
@@ -175,7 +198,6 @@ function buildInnerGame() {
         .grain { position: absolute; width: 4px; height: 4px; background: var(--gold); border-radius: 50%; pointer-events: none; z-index:10 }
     </style></head><body>
     <div class="bg"></div>
-    
     <div id="game-root">
         <div class="card">
             <div class="pig" id="p">
@@ -193,29 +215,19 @@ function buildInnerGame() {
             <div id="ctrl"></div>
         </div>
     </div>
-
     <script>
     const cfg=JSON.parse(decodeURIComponent("${encodeURIComponent(JSON.stringify(cfg))}"));
     let sc=0,qi=0,bt=0;
 
-    // --- ФУНКЦИЯ МАСШТАБИРОВАНИЯ ---
     function scaleGame() {
         const root = document.getElementById('game-root');
         const winW = window.innerWidth;
         const winH = window.innerHeight;
-        // Базовый размер игры (под который мы верстали)
-        const baseW = 360; 
-        const baseH = 600;
-        
-        // Считаем масштаб, чтобы игра вместилась и по ширине, и по высоте
-        const scale = Math.min(winW / baseW, winH / baseH, 1.2); // 1.2 - чтобы не раздувало слишком сильно на 4к экранах
-        
-        root.style.transform = \`scale(\${scale * 0.95})\`; // 0.95 для небольшого отступа
+        const scale = Math.min(winW / 360, winH / 600, 1.2); 
+        root.style.transform = \`scale(\${scale * 0.95})\`;
     }
-    
-    // Запускаем масштабирование при старте и при изменении размера окна
     window.addEventListener('resize', scaleGame);
-    window.onload = () => { scaleGame(); init(); }; // init() запускаем после scaleGame
+    window.onload = () => { scaleGame(); init(); };
 
     function init(){
         if(qi>=cfg.data.length){document.getElementById('qt').innerText="FINISH";return}
@@ -230,9 +242,11 @@ function buildInnerGame() {
     };
     function showA(){
         const c=document.getElementById('ctrl');c.innerHTML='';
+        // Вот здесь игра перемешивает ответы, чтобы игрок не догадался!
         [...cfg.data[qi].a].sort(()=>Math.random()-.5).forEach(o=>{
             const b=document.createElement('button');b.className='btn btn-ans';b.innerText=o;
             b.onclick=()=>{
+                // Проверяем: совпадает ли ответ с первым элементом массива (cfg.data[qi].a[0])
                 if(o===cfg.data[qi].a[0]){sc=Math.min(cfg.goal,sc+bt);drop()}else{sc=Math.max(0,sc-bt)}
                 upd();qi++;setTimeout(init,1000)
             };
@@ -266,12 +280,11 @@ function getGeniallyCode() {
     const w = document.getElementById('width').value;
     const h = document.getElementById('height').value;
     const html = buildInnerGame().replace(/"/g, '&quot;');
-    // width="100%" height="100%" чтобы iframe занимал всё место, которое ему выделит Genially
     document.getElementById('result-code').value = `<iframe width="100%" height="100%" srcdoc="${html}" frameborder="0" scrolling="no" style="border:none; overflow:hidden;"></iframe>`;
     document.getElementById('code-modal').style.display = 'flex';
 }
 
-window.onload = () => { addQ("Das ist ... Haus", ["ein", "eine", "einen", "eines"]); updatePreview(); };
+window.onload = () => { addQ("Ich ... (haben) ein Haus", "habe", ["hast", "hat", "haben"]); updatePreview(); };
 </script>
 </body>
 </html>
