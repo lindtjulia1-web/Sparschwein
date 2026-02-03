@@ -28,11 +28,10 @@
             position: relative; width: 240px; height: 180px; margin: 10px auto;
         }
 
-        /* Маска для песка по форме свинки */
+        /* Маска для песка (обновленный путь формы) */
         .sand-mask {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            /* Путь повторяет форму стеклянной свинки */
-            clip-path: path('M195,100 C195,140 160,165 100,165 C40,165 5,140 5,100 C5,60 40,30 100,30 C150,30 195,60 195,100 M200,90 L225,90 L225,115 L200,110 Z');
+            clip-path: path('M110,30 C160,30 200,60 200,100 C200,140 160,170 110,170 C60,170 20,140 20,100 C20,60 60,30 110,30 M200,85 L225,85 L225,115 L200,115 Z');
             z-index: 1;
         }
 
@@ -41,14 +40,15 @@
             background: var(--gold-gradient); transition: height 1s ease-in-out;
         }
 
-        /* Внешний стеклянный контур */
+        /* Внешний стеклянный контур с улучшенными деталями */
         .pig-glass {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 2; fill: none; stroke: rgba(255,255,255,0.25); stroke-width: 2.5;
+            z-index: 2; fill: none; stroke: rgba(255,255,255,0.4); stroke-width: 2;
+            filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));
             pointer-events: none;
         }
 
-        .score { font-size: 42px; color: var(--gold); font-weight: bold; margin-top: -10px; }
+        .score { font-size: 42px; color: var(--gold); font-weight: bold; margin-top: -10px; text-shadow: 0 0 10px rgba(249, 224, 118, 0.4); }
         .q-text { min-height: 55px; font-size: 19px; margin: 15px 0; color: #fff; }
         
         .btn-group { display: flex; justify-content: center; gap: 12px; }
@@ -56,7 +56,7 @@
             background: #1a1a1a; border: 1.5px solid var(--gold); color: var(--gold);
             padding: 12px 24px; border-radius: 14px; cursor: pointer; font-weight: bold; transition: 0.2s;
         }
-        .btn:hover { background: var(--gold); color: #000; }
+        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 15px var(--gold); }
         .btn-ans { border-color: #fff; color: #fff; }
 
         .feedback { font-size: 15px; font-weight: bold; margin: 10px 0; min-height: 22px; }
@@ -75,11 +75,12 @@
     <div class="pig-area">
         <div class="sand-mask"><div id="sand" class="sand-fill"></div></div>
         <svg class="pig-glass" viewBox="0 0 240 180">
-            <path d="M100,30 C160,30 195,65 195,100 C195,135 160,165 100,165 C40,165 5,135 5,100 C5,65 40,30 100,30" />
-            <path d="M195,90 L225,90 L225,115 L195,110" />
-            <path d="M150,35 L170,10 L185,45" />
-            <path d="M60,165 L55,175 L75,175 L80,165 M130,165 L125,175 L145,175 L150,165" />
-            <circle cx="170" cy="85" r="3" fill="rgba(255,255,255,0.5)" />
+            <path d="M110,30 C165,30 205,65 205,100 C205,135 165,170 110,170 C55,170 15,135 15,100 C15,65 55,30 110,30" stroke-opacity="0.6" />
+            <path d="M205,85 C215,85 225,90 225,100 C225,110 215,115 205,115" />
+            <path d="M140,35 L165,10 L185,45 M90,32 L75,12 L65,40" />
+            <path d="M60,168 C60,175 55,178 55,178 L75,178 M145,168 C145,175 150,178 150,178 L130,178" />
+            <path d="M18,90 C5,85 5,75 15,70" />
+            <circle cx="175" cy="80" r="2.5" fill="rgba(255,255,255,0.8)" />
         </svg>
     </div>
 
@@ -156,7 +157,8 @@
     }
 
     function updateSand() {
-        let h = Math.min(80, (totalScore / 300) * 80);
+        // Увеличил лимит до 400 для плавного заполнения
+        let h = Math.min(85, (totalScore / 400) * 85);
         document.getElementById('sand').style.height = h + '%';
     }
 
