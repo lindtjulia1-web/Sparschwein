@@ -6,7 +6,8 @@
         :root {
             --gold: #f9e076;
             --gold-gradient: linear-gradient(to top, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-            --glass-stroke: rgba(255, 255, 255, 0.25);
+            --glass-stroke: rgba(255, 255, 255, 0.2);
+            --error-red: #ff5252;
         }
         body { background: #0a0a0a; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
 
@@ -23,20 +24,9 @@
         }
         .lang-btn.active { border-color: var(--gold); color: var(--gold); background: #221e0a; }
 
-        .pig-container {
-            position: relative; width: 300px; height: 220px; margin: 0 auto;
-            transition: transform 0.1s ease-in-out;
-        }
+        .pig-container { position: relative; width: 300px; height: 220px; margin: 0 auto; }
 
-        /* Анимация тряски при попадании */
-        .shake { animation: pigShake 0.4s ease-in-out; }
-        @keyframes pigShake {
-            0%, 100% { transform: scale(1); }
-            25% { transform: scale(1.05) rotate(2deg); }
-            50% { transform: scale(0.95) rotate(-2deg); }
-            75% { transform: scale(1.02) rotate(1deg); }
-        }
-
+        /* Маска контура свинки */
         .sand-mask {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             clip-path: path('M160,55 C240,55 280,85 280,120 C280,155 235,185 160,185 C85,185 40,155 40,120 C40,85 80,55 160,55 Z');
@@ -45,7 +35,7 @@
 
         .sand-fill {
             position: absolute; bottom: 35px; left: 0; width: 100%; height: 0%;
-            background: var(--gold-gradient); transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--gold-gradient); transition: height 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
             background-size: 200% 200%;
             animation: sandShimmer 3s infinite alternate;
         }
@@ -55,43 +45,35 @@
             to { background-position: 100% 100%; }
         }
 
-        .pig-svg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 2; fill: none; stroke: var(--glass-stroke); stroke-width: 1.2;
-        }
+        .pig-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; fill: none; stroke: var(--glass-stroke); stroke-width: 1.5; }
 
-        .glass-glint {
-            stroke: rgba(255, 255, 255, 0.5);
-            stroke-dasharray: 80 1000;
-            stroke-dashoffset: 1000;
-            animation: glintMove 6s infinite linear;
-        }
+        /* Эффекты крупинок */
+        .falling-grain { position: absolute; width: 4px; height: 4px; background: var(--gold); border-radius: 50%; z-index: 2; pointer-events: none; }
+        .leak-grain { position: absolute; width: 3px; height: 3px; background: #666; border-radius: 50%; z-index: 10; pointer-events: none; }
 
-        @keyframes glintMove {
-            0% { stroke-dashoffset: 1000; }
-            20% { stroke-dashoffset: 0; }
-            100% { stroke-dashoffset: 0; }
-        }
-
-        .score { font-size: 58px; color: var(--gold); font-weight: bold; margin: 5px 0 0; text-shadow: 0 0 25px rgba(249, 224, 118, 0.2); }
-        .q-text { min-height: 50px; font-size: 19px; margin: 10px 0 25px; color: #ddd; font-weight: 300; }
+        .score { font-size: 58px; color: var(--gold); font-weight: bold; margin: 5px 0; }
+        .q-text { min-height: 60px; font-size: 18px; margin: 15px 0; color: #ddd; line-height: 1.4; }
         
-        .btn-group { display: flex; justify-content: center; gap: 12px; }
+        .btn-group { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .row { display: flex; gap: 10px; justify-content: center; width: 100%; }
+        
         .btn {
             background: transparent; border: 1px solid var(--gold); color: var(--gold);
-            padding: 12px 28px; border-radius: 18px; cursor: pointer; font-weight: bold; transition: 0.3s;
-            position: relative; overflow: hidden;
+            padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s;
         }
-        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 25px rgba(249, 224, 118, 0.4); }
-        .btn-ans { border-color: #444; color: #fff; }
+        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 15px rgba(249, 224, 118, 0.3); }
+        .btn-ans { border-color: #444; color: #fff; width: 100%; }
 
-        .feedback { font-size: 14px; font-weight: bold; margin-bottom: 10px; min-height: 20px; text-transform: uppercase; letter-spacing: 2px; }
+        .feedback { font-size: 14px; font-weight: bold; margin-bottom: 10px; min-height: 20px; letter-spacing: 1px; }
         .hidden { display: none; }
-
-        /* Конфетти */
-        .confetti {
-            position: absolute; width: 8px; height: 8px; background: var(--gold);
-            border-radius: 2px; pointer-events: none; z-index: 100;
+        
+        .shake { animation: shake 0.4s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-3px); }
+            80% { transform: translateX(3px); }
         }
     </style>
 </head>
@@ -105,31 +87,34 @@
     </div>
 
     <div class="pig-container" id="pig-box">
-        <div class="sand-mask"><div id="sand" class="sand-fill"></div></div>
+        <div class="sand-mask">
+            <div id="sand" class="sand-fill"></div>
+        </div>
         
         <svg class="pig-svg" viewBox="0 0 320 220">
-            <path id="mainPath" d="M160,55 C240,55 280,85 280,120 C280,155 235,185 160,185 C85,185 40,155 40,120 C40,85 80,55 160,55" />
-            <path class="glass-glint" d="M160,55 C240,55 280,85 280,120 C280,155 235,185 160,185 C85,185 40,155 40,120 C40,85 80,55 160,55" stroke-width="2" />
-            <ellipse cx="160" cy="55" rx="25" ry="3" />
-            <path d="M100,185 C95,205 110,210 120,205 C125,200 125,185 125,185" />
-            <path d="M200,185 C195,205 210,210 220,205 C225,200 225,185 225,185" />
-            <path d="M280,110 L295,110 M280,132 L295,132" />
-            <ellipse cx="295" cy="121" rx="4" ry="11" />
-            <path d="M235,70 C245,45 270,45 275,80 C260,85 240,80 235,70" />
-            <path d="M195,60 C205,35 225,40 230,65" />
-            <path d="M40,110 C15,100 10,75 30,75 C45,75 40,95 30,90" />
-            <path d="M100,90 Q160,70 220,100" stroke="white" stroke-opacity="0.1" stroke-width="4" />
+            <path d="M160,55 C240,55 280,85 280,120 C280,155 235,185 160,185 C85,185 40,155 40,120 C40,85 80,55 160,55" />
+            <rect x="145" y="52" width="30" height="4" rx="2" fill="rgba(255,255,255,0.4)" />
+            <path d="M100,185 L95,205 M220,185 L225,205" stroke-linecap="round" stroke-width="3" />
+            <circle cx="285" cy="120" r="8" stroke-width="1" />
         </svg>
     </div>
 
+    <div id="diff-tag" style="font-size: 10px; color: #444; margin-top: 10px; letter-spacing: 2px;">LEVEL: EASY</div>
     <div class="score" id="total-val">0</div>
-    <div class="q-text" id="question"></div>
+    <div class="q-text" id="question">Выберите сложность:</div>
 
-    <div id="bet-screen">
-        <div class="btn-group">
-            <button class="btn" onclick="startStage(10)">10</button>
-            <button class="btn" onclick="startStage(25)">25</button>
-            <button class="btn" onclick="startStage(50)">50</button>
+    <div id="diff-screen" class="btn-group">
+        <div class="row">
+            <button class="btn" onclick="initGame('easy')">EASY</button>
+            <button class="btn" onclick="initGame('hard')">HARD</button>
+        </div>
+    </div>
+
+    <div id="bet-screen" class="hidden">
+        <div class="row">
+            <button class="btn" onclick="askQuestion(10)">10</button>
+            <button class="btn" onclick="askQuestion(25)">25</button>
+            <button class="btn" onclick="askQuestion(50)">50</button>
         </div>
     </div>
 
@@ -139,110 +124,141 @@
 
     <div id="res-screen" class="hidden">
         <div id="res-msg" class="feedback"></div>
-        <button class="btn" id="next-btn" onclick="nextQuestion()"></button>
+        <button class="btn" id="next-btn" onclick="showBetScreen()"></button>
     </div>
 </div>
 
 <script>
-    let totalScore = 0;
+    let score = 0;
+    let difficulty = 'easy';
     let currentBet = 0;
-    let qIdx = 0;
     let curLang = 'ru';
-    const MAX_POINTS = 500;
+    let qIdx = 0;
+    const MAX_SCORE = 500;
 
-    const i18n = {
-        ru: { nextBtn: "ДАЛЕЕ", correct: "ВЕРНО!", wrong: "ОШИБКА!", questions: [{q: "Emil ... gefrühstückt.", a:["hat","ist"], c:0}, {q:"Wir ... im Kino.", a:["haben","sind"], c:1}] },
-        en: { nextBtn: "NEXT", correct: "CORRECT!", wrong: "WRONG!", questions: [{q: "Emil ... had breakfast.", a:["hat","ist"], c:0}, {q:"We ... at the cinema.", a:["haben","sind"], c:1}] },
-        de: { nextBtn: "WEITER", correct: "RICHTIG!", wrong: "FALSCH!", questions: [{q: "Emil ... gefrühstückt.", a:["hat","ist"], c:0}, {q:"Wir ... im Kino.", a:["haben","sind"], c:1}] }
+    // --- ЗВУКОВОЙ ДВИЖОК ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playTone(freq, type, duration, vol) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function soundWin() {
+        playTone(880, 'sine', 0.1, 0.2); // Первый дзынь
+        setTimeout(() => playTone(1320, 'sine', 0.2, 0.1), 100); // Второй дзынь выше
+    }
+
+    function soundLoss() {
+        playTone(150, 'sawtooth', 0.3, 0.1); // Низкий звук ошибки
+    }
+
+    // --- ЛОГИКА ИГРЫ ---
+    const data = {
+        ru: { next: "ДАЛЕЕ", win: "ЗОЛОТО ДОБАВЛЕНО!", loss: "УТЕЧКА ПЕСКА...", easy: [{q:"Ich ... (haben) ein Haus.", a:["habe","hast"], c:0}], hard: [{q:"Если бы я был богат...", a:["Wäre ich","Ich bin"], c:0}] },
+        en: { next: "NEXT", win: "GOLD ADDED!", loss: "SAND LEAK...", easy: [{q:"I ... (have) a car.", a:["have","has"], c:0}], hard: [{q:"If I were you...", a:["Wäre ich","I am"], c:0}] },
+        de: { next: "WEITER", win: "GOLD HINZUGEFÜGT!", loss: "SANDVERLUST...", easy: [{q:"Ich ... (haben) Zeit.", a:["habe","hast"], c:0}], hard: [{q:"Wäre ich reich...", a:["Wäre ich","Ich bin"], c:0}] }
     };
 
-    function createConfetti(amount) {
-        for(let i=0; i<amount; i++) {
-            const c = document.createElement('div');
-            c.className = 'confetti';
-            document.body.appendChild(c);
-            
-            const startX = window.innerWidth / 2;
-            const startY = window.innerHeight / 2 - 50;
-            const angle = Math.random() * Math.PI * 2;
-            const velocity = 5 + Math.random() * 10;
-            const tx = Math.cos(angle) * velocity * 20;
-            const ty = Math.sin(angle) * velocity * 20;
-
-            c.style.left = startX + 'px';
-            c.style.top = startY + 'px';
-            c.style.background = `hsl(${45 + Math.random()*15}, 100%, ${50 + Math.random()*20}%)`;
-
-            const anim = c.animate([
-                { transform: 'translate(0,0) rotate(0)', opacity: 1 },
-                { transform: `translate(${tx}px, ${ty}px) rotate(${Math.random()*720}deg)`, opacity: 0 }
-            ], { duration: 1000 + Math.random()*1000, easing: 'cubic-bezier(0, .5, .5, 1)' });
-
-            anim.onfinish = () => c.remove();
-        }
+    function initGame(d) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        difficulty = d;
+        document.getElementById('diff-tag').innerText = `LEVEL: ${d.toUpperCase()}`;
+        document.getElementById('diff-screen').classList.add('hidden');
+        showBetScreen();
     }
 
-    function setLang(lang, btn) {
-        curLang = lang;
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        updateUI();
+    function showBetScreen() {
+        document.getElementById('res-screen').classList.add('hidden');
+        document.getElementById('bet-screen').classList.remove('hidden');
+        document.getElementById('question').innerText = (curLang === 'ru' ? "Выберите ставку:" : "Choose bet:");
     }
 
-    function startStage(val) {
-        currentBet = val;
+    function askQuestion(bet) {
+        currentBet = bet;
         document.getElementById('bet-screen').classList.add('hidden');
+        const q = data[curLang][difficulty][qIdx];
+        document.getElementById('question').innerText = q.q;
         const list = document.getElementById('ans-list');
         list.innerHTML = '';
-        i18n[curLang].questions[qIdx].a.forEach((text, i) => {
-            list.innerHTML += `<button class="btn btn-ans" onclick="finishStage(${i})">${text}</button>`;
+        q.a.forEach((txt, i) => {
+            list.innerHTML += `<button class="btn btn-ans" onclick="checkAnswer(${i})">${txt}</button>`;
         });
         document.getElementById('ans-screen').classList.remove('hidden');
     }
 
-    function finishStage(idx) {
-        const isWin = idx === i18n[curLang].questions[qIdx].c;
-        const msg = document.getElementById('res-msg');
-        const pig = document.getElementById('pig-box');
-
-        if(isWin) { 
-            totalScore += currentBet; 
-            msg.innerText = i18n[curLang].correct; 
-            msg.style.color = "#4caf50";
-            pig.classList.add('shake');
-            setTimeout(() => pig.classList.remove('shake'), 400);
-            createConfetti(totalScore >= MAX_POINTS ? 100 : 20);
-        } else { 
-            totalScore = Math.max(0, totalScore - currentBet); 
-            msg.innerText = i18n[curLang].wrong; 
-            msg.style.color = "#ff5252"; 
-        }
-        
-        updateSand();
-        document.getElementById('total-val').innerText = totalScore;
+    function checkAnswer(idx) {
+        const isCorrect = idx === data[curLang][difficulty][qIdx].c;
         document.getElementById('ans-screen').classList.add('hidden');
+        
+        if(isCorrect) {
+            score += currentBet;
+            soundWin();
+            dropSandEffect();
+            document.getElementById('res-msg').style.color = "var(--gold)";
+        } else {
+            score = Math.max(0, score - currentBet);
+            soundLoss();
+            leakSandEffect();
+            document.getElementById('res-msg').style.color = "var(--error-red)";
+        }
+
+        document.getElementById('total-val').innerText = score;
+        document.getElementById('res-msg').innerText = isCorrect ? data[curLang].win : data[curLang].loss;
+        document.getElementById('next-btn').innerText = data[curLang].next;
         document.getElementById('res-screen').classList.remove('hidden');
+        updateSandLevel();
     }
 
-    function updateUI() {
-        document.getElementById('question').innerText = i18n[curLang].questions[qIdx].q;
-        document.getElementById('next-btn').innerText = i18n[curLang].nextBtn;
-        document.getElementById('total-val').innerText = totalScore;
-        updateSand();
+    function dropSandEffect() {
+        const container = document.getElementById('pig-box');
+        for(let i=0; i<15; i++) {
+            setTimeout(() => {
+                const grain = document.createElement('div');
+                grain.className = 'falling-grain';
+                grain.style.left = (145 + Math.random() * 20) + 'px';
+                grain.style.top = '52px';
+                container.appendChild(grain);
+                grain.animate([
+                    { transform: 'translateY(0)', opacity: 1 },
+                    { transform: `translate(${Math.random()*30-15}px, 100px)`, opacity: 0 }
+                ], { duration: 1000 }).onfinish = () => grain.remove();
+            }, i * 40);
+        }
     }
 
-    function updateSand() {
-        let h = Math.min(60, (totalScore / MAX_POINTS) * 60);
+    function leakSandEffect() {
+        document.getElementById('pig-box').classList.add('shake');
+        setTimeout(() => document.getElementById('pig-box').classList.remove('shake'), 400);
+        const container = document.getElementById('pig-box');
+        for(let i=0; i<10; i++) {
+            const grain = document.createElement('div');
+            grain.className = 'leak-grain';
+            grain.style.left = (80 + Math.random() * 140) + 'px';
+            grain.style.top = '185px';
+            container.appendChild(grain);
+            grain.animate([{ opacity: 1 }, { transform: 'translateY(40px)', opacity: 0 }], 600).onfinish = () => grain.remove();
+        }
+    }
+
+    function updateSandLevel() {
+        const h = Math.min(60, (score / MAX_SCORE) * 60);
         document.getElementById('sand').style.height = h + '%';
     }
 
-    function nextQuestion() {
-        qIdx = (qIdx + 1) % i18n[curLang].questions.length;
-        document.getElementById('res-screen').classList.add('hidden');
-        document.getElementById('bet-screen').classList.remove('hidden');
-        updateUI();
+    function setLang(l, btn) {
+        curLang = l;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
     }
-    updateUI();
 </script>
 </body>
 </html>
