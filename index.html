@@ -7,8 +7,7 @@
             --gold: #f9e076;
             --gold-deep: #bf953f;
             --error-red: #ff5252;
-            --glass-line: rgba(255, 255, 255, 0.3);
-            --glass-shine: rgba(255, 255, 255, 0.5);
+            --glass-stroke: rgba(255, 255, 255, 0.25);
         }
         body { background: #0a0a0a; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
 
@@ -18,31 +17,56 @@
             position: relative;
         }
 
-        /* --- СТИЛИ БЕЗ ИЗМЕНЕНИЙ --- */
         .lang-switch { position: absolute; top: 25px; right: 35px; display: flex; gap: 8px; z-index: 20; }
-        .lang-btn { background: #1a1a1a; border: 1px solid #333; color: #555; font-size: 10px; padding: 4px 10px; cursor: pointer; border-radius: 6px; transition: 0.3s; }
+        .lang-btn {
+            background: #1a1a1a; border: 1px solid #333; color: #555;
+            font-size: 10px; padding: 4px 10px; cursor: pointer; border-radius: 6px; transition: 0.3s;
+        }
         .lang-btn.active { border-color: var(--gold); color: var(--gold); background: #221e0a; }
-        .pig-container { position: relative; width: 320px; height: 240px; margin: 0 auto; }
-        .pig-svg { width: 100%; height: 100%; transition: 0.5s; overflow: visible; }
+
+        .pig-container { position: relative; width: 300px; height: 220px; margin: 0 auto; }
+        .pig-svg { width: 100%; height: 100%; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); overflow: visible; }
         
         #sand-rect { 
             transition: y 1.5s ease-in-out, height 1.5s ease-in-out;
-            filter: url(#sand-texture); 
+            filter: url(#shimmer);
         }
+
+        /* Анимация блика */
+        @keyframes flash {
+            0% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.1)); opacity: 0.3; }
+            50% { filter: drop-shadow(0 0 25px rgba(255,255,255,0.8)); opacity: 1; }
+            100% { filter: drop-shadow(0 0 5px rgba(255,255,255,0.1)); opacity: 0.3; }
+        }
+        .glass-glint { animation: flash 0.6s ease-out; }
 
         .falling-grain { position: absolute; width: 4px; height: 4px; background: #ffe680; border-radius: 50%; z-index: 10; pointer-events: none; }
         .leak-grain { position: absolute; width: 3px; height: 3px; background: #555; border-radius: 50%; z-index: 10; pointer-events: none; }
+        .confetti { position: absolute; width: 8px; height: 8px; z-index: 100; pointer-events: none; border-radius: 2px; }
+
         .score { font-size: 58px; color: var(--gold); font-weight: bold; margin: 10px 0; text-shadow: 0 0 20px rgba(249, 224, 118, 0.2); }
         .q-text { min-height: 80px; font-size: 18px; color: #ddd; margin: 15px 0; line-height: 1.4; display: flex; align-items: center; justify-content: center; }
+        
         .btn-group { display: flex; flex-direction: column; gap: 10px; align-items: center; }
         .row { display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap; }
-        .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 12px 24px; border-radius: 14px; cursor: pointer; font-weight: bold; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .btn {
+            background: transparent; border: 1px solid var(--gold); color: var(--gold);
+            padding: 12px 24px; border-radius: 14px; cursor: pointer; font-weight: bold; transition: 0.2s;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
         .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(249, 224, 118, 0.4); }
         .btn-ans { border-color: #333; color: #fff; width: 45%; font-size: 12px; padding: 10px; }
+
         .feedback { font-size: 14px; font-weight: bold; margin-bottom: 10px; min-height: 20px; }
         .hidden { display: none; }
+        
         .shake { animation: shake 0.4s; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
     </style>
 </head>
 <body>
@@ -58,58 +82,44 @@
         <svg class="pig-svg" id="main-pig" viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <mask id="pig-mask">
-                    <ellipse cx="170" cy="115" rx="105" ry="75" fill="white" />
+                    <path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="white" />
                 </mask>
-
+                
                 <linearGradient id="gold-grad" x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%" stop-color="#7a5200" />
-                    <stop offset="25%" stop-color="#bf953f" />
-                    <stop offset="50%" stop-color="#f9e076" />
-                    <stop offset="75%" stop-color="#fcf6ba" />
-                    <stop offset="100%" stop-color="#d4af37" />
+                    <stop offset="0%" stop-color="#bf953f" />
+                    <stop offset="30%" stop-color="#f9e076" />
+                    <stop offset="60%" stop-color="#fcf6ba" />
+                    <stop offset="100%" stop-color="#b38728" />
                 </linearGradient>
 
-                <filter id="sand-texture">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" result="noise" />
+                <filter id="shimmer">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" result="noise" />
+                    <feColorMatrix type="matrix" values="1 0 0 0 0.9  0 1 0 0 0.7  0 0 1 0 0.2  0 0 0 1 0" />
                     <feComposite operator="in" in2="SourceGraphic" />
-                    <feBlend in="SourceGraphic" in2="noise" mode="multiply" />
-                </filter>
-
-                <filter id="glass-effect">
-                    <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blur" />
-                    <feSpecularLighting in="blur" surfaceScale="5" specularConstant="1.2" specularExponent="30" lighting-color="#ffffff" result="spec">
-                        <fePointLight x="100" y="60" z="100" />
-                    </feSpecularLighting>
-                    <feComposite in="spec" in2="SourceAlpha" operator="in" />
                 </filter>
             </defs>
 
-            <ellipse cx="172" cy="117" rx="105" ry="75" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
-
             <g mask="url(#pig-mask)">
-                <rect id="sand-rect" x="50" y="190" width="240" height="0" fill="url(#gold-grad)" />
-                <rect id="sand-top-glow" x="50" y="190" width="240" height="3" fill="rgba(255,255,255,0.3)" style="transition: y 1.5s; opacity: 0.5;" />
+                <rect id="sand-rect" x="50" y="190" width="250" height="0" fill="url(#gold-grad)" />
             </g>
 
-            <g id="body-group">
-                <rect x="110" y="185" width="18" height="25" rx="8" fill="rgba(255,255,255,0.05)" stroke="var(--glass-line)" />
-                <rect x="215" y="185" width="18" height="25" rx="8" fill="rgba(255,255,255,0.05)" stroke="var(--glass-line)" />
-                
-                <path d="M65,115 L50,115" stroke="var(--glass-line)" stroke-width="2" fill="none" />
-                <ellipse cx="50" cy="115" rx="5" ry="12" fill="rgba(255,255,255,0.05)" stroke="var(--glass-line)" />
+            <path id="pig-outline" d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" 
+                  fill="none" stroke="var(--glass-stroke)" stroke-width="1.5" />
 
-                <path d="M110,60 Q100,20 135,45" fill="none" stroke="var(--glass-line)" stroke-width="2" />
-                <path d="M190,45 Q210,15 210,55" fill="none" stroke="var(--glass-line)" stroke-width="2" />
+            <path id="snout" d="M60,100 L45,100 C42,100 40,103 40,110 C40,117 42,120 45,120 L60,120" fill="none" stroke="var(--glass-stroke)" stroke-width="1.5" />
+            <ellipse cx="40" cy="110" rx="3" ry="10" fill="none" stroke="var(--glass-stroke)" stroke-width="1" />
 
-                <ellipse id="pig-outline" cx="170" cy="115" rx="105" ry="75" fill="none" stroke="var(--glass-line)" stroke-width="2" filter="url(#glass-effect)" />
+            <path d="M105,62 L100,40 L125,52" fill="none" stroke="var(--glass-stroke)" stroke-width="1.5" stroke-linejoin="round" />
+            <path d="M165,52 L175,35 L185,50" fill="none" stroke="var(--glass-stroke)" stroke-width="1.5" stroke-linejoin="round" />
 
-                <path d="M275,110 C300,90 310,130 285,130" fill="none" stroke="var(--glass-line)" stroke-width="1.5" />
+            <path d="M290,125 C310,120 315,140 305,145 C295,150 290,135 300,130 C305,128 310,132 308,138" fill="none" stroke="var(--glass-stroke)" stroke-width="1.2" />
 
-                <ellipse cx="170" cy="65" rx="55" ry="8" fill="rgba(255,255,255,0.15)" filter="blur(4px)" />
-                <path d="M250,90 Q270,115 250,150" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="3" filter="blur(2px)" />
-            </g>
+            <path d="M110,190 C110,210 90,210 90,190" fill="none" stroke="var(--glass-stroke)" stroke-width="2" stroke-linecap="round" />
+            <path d="M140,195 C140,215 120,215 120,195" fill="none" stroke="var(--glass-stroke)" stroke-width="2" stroke-linecap="round" />
+            <path d="M220,195 C220,215 200,215 200,195" fill="none" stroke="var(--glass-stroke)" stroke-width="2" stroke-linecap="round" />
+            <path d="M250,185 C250,205 230,205 230,185" fill="none" stroke="var(--glass-stroke)" stroke-width="2" stroke-linecap="round" />
 
-            <rect x="150" y="42" width="40" height="4" rx="2" fill="rgba(0,0,0,0.4)" stroke="var(--glass-line)" />
+            <ellipse cx="170" cy="50" rx="20" ry="3" fill="rgba(255,255,255,0.05)" stroke="var(--glass-stroke)" stroke-width="1" />
         </svg>
     </div>
 
@@ -118,21 +128,12 @@
     <div id="question-box">
         <div class="q-text" id="question">Выберите сложность:</div>
         <div id="diff-screen" class="btn-group">
-            <div class="row">
-                <button class="btn" onclick="initGame('easy')">EASY</button>
-                <button class="btn" onclick="initGame('hard')">HARD</button>
-            </div>
+            <div class="row"><button class="btn" onclick="initGame('easy')">EASY</button><button class="btn" onclick="initGame('hard')">HARD</button></div>
         </div>
         <div id="bet-screen" class="hidden">
-            <div class="row">
-                <button class="btn" onclick="askQuestion(10)">10</button>
-                <button class="btn" onclick="askQuestion(25)">25</button>
-                <button class="btn" onclick="askQuestion(50)">50</button>
-            </div>
+            <div class="row"><button class="btn" onclick="askQuestion(10)">10</button><button class="btn" onclick="askQuestion(25)">25</button><button class="btn" onclick="askQuestion(50)">50</button></div>
         </div>
-        <div id="ans-screen" class="hidden">
-            <div class="row" id="ans-list"></div>
-        </div>
+        <div id="ans-screen" class="hidden"><div class="row" id="ans-list"></div></div>
         <div id="res-screen" class="hidden">
             <div id="res-msg" class="feedback"></div>
             <button class="btn" id="next-btn" onclick="nextAction()"></button>
@@ -142,11 +143,11 @@
 </div>
 
 <script>
-    /* Логика оставлена полностью идентичной вашему коду */
+    // Весь JS-код сохранен и дополнен эффектами сияния
     let score = 0, difficulty = 'easy', currentBet = 0, curLang = 'ru', qIdx = 0, isGameOver = false;
     const MAX_SCORE = 500, PIG_BOTTOM = 190;
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
+
     function playTone(freq, type, duration, vol) {
         const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
         osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
@@ -157,82 +158,61 @@
     }
 
     const data = {
-        ru: { 
-            next: "ДАЛЕЕ", win: "ВЕРНО!", loss: "УТЕЧКА ПЕСКА...", finish: "ЗОЛОТОЕ ИЗОБИЛИЕ!",
-            easy: [
-                {q:"Ich ... (haben) ein Haus.", a:["habe","hast","hat","haben"], c:0},
-                {q:"Du ... (sein) schön.", a:["bist","ist","sind","bin"], c:0},
-                {q:"Wir ... (gehen) nach Hause.", a:["gehen","gehst","geht","gegangen"], c:0}
-            ],
-            hard: [
-                {q:"Если бы я был богат (Konjunktiv II)...", a:["Wäre ich reich","Ich bin reich","Ich war reich"], c:0},
-                {q:"Я бы пошел (würde-form)...", a:["Ich würde gehen","Ich werde gehen","Ich gehe"], c:0}
-            ]
+        ru: { next: "ДАЛЕЕ", win: "ВЕРНО!", loss: "УТЕЧКА ПЕСКА...", finish: "ЗОЛОТОЕ ИЗОБИЛИЕ!",
+            easy: [{q:"Ich ... (haben) ein Haus.", a:["habe","hast","hat","haben"], c:0},{q:"Du ... (sein) schön.", a:["bist","ist","sind","bin"], c:0},{q:"Wir ... (gehen) nach Hause.", a:["gehen","gehst","geht","gegangen"], c:0},{q:"Er ... (essen) Apfel.", a:["isst","essen","esst","esse"], c:0},{q:"Sie ... (trinken) Wasser.", a:["trinkt","trinken","trinkst","getrunken"], c:0}],
+            hard: [{q:"Если бы я был богат (Konjunktiv II)...", a:["Wäre ich reich","Ich bin reich","Ich war reich","Würde я reich"], c:0},{q:"Я бы пошел (würde-form)...", a:["Ich würde gehen","Ich werde gehen","Ich bin gegangen","Ich gehe"], c:0},{q:"Несмотря на дождь...", a:["Trotz des Regens","Wegen dem Regen","Bei dem Regen","Trotz dem Regen"], c:0},{q:"Я жду тебя (Präposition)...", a:["Ich warте auf dich","Ich warte für dich","Ich warте dich","Ich warте an dich"], c:0},{q:"Она сказала, что придет...", a:["..., dass sie kommt","..., weil sie kommt","..., ob она kommt","..., когда sie kommt"], c:0}]
         },
-        en: { next: "NEXT", win: "CORRECT!", loss: "SAND LEAK...", finish: "GOLDEN VICTORY!", easy: [{q:"I ... (be) a student.", a:["am","is","are"], c:0}], hard: [{q:"If I ... you...", a:["were","was","am"], c:0}] },
-        de: { next: "WEITER", win: "RICHTIG!", loss: "SANDVERLUST...", finish: "GOLDENER SIEG!", easy: [{q:"Ich ... Deutsch.", a:["lerne","lernt","lernst"], c:0}], hard: [{q:"Je mehr, ... besser.", a:["desto","als","wie"], c:0}] }
+        en: { next: "NEXT", win: "CORRECT!", loss: "SAND LEAK...", finish: "GOLDEN VICTORY!",
+            easy: [{q:"I ... (be) a student.", a:["am","is","are","be"], c:0},{q:"They ... (play) football.", a:["play","plays","playing","played"], c:0},{q:"She ... (like) pizza.", a:["likes","like","liking","liked"], c:0},{q:"We ... (go) to school.", a:["go","goes","going","gone"], c:0},{q:"He ... (have) a dog.", a:["has","have","having","had"], c:0}],
+            hard: [{q:"If I ... you, I would go.", a:["were","was","am","be"], c:0},{q:"She ... here for 5 years.", a:["has been","is","was","has being"], c:0},{q:"By tomorrow, I ... it.", a:["will have done","will do","did","have done"], c:0},{q:"I look forward to ... you.", a:["seeing","see","to see","seen"], c:0},{q:"Hardly ... when it rain.", a:["had I left","I left","I have left","did I leave"], c:0}]
+        },
+        de: { next: "WEITER", win: "RICHTIG!", loss: "SANDVERLUST...", finish: "GOLDENER SIEG!",
+            easy: [{q:"Ich ... (lernen) Deutsch.", a:["lerne","lernst","lernt","lernen"], c:0},{q:"Das ... (sein) gut.", a:["ist","sind","bin","seid"], c:0},{q:"Mein Vater ... (arbeiten).", a:["arbeitet","arbeiten","arbeitest","gearbeitet"], c:0},{q:"Das Wetter ... (sein) kalt.", a:["ist","sind","war","wäre"], c:0},{q:"Wo ... (wohnen) du?", a:["wohnst","wohnen","wohnt","wohnte"], c:0}],
+            hard: [{q:"Nachdem er ... (essen), ging er.", a:["gegessen hatte","aß","essen","hat gegessen"], c:0},{q:"Das Haus, ... ich wohne.", a:["in dem","das","welches","worin"], c:0},{q:"Statt ... (helfen), schlief er.", a:["zu helfen","hilft","helfen","geholfen"], c:0},{q:"Je mehr, ... besser.", a:["desto","als","wie","umso"], c:0},{q:"Er tut so, als ... er reich.", a:["wäre","ist","sei","war"], c:0}]
+        }
     };
 
-    function initGame(d) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        difficulty = d; qIdx = 0;
-        document.getElementById('diff-tag').innerText = `LEVEL: ${d.toUpperCase()}`;
-        document.getElementById('diff-screen').classList.add('hidden');
-        showBetScreen();
-    }
-
-    function showBetScreen() {
-        if(isGameOver) return;
-        document.getElementById('res-screen').classList.add('hidden');
-        document.getElementById('bet-screen').classList.remove('hidden');
-        document.getElementById('question').innerText = (curLang === 'ru' ? "Выберите ставку:" : "Choose bet:");
-    }
-
-    function askQuestion(bet) {
-        currentBet = bet; document.getElementById('bet-screen').classList.add('hidden');
-        const q = data[curLang][difficulty][qIdx] || data[curLang][difficulty][0];
-        document.getElementById('question').innerText = q.q;
-        const list = document.getElementById('ans-list'); list.innerHTML = '';
-        q.a.forEach((txt, i) => { list.innerHTML += `<button class="btn btn-ans" onclick="checkAnswer(${i})">${txt}</button>`; });
-        document.getElementById('ans-screen').classList.remove('hidden');
-    }
+    function initGame(d) { if (audioCtx.state === 'suspended') audioCtx.resume(); difficulty = d; qIdx = 0; document.getElementById('diff-tag').innerText = `LEVEL: ${d.toUpperCase()}`; document.getElementById('diff-screen').classList.add('hidden'); showBetScreen(); }
+    function showBetScreen() { if(isGameOver) return; document.getElementById('res-screen').classList.add('hidden'); document.getElementById('bet-screen').classList.remove('hidden'); document.getElementById('question').innerText = (curLang === 'ru' ? "Выберите ставку:" : "Choose bet:"); }
+    function askQuestion(bet) { currentBet = bet; document.getElementById('bet-screen').classList.add('hidden'); const q = data[curLang][difficulty][qIdx]; document.getElementById('question').innerText = q.q; const list = document.getElementById('ans-list'); list.innerHTML = ''; q.a.forEach((txt, i) => { list.innerHTML += `<button class="btn btn-ans" onclick="checkAnswer(${i})">${txt}</button>`; }); document.getElementById('ans-screen').classList.remove('hidden'); }
 
     function checkAnswer(idx) {
-        const isCorrect = idx === (data[curLang][difficulty][qIdx] || data[curLang][difficulty][0]).c;
+        const isCorrect = idx === data[curLang][difficulty][qIdx].c;
         document.getElementById('ans-screen').classList.add('hidden');
         if(isCorrect) {
             score += currentBet;
-            playTone(880, 'sine', 0.1, 0.2);
+            playTone(880, 'sine', 0.1, 0.2); setTimeout(() => playTone(1320, 'sine', 0.2, 0.1), 100);
             dropSandEffect();
+            triggerGlint(); // Эффект стекла
+            document.getElementById('res-msg').style.color = "var(--gold)";
         } else {
             score = Math.max(0, score - currentBet);
             playTone(150, 'sawtooth', 0.3, 0.1);
             leakSandEffect();
+            document.getElementById('res-msg').style.color = "var(--error-red)";
         }
         document.getElementById('total-val').innerText = score;
         document.getElementById('res-msg').innerText = isCorrect ? data[curLang].win : data[curLang].loss;
-        document.getElementById('res-msg').style.color = isCorrect ? "var(--gold)" : "var(--error-red)";
         document.getElementById('next-btn').innerText = data[curLang].next;
         document.getElementById('res-screen').classList.remove('hidden');
         updateSandLevel();
     }
 
-    function nextAction() {
-        qIdx++;
-        if (qIdx >= data[curLang][difficulty].length) qIdx = 0;
-        showBetScreen();
+    function triggerGlint() {
+        const pig = document.getElementById('main-pig');
+        pig.classList.add('glass-glint');
+        setTimeout(() => pig.classList.remove('glass-glint'), 600);
     }
 
+    function nextAction() { qIdx++; if (qIdx >= data[curLang][difficulty].length) { qIdx = 0; showBetScreen(); } else { showBetScreen(); } }
     function dropSandEffect() {
         const container = document.getElementById('pig-box');
         for(let i=0; i<15; i++) {
             setTimeout(() => {
-                const grain = document.createElement('div');
-                grain.className = 'falling-grain';
-                grain.style.left = (155 + Math.random() * 30) + 'px';
-                grain.style.top = '50px';
+                const grain = document.createElement('div'); grain.className = 'falling-grain';
+                grain.style.left = (160 + Math.random() * 20) + 'px'; grain.style.top = '50px';
                 container.appendChild(grain);
-                grain.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: `translate(${Math.random()*40-20}px, 120px)`, opacity: 0 }], { duration: 1200 }).onfinish = () => grain.remove();
+                grain.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: `translate(${Math.random()*40-20}px, 100px)`, opacity: 0 }], { duration: 1000 }).onfinish = () => grain.remove();
             }, i * 40);
         }
     }
@@ -240,38 +220,42 @@
     function leakSandEffect() {
         document.getElementById('pig-box').classList.add('shake');
         setTimeout(() => document.getElementById('pig-box').classList.remove('shake'), 400);
+        const container = document.getElementById('pig-box');
+        for(let i=0; i<10; i++) {
+            const grain = document.createElement('div'); grain.className = 'leak-grain';
+            grain.style.left = (120 + Math.random() * 80) + 'px'; grain.style.top = '190px';
+            container.appendChild(grain);
+            grain.animate([{ opacity: 1 }, { transform: 'translateY(50px)', opacity: 0 }], 600).onfinish = () => grain.remove();
+        }
     }
 
     function updateSandLevel() {
         const sand = document.getElementById('sand-rect');
-        const sGlow = document.getElementById('sand-top-glow');
         const fillHeight = Math.min(140, (score / MAX_SCORE) * 140);
-        
         sand.setAttribute('y', PIG_BOTTOM - fillHeight);
         sand.setAttribute('height', fillHeight);
-        sGlow.setAttribute('y', PIG_BOTTOM - fillHeight);
-        sGlow.style.opacity = score > 0 ? "0.6" : "0";
-
-        document.getElementById('pig-outline').style.stroke = `rgba(249, 224, 118, ${0.3 + (score/MAX_SCORE * 0.4)})`;
-        document.getElementById('main-pig').style.filter = `drop-shadow(0 0 ${score/40}px rgba(249, 224, 118, 0.3))`;
-
+        document.getElementById('pig-outline').style.stroke = `rgba(255, 255, 255, ${0.25 + (score/MAX_SCORE * 0.5)})`;
+        document.getElementById('main-pig').style.filter = `drop-shadow(0 0 ${score/20}px rgba(249, 224, 118, 0.4))`;
         if (score >= MAX_SCORE) finishGame();
     }
 
     function finishGame() {
         isGameOver = true;
+        playTone(523.25, 'sine', 0.2, 0.2); setTimeout(() => playTone(659.25, 'sine', 0.2, 0.2), 150); setTimeout(() => playTone(783.99, 'sine', 0.4, 0.3), 300);
+        for(let i=0; i<60; i++) {
+            const c = document.createElement('div'); c.className = 'confetti';
+            c.style.left = Math.random() * 100 + '%'; c.style.top = '-10px';
+            c.style.backgroundColor = ['#f9e076', '#bf953f', '#fff', '#aa771c'][Math.floor(Math.random()*4)];
+            document.body.appendChild(c);
+            c.animate([{ transform: 'translateY(0) rotate(0deg)', opacity: 1 }, { transform: `translate(${Math.random()*300-150}px, 110vh) rotate(${Math.random()*720}deg)`, opacity: 0 }], { duration: 3000 + Math.random()*2000 }).onfinish = () => c.remove();
+        }
         document.getElementById('next-btn').classList.add('hidden');
         document.getElementById('restart-btn').classList.remove('hidden');
         document.getElementById('res-msg').innerText = data[curLang].finish;
         document.getElementById('question').innerText = "🏆";
     }
 
-    function setLang(l, btn) {
-        curLang = l;
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        if(!isGameOver) document.getElementById('next-btn').innerText = data[curLang].next;
-    }
+    function setLang(l, btn) { curLang = l; document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); if(!isGameOver) { document.getElementById('next-btn').innerText = data[curLang].next; } }
 </script>
 </body>
 </html>
