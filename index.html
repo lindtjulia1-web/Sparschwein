@@ -17,14 +17,19 @@
         .sidebar-content label { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; margin-top: 8px; }
         .sidebar-content input, .sidebar-content select { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 12px; margin-top: 5px; box-sizing: border-box; outline: none; }
         
+        /* Стили для чекбоксов */
+        .check-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; cursor: pointer; }
+        .check-row input { width: auto; margin: 0; cursor: pointer; }
+        .check-row span { font-size: 11px; color: #eee; }
+
         .btn { background: #3d3d45; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 15px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
         .btn-main { background: #ffb347; color: #000; margin-top: 20px; } 
         .btn-main:hover { background: #ffa02e; }
         .btn-code { background: #77dd77; color: #000; margin-top: 8px; } 
 
         .preview { flex: 1; background: #0c0c0e; display: flex; align-items: center; justify-content: center; }
-        #device-wrapper { border: 1px solid #333; background: #000; position: relative; overflow: hidden; border-radius: 30px; transition: 0.3s; }
-        iframe { width: 100%; height: 100%; border: none; }
+        #device-wrapper { border: 1px solid #333; background: #000; position: relative; overflow: hidden; border-radius: 30px; transition: 0.3s; background-size: cover; background-position: center; }
+        iframe { width: 100%; height: 100%; border: none; background: transparent; }
         
         #code-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; }
         textarea { width: 80%; height: 50%; background: #111; color: var(--accent); padding: 20px; border: 1px solid var(--accent); border-radius: 20px; font-family: monospace; }
@@ -57,15 +62,29 @@
             <div><label>Цвет тени</label><input type="color" id="shadowColor" value="#f9e076"></div>
         </div>
 
-        <h2>Шрифт</h2>
+        <h2>Оформление и Шрифты</h2>
+        <label>Фон (URL картинки)</label>
+        <input type="text" id="bg-url" placeholder="https://..." onchange="updatePreview()">
+        
+        <label>Шрифт</label>
         <select id="fontFamily" onchange="updatePreview()">
             <option value="'ABeeZee', sans-serif">ABeeZee</option>
-            <option value="'Actor', sans-serif">Actor</option>
-            <option value="'Acme', sans-serif">Acme</option>
             <option value="'Montserrat', sans-serif">Montserrat</option>
+            <option value="'Acme', sans-serif">Acme</option>
         </select>
+        
         <label>Размер шрифта (px)</label>
         <input type="range" id="fontSize" min="12" max="32" value="20" oninput="updatePreview()">
+
+        <h2>Алгоритмы</h2>
+        <label class="check-row">
+            <input type="checkbox" id="randomOrder"> 
+            <span>Рандомный порядок вопросов</span>
+        </label>
+        <label class="check-row">
+            <input type="checkbox" id="autoFillWrongs" checked> 
+            <span>Брать ложные ответы из других вопросов</span>
+        </label>
 
         <h2>Размер виджета</h2>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -73,25 +92,23 @@
             <input type="number" id="height" value="600" onchange="updatePreview()">
         </div>
 
-        <h2>Цвета кнопок</h2>
-        <div class="color-grid">
-            <div><label>Цвет</label><input type="color" id="btnColor" value="#f9e076"></div>
-            <div><label>Прозрачность</label><input type="range" id="btnAlpha" min="0" max="1" step="0.1" value="0.1"></div>
-        </div>
-
         <h2>Вопросы</h2>
         <div id="q-container"></div>
         <button class="btn" onclick="addQ()">+ ДОБАВИТЬ ВОПРОС</button>
 
         <h2>Настройки</h2>
-        <label>Цель (баллов)</label>
-        <input type="number" id="goal" value="500">
-        <label>Язык</label>
-        <select id="lang">
-            <option value="ru">Русский</option>
-            <option value="en">English</option>
-            <option value="de">Deutsch</option>
-        </select>
+        <div class="color-grid">
+            <div><label>Цвет кнопок</label><input type="color" id="btnColor" value="#f9e076"></div>
+            <div><label>Язык</label>
+                <select id="lang">
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                    <option value="de">Deutsch</option>
+                </select>
+            </div>
+        </div>
+        <label>Прозрачность кнопок</label>
+        <input type="range" id="btnAlpha" min="0" max="1" step="0.1" value="0.1">
     </div>
     <div style="padding: 20px; border-top: 1px solid var(--border);">
         <button class="btn btn-main" onclick="updatePreview()">ОБНОВИТЬ ПРЕВЬЮ</button>
@@ -132,15 +149,44 @@ function hexToRgba(hex, alpha) {
 }
 
 function buildInnerGame() {
-    const qs = [];
+    const rawQs = [];
+    const allCorrectAnswers = [];
+    
     document.querySelectorAll('.sidebar-content .card').forEach(card => {
         const q = card.querySelector('.inp-q').value;
         const correct = card.querySelector('.inp-correct').value.trim();
-        const wrongList = card.querySelector('.inp-wrong').value.split(',').map(s => s.trim()).filter(s => s !== "");
-        if(q && correct) qs.push({ q: q, a: [correct, ...wrongList] });
+        const wrongText = card.querySelector('.inp-wrong').value;
+        const wrongs = wrongText.split(',').map(s => s.trim()).filter(s => s !== "");
+        
+        if(q && correct) {
+            rawQs.push({ q, correct, wrongs });
+            allCorrectAnswers.push(correct);
+        }
     });
+
+    // Применяем логику автозаполнения ложных ответов
+    const autoFill = document.getElementById('autoFillWrongs').checked;
+    const finalQs = rawQs.map(item => {
+        let answers = [item.correct];
+        let currentWrongs = [...item.wrongs];
+        
+        if(autoFill && currentWrongs.length === 0) {
+            // Берем 2 случайных правильных ответа из других вопросов
+            let others = allCorrectAnswers.filter(a => a !== item.correct);
+            others.sort(() => Math.random() - 0.5);
+            currentWrongs = others.slice(0, 2);
+        }
+        
+        return { q: item.q, a: [item.correct, ...currentWrongs] };
+    });
+
+    // Рандомный порядок вопросов
+    if(document.getElementById('randomOrder').checked) {
+        finalQs.sort(() => Math.random() - 0.5);
+    }
     
     const cfg = { 
+        bg: document.getElementById('bg-url').value,
         startTitle: document.getElementById('start-title').value,
         startBtn: document.getElementById('start-btn-text').value,
         endText: document.getElementById('end-text').value,
@@ -148,13 +194,12 @@ function buildInnerGame() {
         borderWidth: document.getElementById('borderWidth').value,
         shadowColor: document.getElementById('shadowColor').value,
         shadowBlur: document.getElementById('shadowBlur').value,
-        goal: parseInt(document.getElementById('goal').value), 
         lang: document.getElementById('lang').value,
         font: document.getElementById('fontFamily').value,
         fontSize: document.getElementById('fontSize').value,
         btnColor: document.getElementById('btnColor').value,
         btnRgba: hexToRgba(document.getElementById('btnColor').value, document.getElementById('btnAlpha').value),
-        data: qs 
+        data: finalQs 
     };
 
     const fontName = cfg.font.split(',')[0].replace(/'/g, '');
@@ -164,12 +209,13 @@ function buildInnerGame() {
     <link href="${gFont}" rel="stylesheet">
     <style>
         body { margin:0; height:100vh; overflow:hidden; font-family:${cfg.font}; background:#000; color:#fff; display: flex; align-items: center; justify-content: center; }
+        .bg-layer { position:fixed; inset:0; background: url('${cfg.bg}') center/cover no-repeat; opacity:0.5; z-index:-1; }
         #game-root { 
             width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; 
             border: ${cfg.borderWidth}px solid ${cfg.borderColor};
             box-shadow: inset 0 0 ${cfg.shadowBlur}px ${cfg.shadowColor}, 0 0 ${cfg.shadowBlur}px ${cfg.shadowColor};
         }
-        .score { font-size: 44px; color: ${cfg.btnColor}; font-weight: 800; text-align: center; margin-bottom: 5px; }
+        .score { font-size: 44px; color: ${cfg.btnColor}; font-weight: 800; text-align: center; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
         #pile-container { flex: 1; position: relative; border-bottom: 2px solid ${cfg.btnRgba}; overflow: hidden; }
         .coin { position: absolute; font-size: 26px; pointer-events: none; }
         .label-sm { font-size: ${cfg.fontSize}px; text-align: center; margin: 15px 0; text-transform: uppercase; min-height: 1.2em; display:flex; align-items:center; justify-content:center; }
@@ -178,13 +224,14 @@ function buildInnerGame() {
             border: 1.5px solid ${cfg.btnColor}; background: ${cfg.btnRgba}; color: ${cfg.btnColor}; 
             padding: 14px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; transition: 0.2s;
         }
-        .btn-ans:hover, .btn-stake:hover, .btn-start:hover { background: ${hexToRgba(cfg.btnColor, 0.4)}; }
-        .screen { position: absolute; inset: 20px; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 100; background: #000; }
+        .btn-ans:hover, .btn-stake:hover, .btn-start:hover { background: ${hexToRgba(cfg.btnColor, 0.4)}; transform: scale(1.02); }
+        .screen { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 100; background: rgba(0,0,0,0.8); }
         .active { display: flex; }
     </style></head><body>
+    <div class="bg-layer"></div>
     <div id="game-root">
         <div id="start-screen" class="screen active">
-            <h1 style="margin-bottom:30px">${cfg.startTitle}</h1>
+            <h1 style="margin: 0 20px 30px">${cfg.startTitle}</h1>
             <button class="btn-start" style="width:200px" onclick="startGame()">${cfg.startBtn}</button>
         </div>
         <div id="game-content" style="flex:1; display:none; flex-direction:column">
@@ -268,17 +315,13 @@ function buildInnerGame() {
 
 function updatePreview() {
     const dev = document.getElementById('device-wrapper');
-    const width = document.getElementById('width').value;
-    const height = document.getElementById('height').value;
-    const bColor = document.getElementById('borderColor').value;
-    const bWidth = document.getElementById('borderWidth').value;
-    const sBlur = document.getElementById('shadowBlur').value;
-    const sColor = document.getElementById('shadowColor').value;
+    const bgUrl = document.getElementById('bg-url').value;
     
-    dev.style.width = width + "px";
-    dev.style.height = height + "px";
-    dev.style.border = `${bWidth}px solid ${bColor}`;
-    dev.style.boxShadow = `0 0 ${sBlur}px ${sColor}`;
+    dev.style.width = document.getElementById('width').value + "px";
+    dev.style.height = document.getElementById('height').value + "px";
+    dev.style.border = `${document.getElementById('borderWidth').value}px solid ${document.getElementById('borderColor').value}`;
+    dev.style.boxShadow = `0 0 ${document.getElementById('shadowBlur').value}px ${document.getElementById('shadowColor').value}`;
+    dev.style.backgroundImage = bgUrl ? `url('${bgUrl}')` : 'none';
     
     document.getElementById('ifr').srcdoc = buildInnerGame();
 }
@@ -291,6 +334,7 @@ function getGeniallyCode() {
 
 window.onload = () => { 
     addQ("Сколько золотых в сундуке?", "100", ["50", "200"]); 
+    addQ("Кто украл сокровища?", "Пират", []); 
     updatePreview(); 
 };
 </script>
