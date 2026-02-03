@@ -6,60 +6,57 @@
         :root {
             --gold: #f9e076;
             --gold-gradient: linear-gradient(to top, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            --glass-stroke: rgba(255, 255, 255, 0.3);
         }
-        body { background: transparent; margin: 0; font-family: 'Segoe UI', sans-serif; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        body { background: #0f0f0f; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
 
         .game-card {
-            width: 360px; background: #111; border-radius: 35px; padding: 25px;
-            text-align: center; border: 1px solid #333; box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            width: 380px; background: #141414; border-radius: 45px; padding: 30px;
+            text-align: center; border: 1px solid #222; box-shadow: 0 40px 100px rgba(0,0,0,0.8);
             position: relative;
         }
 
-        /* Выбор языка */
-        .lang-switch { position: absolute; top: 20px; right: 25px; display: flex; gap: 5px; }
+        .lang-switch { position: absolute; top: 25px; right: 35px; display: flex; gap: 8px; z-index: 5; }
         .lang-btn {
-            background: #222; border: 1px solid #444; color: #666;
-            font-size: 10px; padding: 5px 8px; cursor: pointer; border-radius: 6px;
+            background: #1a1a1a; border: 1px solid #333; color: #555;
+            font-size: 10px; padding: 4px 10px; cursor: pointer; border-radius: 6px; transition: 0.3s;
         }
-        .lang-btn.active { border-color: var(--gold); color: var(--gold); }
+        .lang-btn.active { border-color: var(--gold); color: var(--gold); background: #2a2510; }
 
-        /* Контейнер свинки */
-        .pig-area {
-            position: relative; width: 240px; height: 180px; margin: 10px auto;
+        .pig-container {
+            position: relative; width: 300px; height: 220px; margin: 0 auto;
         }
 
-        /* Маска для песка (обновленный путь формы) */
+        /* Маска песка точно по контуру «фасолины» */
         .sand-mask {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            clip-path: path('M110,30 C160,30 200,60 200,100 C200,140 160,170 110,170 C60,170 20,140 20,100 C20,60 60,30 110,30 M200,85 L225,85 L225,115 L200,115 Z');
+            clip-path: path('M150,50 C230,50 270,80 270,120 C270,160 220,190 150,190 C80,190 30,160 30,120 C30,80 70,50 150,50 Z');
             z-index: 1;
         }
 
         .sand-fill {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
-            background: var(--gold-gradient); transition: height 1s ease-in-out;
+            position: absolute; bottom: 30px; left: 0; width: 100%; height: 0%;
+            background: var(--gold-gradient); transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Внешний стеклянный контур с улучшенными деталями */
-        .pig-glass {
+        .pig-svg {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 2; fill: none; stroke: rgba(255,255,255,0.4); stroke-width: 2;
-            filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));
-            pointer-events: none;
+            z-index: 2; fill: none; stroke: var(--glass-stroke); stroke-width: 1.5;
+            filter: drop-shadow(0 0 2px rgba(255,255,255,0.1));
         }
 
-        .score { font-size: 42px; color: var(--gold); font-weight: bold; margin-top: -10px; text-shadow: 0 0 10px rgba(249, 224, 118, 0.4); }
-        .q-text { min-height: 55px; font-size: 19px; margin: 15px 0; color: #fff; }
+        .score { font-size: 54px; color: var(--gold); font-weight: bold; margin: 10px 0 0; text-shadow: 0 0 20px rgba(249, 224, 118, 0.3); }
+        .q-text { min-height: 50px; font-size: 18px; margin: 10px 0 20px; color: #bbb; }
         
         .btn-group { display: flex; justify-content: center; gap: 12px; }
         .btn {
-            background: #1a1a1a; border: 1.5px solid var(--gold); color: var(--gold);
-            padding: 12px 24px; border-radius: 14px; cursor: pointer; font-weight: bold; transition: 0.2s;
+            background: #1a1a1a; border: 1px solid var(--gold); color: var(--gold);
+            padding: 12px 25px; border-radius: 16px; cursor: pointer; font-weight: bold; transition: 0.2s;
         }
-        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 15px var(--gold); }
-        .btn-ans { border-color: #fff; color: #fff; }
+        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(249, 224, 118, 0.4); }
+        .btn-ans { border-color: #555; color: #fff; }
 
-        .feedback { font-size: 15px; font-weight: bold; margin: 10px 0; min-height: 22px; }
+        .feedback { font-size: 14px; font-weight: bold; margin-bottom: 10px; min-height: 20px; letter-spacing: 1px; }
         .hidden { display: none; }
     </style>
 </head>
@@ -72,15 +69,25 @@
         <button class="lang-btn" onclick="setLang('de', this)">DE</button>
     </div>
 
-    <div class="pig-area">
+    <div class="pig-container">
         <div class="sand-mask"><div id="sand" class="sand-fill"></div></div>
-        <svg class="pig-glass" viewBox="0 0 240 180">
-            <path d="M110,30 C165,30 205,65 205,100 C205,135 165,170 110,170 C55,170 15,135 15,100 C15,65 55,30 110,30" stroke-opacity="0.6" />
-            <path d="M205,85 C215,85 225,90 225,100 C225,110 215,115 205,115" />
-            <path d="M140,35 L165,10 L185,45 M90,32 L75,12 L65,40" />
-            <path d="M60,168 C60,175 55,178 55,178 L75,178 M145,168 C145,175 150,178 150,178 L130,178" />
-            <path d="M18,90 C5,85 5,75 15,70" />
-            <circle cx="175" cy="80" r="2.5" fill="rgba(255,255,255,0.8)" />
+        <svg class="pig-svg" viewBox="0 0 320 220">
+            <path d="M160,50 C240,50 280,80 280,120 C280,160 230,190 160,190 C90,190 40,160 40,120 C40,80 80,50 160,50" />
+            
+            <path d="M140,50 Q160,45 180,50" stroke-width="2.5" />
+
+            <path d="M95,190 Q90,210 105,210 Q120,210 115,190" />
+            <path d="M205,190 Q200,210 215,210 Q230,210 225,190" />
+
+            <path d="M280,110 L295,110 M280,135 L295,135" />
+            <ellipse cx="295" cy="122.5" rx="4" ry="12.5" />
+
+            <path d="M230,65 C245,40 265,40 270,75 C255,75 235,75 230,65" />
+            <path d="M190,55 C200,35 215,35 220,60" />
+
+            <path d="M40,110 C20,105 15,85 30,80 C45,75 45,95 35,100" />
+
+            <path d="M80,80 Q160,65 230,90" stroke="white" stroke-opacity="0.2" stroke-width="3" />
         </svg>
     </div>
 
@@ -112,12 +119,9 @@
     let curLang = 'ru';
 
     const i18n = {
-        ru: { nextBtn: "ДАЛЕЕ", correct: "ВЕРНО!", wrong: "ОШИБКА!", 
-              questions: [{q: "Emil ... gefrühstückt.", a:["hat","ist"], c:0}, {q:"Wir ... im Kino.", a:["haben","sind"], c:1}] },
-        en: { nextBtn: "NEXT", correct: "CORRECT!", wrong: "WRONG!", 
-              questions: [{q: "Emil ... had breakfast.", a:["hat","ist"], c:0}, {q:"We ... at the cinema.", a:["haben","sind"], c:1}] },
-        de: { nextBtn: "WEITER", correct: "RICHTIG!", wrong: "FALSCH!", 
-              questions: [{q: "Emil ... gefrühstückt.", a:["hat","ist"], c:0}, {q:"Wir ... im Kino.", a:["haben","sind"], c:1}] }
+        ru: { nextBtn: "ДАЛЕЕ", correct: "ВЕРНО!", wrong: "ОШИБКА!", questions: [{q: "Emil ... gefrühstückt.", a:["hat","ist"], c:0}, {q:"Wir ... im Kino.", a:["haben","sind"], c:1}] },
+        en: { nextBtn: "NEXT", correct: "CORRECT!", wrong: "WRONG!", questions: [{q: "Emil ... had breakfast.", a:["hat","ist"], c:0}, {q:"We ... at the cinema.", a:["haben","sind"], c:1}] },
+        de: { nextBtn: "WEITER", correct: "RICHTIG!", wrong: "FALSCH!", questions: [{q: "Emil ... gefrühstückt.", a:["hat","ist"], c:0}, {q:"Wir ... im Kino.", a:["haben","sind"], c:1}] }
     };
 
     function setLang(lang, btn) {
@@ -157,8 +161,8 @@
     }
 
     function updateSand() {
-        // Увеличил лимит до 400 для плавного заполнения
-        let h = Math.min(85, (totalScore / 400) * 85);
+        // Максимальное наполнение — 400 очков
+        let h = Math.min(65, (totalScore / 400) * 65);
         document.getElementById('sand').style.height = h + '%';
     }
 
