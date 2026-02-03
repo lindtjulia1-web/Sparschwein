@@ -17,7 +17,6 @@
         .sidebar-content label { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; margin-top: 8px; }
         .sidebar-content input, .sidebar-content select { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 12px; margin-top: 5px; box-sizing: border-box; outline: none; }
         
-        /* Стили для чекбоксов */
         .check-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; cursor: pointer; }
         .check-row input { width: auto; margin: 0; cursor: pointer; }
         .check-row span { font-size: 11px; color: #eee; }
@@ -36,33 +35,43 @@
         
         .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         input[type="color"] { padding: 2px; height: 38px; cursor: pointer; border-radius: 10px; }
+
+        /* Анимация билборда для превью */
+        @keyframes billboard {
+            0% { filter: brightness(1) drop-shadow(0 0 2px var(--shad)); }
+            50% { filter: brightness(1.5) drop-shadow(0 0 15px var(--shad)); }
+            100% { filter: brightness(1) drop-shadow(0 0 2px var(--shad)); }
+        }
+        .anim-border { animation: billboard 2s infinite ease-in-out; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <div class="sidebar-content">
-        <h2>Запуск квиза</h2>
+        <h2>Запуск и Тексты</h2>
         <label>Заголовок при запуске</label>
         <input type="text" id="start-title" value="Готовы к игре?">
         <label>Текст кнопки запуска</label>
         <input type="text" id="start-btn-text" value="НАЧАТЬ">
+        <label>Цвет текста (вопросы/заголовки)</label>
+        <input type="color" id="textColor" value="#ffffff">
 
         <h2>Финальный фидбек</h2>
         <label>Текст после завершения</label>
         <input type="text" id="end-text" placeholder="Стандартный текст">
 
-        <h2>Рамка и эффекты</h2>
+        <h2>Эффекты билборда</h2>
         <div class="color-grid">
-            <div><label>Цвет рамки</label><input type="color" id="borderColor" value="#f9e076"></div>
-            <div><label>Толщина (px)</label><input type="number" id="borderWidth" value="0"></div>
+            <div><label>Цвет рамки</label><input type="color" id="borderColor" value="#f9e076" onchange="updatePreview()"></div>
+            <div><label>Толщина (px)</label><input type="number" id="borderWidth" value="4"></div>
         </div>
         <div class="color-grid">
-            <div><label>Тень (размытие)</label><input type="number" id="shadowBlur" value="0"></div>
-            <div><label>Цвет тени</label><input type="color" id="shadowColor" value="#f9e076"></div>
+            <div><label>Свечение</label><input type="number" id="shadowBlur" value="15"></div>
+            <div><label>Цвет свечения</label><input type="color" id="shadowColor" value="#f9e076"></div>
         </div>
 
-        <h2>Оформление и Шрифты</h2>
+        <h2>Оформление</h2>
         <label>Фон (URL картинки)</label>
         <input type="text" id="bg-url" placeholder="https://..." onchange="updatePreview()">
         
@@ -77,14 +86,8 @@
         <input type="range" id="fontSize" min="12" max="32" value="20" oninput="updatePreview()">
 
         <h2>Алгоритмы</h2>
-        <label class="check-row">
-            <input type="checkbox" id="randomOrder"> 
-            <span>Рандомный порядок вопросов</span>
-        </label>
-        <label class="check-row">
-            <input type="checkbox" id="autoFillWrongs" checked> 
-            <span>Брать ложные ответы из других вопросов</span>
-        </label>
+        <label class="check-row"><input type="checkbox" id="randomOrder"><span>Рандомный порядок вопросов</span></label>
+        <label class="check-row"><input type="checkbox" id="autoFillWrongs" checked><span>Авто-ложные ответы</span></label>
 
         <h2>Размер виджета</h2>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -96,19 +99,17 @@
         <div id="q-container"></div>
         <button class="btn" onclick="addQ()">+ ДОБАВИТЬ ВОПРОС</button>
 
-        <h2>Настройки</h2>
+        <h2>Кнопки</h2>
         <div class="color-grid">
             <div><label>Цвет кнопок</label><input type="color" id="btnColor" value="#f9e076"></div>
-            <div><label>Язык</label>
-                <select id="lang">
-                    <option value="ru">Русский</option>
-                    <option value="en">English</option>
-                    <option value="de">Deutsch</option>
-                </select>
-            </div>
+            <div><label>Прозрачность</label><input type="range" id="btnAlpha" min="0" max="1" step="0.1" value="0.1"></div>
         </div>
-        <label>Прозрачность кнопок</label>
-        <input type="range" id="btnAlpha" min="0" max="1" step="0.1" value="0.1">
+        <label>Язык</label>
+        <select id="lang">
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+        </select>
     </div>
     <div style="padding: 20px; border-top: 1px solid var(--border);">
         <button class="btn btn-main" onclick="updatePreview()">ОБНОВИТЬ ПРЕВЬЮ</button>
@@ -117,7 +118,7 @@
 </div>
 
 <div class="preview">
-    <div id="device-wrapper"><iframe id="ifr"></iframe></div>
+    <div id="device-wrapper" class="anim-border"><iframe id="ifr"></iframe></div>
 </div>
 
 <div id="code-modal">
@@ -135,7 +136,7 @@ function addQ(qText = "", correct = "", wrongs = ["", ""]) {
         <label>Вопрос</label><input type="text" class="inp-q" value="${qText}">
         <label style="color:var(--green)">✓ Верный ответ</label>
         <input type="text" class="inp-correct" value="${correct}">
-        <label style="color:var(--red)">× Ложные (через запятую)</label>
+        <label style="color:var(--red)">× Ложные</label>
         <input type="text" class="inp-wrong" value="${wrongs.join(', ')}">
     `;
     document.getElementById('q-container').appendChild(div);
@@ -151,45 +152,31 @@ function hexToRgba(hex, alpha) {
 function buildInnerGame() {
     const rawQs = [];
     const allCorrectAnswers = [];
-    
     document.querySelectorAll('.sidebar-content .card').forEach(card => {
         const q = card.querySelector('.inp-q').value;
         const correct = card.querySelector('.inp-correct').value.trim();
-        const wrongText = card.querySelector('.inp-wrong').value;
-        const wrongs = wrongText.split(',').map(s => s.trim()).filter(s => s !== "");
-        
-        if(q && correct) {
-            rawQs.push({ q, correct, wrongs });
-            allCorrectAnswers.push(correct);
-        }
+        const wrongs = card.querySelector('.inp-wrong').value.split(',').map(s => s.trim()).filter(s => s !== "");
+        if(q && correct) { rawQs.push({ q, correct, wrongs }); allCorrectAnswers.push(correct); }
     });
 
-    // Применяем логику автозаполнения ложных ответов
     const autoFill = document.getElementById('autoFillWrongs').checked;
     const finalQs = rawQs.map(item => {
-        let answers = [item.correct];
         let currentWrongs = [...item.wrongs];
-        
         if(autoFill && currentWrongs.length === 0) {
-            // Берем 2 случайных правильных ответа из других вопросов
-            let others = allCorrectAnswers.filter(a => a !== item.correct);
-            others.sort(() => Math.random() - 0.5);
+            let others = allCorrectAnswers.filter(a => a !== item.correct).sort(() => Math.random() - 0.5);
             currentWrongs = others.slice(0, 2);
         }
-        
         return { q: item.q, a: [item.correct, ...currentWrongs] };
     });
 
-    // Рандомный порядок вопросов
-    if(document.getElementById('randomOrder').checked) {
-        finalQs.sort(() => Math.random() - 0.5);
-    }
+    if(document.getElementById('randomOrder').checked) finalQs.sort(() => Math.random() - 0.5);
     
     const cfg = { 
         bg: document.getElementById('bg-url').value,
         startTitle: document.getElementById('start-title').value,
         startBtn: document.getElementById('start-btn-text').value,
         endText: document.getElementById('end-text').value,
+        textColor: document.getElementById('textColor').value,
         borderColor: document.getElementById('borderColor').value,
         borderWidth: document.getElementById('borderWidth').value,
         shadowColor: document.getElementById('shadowColor').value,
@@ -208,14 +195,19 @@ function buildInnerGame() {
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
     <link href="${gFont}" rel="stylesheet">
     <style>
-        body { margin:0; height:100vh; overflow:hidden; font-family:${cfg.font}; background:#000; color:#fff; display: flex; align-items: center; justify-content: center; }
+        @keyframes shine {
+            0% { border-color: ${cfg.borderColor}; box-shadow: 0 0 ${cfg.shadowBlur}px ${cfg.shadowColor}; }
+            50% { border-color: #fff; box-shadow: 0 0 ${parseInt(cfg.shadowBlur)+10}px #fff, inset 0 0 10px ${cfg.shadowColor}; }
+            100% { border-color: ${cfg.borderColor}; box-shadow: 0 0 ${cfg.shadowBlur}px ${cfg.shadowColor}; }
+        }
+        body { margin:0; height:100vh; overflow:hidden; font-family:${cfg.font}; background:#000; color:${cfg.textColor}; display: flex; align-items: center; justify-content: center; }
         .bg-layer { position:fixed; inset:0; background: url('${cfg.bg}') center/cover no-repeat; opacity:0.5; z-index:-1; }
         #game-root { 
             width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; 
             border: ${cfg.borderWidth}px solid ${cfg.borderColor};
-            box-shadow: inset 0 0 ${cfg.shadowBlur}px ${cfg.shadowColor}, 0 0 ${cfg.shadowBlur}px ${cfg.shadowColor};
+            animation: shine 3s infinite ease-in-out;
         }
-        .score { font-size: 44px; color: ${cfg.btnColor}; font-weight: 800; text-align: center; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .score { font-size: 44px; color: ${cfg.btnColor}; font-weight: 800; text-align: center; margin-bottom: 5px; }
         #pile-container { flex: 1; position: relative; border-bottom: 2px solid ${cfg.btnRgba}; overflow: hidden; }
         .coin { position: absolute; font-size: 26px; pointer-events: none; }
         .label-sm { font-size: ${cfg.fontSize}px; text-align: center; margin: 15px 0; text-transform: uppercase; min-height: 1.2em; display:flex; align-items:center; justify-content:center; }
@@ -224,7 +216,7 @@ function buildInnerGame() {
             border: 1.5px solid ${cfg.btnColor}; background: ${cfg.btnRgba}; color: ${cfg.btnColor}; 
             padding: 14px; border-radius: 20px; cursor: pointer; font-family: inherit; font-weight: bold; transition: 0.2s;
         }
-        .btn-ans:hover, .btn-stake:hover, .btn-start:hover { background: ${hexToRgba(cfg.btnColor, 0.4)}; transform: scale(1.02); }
+        .btn-ans:hover { background: ${hexToRgba(cfg.btnColor, 0.4)}; transform: scale(1.02); }
         .screen { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 100; background: rgba(0,0,0,0.8); }
         .active { display: flex; }
     </style></head><body>
@@ -244,23 +236,17 @@ function buildInnerGame() {
     <script>
     const cfg = JSON.parse(decodeURIComponent("${encodeURIComponent(JSON.stringify(cfg))}"));
     let score=0, qi=0, currentStake=0;
-    const dict = {
-        ru: { stake: 'Выберите ставку', finish: 'Отличная работа!' },
-        en: { stake: 'Choose your stake', finish: 'Great Job!' },
-        de: { stake: 'Wähle deinen Einsatz', finish: 'Gut gemacht!' }
-    }[cfg.lang];
+    const dict = { ru: { stake: 'Ставка', finish: 'Конец!' }, en: { stake: 'Stake', finish: 'Finish!' }, de: { stake: 'Einsatz', finish: 'Ende!' } }[cfg.lang];
 
     function startGame() {
         document.getElementById('start-screen').classList.remove('active');
         document.getElementById('game-content').style.display = 'flex';
         showStakes();
     }
-
     function showFinish() {
         document.getElementById('ui-label').innerText = cfg.endText || dict.finish;
         document.getElementById('ctrl').innerHTML = '';
     }
-
     function showStakes() {
         if(qi >= cfg.data.length) { showFinish(); return; }
         document.getElementById('ui-label').innerText = dict.stake;
@@ -274,7 +260,6 @@ function buildInnerGame() {
             c.appendChild(b);
         });
     }
-
     function showQuestion() {
         document.getElementById('ui-label').innerText = cfg.data[qi].q;
         const c = document.getElementById('ctrl');
@@ -297,7 +282,6 @@ function buildInnerGame() {
             c.appendChild(b);
         });
     }
-
     function dropCoins(count) {
         const container = document.getElementById('pile-container');
         for(let i=0; i<count; i++) {
@@ -315,14 +299,12 @@ function buildInnerGame() {
 
 function updatePreview() {
     const dev = document.getElementById('device-wrapper');
-    const bgUrl = document.getElementById('bg-url').value;
-    
+    const sCol = document.getElementById('shadowColor').value;
+    dev.style.setProperty('--shad', sCol);
     dev.style.width = document.getElementById('width').value + "px";
     dev.style.height = document.getElementById('height').value + "px";
     dev.style.border = `${document.getElementById('borderWidth').value}px solid ${document.getElementById('borderColor').value}`;
-    dev.style.boxShadow = `0 0 ${document.getElementById('shadowBlur').value}px ${document.getElementById('shadowColor').value}`;
-    dev.style.backgroundImage = bgUrl ? `url('${bgUrl}')` : 'none';
-    
+    dev.style.backgroundImage = document.getElementById('bg-url').value ? `url('${document.getElementById('bg-url').value}')` : 'none';
     document.getElementById('ifr').srcdoc = buildInnerGame();
 }
 
@@ -334,7 +316,6 @@ function getGeniallyCode() {
 
 window.onload = () => { 
     addQ("Сколько золотых в сундуке?", "100", ["50", "200"]); 
-    addQ("Кто украл сокровища?", "Пират", []); 
     updatePreview(); 
 };
 </script>
