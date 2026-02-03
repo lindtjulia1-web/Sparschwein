@@ -2,64 +2,66 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>KGB Gold Pile Editor</title>
+    <title>KGB Dynamic Pile Editor Pro</title>
     <style>
-        :root { --accent: #f9e076; --bg: #0e0e10; --panel: #18181b; --border: #2d2d33; --green: #4caf50; --red: #f44336; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        :root { --accent: #f9e076; --bg: #1e1e24; --panel: #2a2a32; --border: #3d3d45; --green: #4caf50; --red: #f44336; }
+        body { font-family: 'Segoe UI', sans-serif; background: #000; color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        .sidebar { width: 360px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
-        .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
-        h2 { color: var(--accent); font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        /* Стили редактора */
+        .sidebar { width: 380px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 25px; }
+        h2 { color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; margin: 25px 0 15px; border-left: 3px solid var(--accent); padding-left: 10px; }
         
-        .size-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .card { background: #222; border: 1px solid #333; padding: 15px; border-radius: 10px; margin-bottom: 10px; position: relative; }
-        .del-btn { position: absolute; top: 8px; right: 8px; color: #ff4444; font-size: 18px; cursor: pointer; }
+        .card { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 18px; border-radius: 15px; margin-bottom: 15px; position: relative; }
+        .del-btn { position: absolute; top: 10px; right: 10px; color: var(--red); cursor: pointer; font-size: 12px; font-weight: bold; text-transform: uppercase; }
         
-        label { display: block; font-size: 10px; color: #888; text-transform: uppercase; margin-top: 8px; font-weight: bold; }
-        input, select { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 6px; margin-top: 4px; box-sizing: border-box; outline: none; }
+        label { display: block; font-size: 11px; color: #aaa; text-transform: uppercase; margin-top: 10px; }
+        input, select { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 8px; margin-top: 5px; box-sizing: border-box; outline: none; transition: 0.2s; font-family: inherit; }
         
-        .inp-correct { border-color: var(--green); background: rgba(76, 175, 80, 0.1); }
-        .inp-wrong { border-color: var(--red); background: rgba(244, 67, 54, 0.1); }
+        .inp-correct { border-left: 4px solid var(--green) !important; }
+        .inp-wrong { border-left: 4px solid var(--red) !important; }
 
-        .btn { background: #333; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .btn-main { background: var(--accent); color: #000; margin-top: 20px; text-transform: uppercase; }
+        .btn { background: #3d3d45; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+        .btn-main { background: var(--accent); color: #000; margin-top: 20px; }
+        .btn-code { background: #00d4ff; color: #000; }
 
-        .preview { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
-        #device-wrapper { border: 2px dashed #444; background: #111; transition: 0.3s; position: relative; }
-        iframe { width: 100%; height: 100%; border: none; display: block; }
+        .preview { flex: 1; background: #0c0c0e; display: flex; align-items: center; justify-content: center; position: relative; }
+        #device-wrapper { border: 1px solid #333; background: #000; position: relative; overflow: hidden; }
+        iframe { width: 100%; height: 100%; border: none; }
         
-        #code-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; }
-        textarea { width: 85%; height: 400px; background: #111; color: var(--accent); padding: 20px; border: 1px solid var(--accent); border-radius: 12px; font-family: monospace; font-size: 11px; }
+        #code-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; }
+        textarea { width: 80%; height: 50%; background: #111; color: var(--accent); padding: 20px; border: 1px solid var(--accent); border-radius: 15px; font-family: monospace; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <div class="sidebar-content">
-        <h2>Стиль текста</h2>
-        <label>Шрифт</label>
+        <h2 style="margin-top:0">Стиль текста</h2>
+        <label>Выберите шрифт</label>
         <select id="fontFamily">
-            <option value="'Segoe UI', sans-serif">Standard (Sans)</option>
-            <option value="'Georgia', serif">Classic (Serif)</option>
-            <option value="'Courier New', monospace">Retro (Mono)</option>
-            <option value="'Impact', sans-serif">Bold (Impact)</option>
-            <option value="'Comic Sans MS', cursive">Casual</option>
+            <optgroup label="Стандартные">
+                <option value="'Segoe UI', sans-serif">Segoe UI (System)</option>
+                <option value="'Georgia', serif">Georgia (Serif)</option>
+            </optgroup>
+            <optgroup label="Загруженные">
+                <option value="'ABeeZee', sans-serif">ABeeZee</option>
+                <option value="'Abel', sans-serif">Abel</option>
+                <option value="'Abhaya Libre', serif">Abhaya Libre</option>
+                <option value="'Abril Fatface', display">Abril Fatface</option>
+                <option value="'Aclonica', sans-serif">Aclonica</option>
+                <option value="'Acme', sans-serif">Acme</option>
+                <option value="'Actor', sans-serif">Actor</option>
+            </optgroup>
         </select>
 
-        <h2>Размер окна</h2>
-        <div class="size-grid">
-            <div><label>Ширина</label><input type="number" id="width" value="400" oninput="resizePreview()"></div>
-            <div><label>Высота</label><input type="number" id="height" value="600" oninput="resizePreview()"></div>
+        <h2>Размеры виджета</h2>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <input type="number" id="width" value="400" placeholder="Ширина">
+            <input type="number" id="height" value="600" placeholder="Высота">
         </div>
 
-        <label>Язык</label>
-        <select id="lang">
-            <option value="ru">Русский</option>
-            <option value="en">English</option>
-            <option value="de">Deutsch</option>
-        </select>
-
-        <label style="display:flex; align-items:center; gap:10px; margin-top:10px; font-size:12px;">
+        <label style="display:flex; align-items:center; gap:10px; margin-top:15px; cursor:pointer">
             <input type="checkbox" id="isPirate" style="width:auto"> 🏴‍☠️ Пиратские монеты
         </label>
 
@@ -72,10 +74,17 @@
         
         <label>Фон (URL)</label>
         <input type="text" id="bg-url" value="" placeholder="https://...">
+        
+        <label>Язык интерфейса</label>
+        <select id="lang">
+            <option value="ru">Русский</option>
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+        </select>
     </div>
-    <div style="padding: 20px; border-top: 1px solid #333;">
-        <button class="btn btn-main" onclick="updatePreview()">Обновить Превью</button>
-        <button class="btn" onclick="getGeniallyCode()" style="background:#00d4ff; color:#000">ПОЛУЧИТЬ КОД</button>
+    <div style="padding: 20px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.2);">
+        <button class="btn btn-main" onclick="updatePreview()">ОБНОВИТЬ ПРЕВЬЮ</button>
+        <button class="btn btn-code" onclick="getGeniallyCode()">ПОЛУЧИТЬ КОД</button>
     </div>
 </div>
 
@@ -84,27 +93,21 @@
 </div>
 
 <div id="code-modal">
-    <h3 style="color: #fff">Код для Genially:</h3>
+    <h3 style="color: #fff">Код для вставки:</h3>
     <textarea id="result-code" readonly onclick="this.select()"></textarea>
     <button class="btn" onclick="document.getElementById('code-modal').style.display='none'" style="width: 200px">Закрыть</button>
 </div>
 
 <script>
-function resizePreview() {
-    const dev = document.getElementById('device-wrapper');
-    dev.style.width = document.getElementById('width').value + "px";
-    dev.style.height = document.getElementById('height').value + "px";
-}
-
-function addQ(qText = "", correct = "", wrongs = ["", "", ""]) {
+function addQ(qText = "", correct = "", wrongs = ["", ""]) {
     const div = document.createElement('div');
     div.className = 'card';
     div.innerHTML = `
-        <span class="del-btn" onclick="this.parentElement.remove()">×</span>
+        <span class="del-btn" onclick="this.parentElement.remove()">× Удалить</span>
         <label>Вопрос</label><input type="text" class="inp-q" value="${qText}">
-        <label style="color:var(--green)">✓ Правильный</label>
+        <label style="color:var(--green)">Верный ответ</label>
         <input type="text" class="inp-correct" value="${correct}">
-        <label style="color:var(--red)">× Неправильные</label>
+        <label style="color:var(--red)">Ложные (через запятую)</label>
         <input type="text" class="inp-wrong" value="${wrongs.join(', ')}">
     `;
     document.getElementById('q-container').appendChild(div);
@@ -121,109 +124,122 @@ function buildInnerGame() {
     
     const cfg = { 
         bg: document.getElementById('bg-url').value, 
-        goal: document.getElementById('goal').value, 
+        goal: parseInt(document.getElementById('goal').value), 
         lang: document.getElementById('lang').value,
         pirate: document.getElementById('isPirate').checked,
         font: document.getElementById('fontFamily').value,
         data: qs 
     };
 
+    const fontName = cfg.font.split(',')[0].replace(/'/g, '');
+    const googleFontUrl = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}&display=swap`;
+
     return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="${googleFontUrl}" rel="stylesheet">
     <style>
-        :root{--gold:#f9e076;--gold-d:#bf953f}
+        :root{--gold:#f9e076;}
         body { margin:0; height:100vh; overflow:hidden; font-family:${cfg.font}; background:#000; color:#fff; display: flex; align-items: center; justify-content: center; }
-        .bg{position:fixed;inset:0;background:url('${cfg.bg}') center/cover;opacity:0.6;z-index:-1}
-        #game-root { width: 360px; height: 600px; position: relative; transform-origin: center center; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; box-sizing: border-box; }
-        .card { width: 100%; height: 100%; background: rgba(20,20,25,0.95); border-radius: 35px; padding: 25px; border: 1px solid #333; text-align: center; box-shadow: 0 20px 50px #000; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .bg{position:fixed;inset:0;background:url('${cfg.bg}') center/cover;opacity:0.5;z-index:-1}
+        #game-root { width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
+        .main-card { flex: 1; background: rgba(20,20,25,0.92); border-radius: 35px; padding: 25px; border: 1px solid #333; display: flex; flex-direction: column; position: relative; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
         
-        /* ГОРКА ЗОЛОТА */
-        .gold-area { flex: 1; position: relative; overflow: hidden; margin-bottom: 10px; display:flex; align-items:flex-end; justify-content:center; }
-        .pile-svg { width: 100%; height: 100px; transition: height 0.5s ease; fill: url(#goldGrad); }
+        .score { font-size: 50px; color: var(--gold); font-weight: 800; text-align: center; margin-bottom: 5px; text-shadow: 0 0 15px rgba(249,224,118,0.4); }
         
-        .score { font-size: 44px; color: var(--gold); font-weight: 800; margin: 10px 0; z-index: 5; }
-        .q-box { min-height: 80px; font-size: 20px; margin-bottom: 15px; z-index: 5; display: flex; align-items: center; justify-content: center; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; z-index: 5; }
-        .btn { border: 1px solid #444; background: #1a1a1a; color: #ccc; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: inherit; }
-        .btn-ans { width: 100%; border: 1px solid var(--gold); color: var(--gold); background: none; margin-bottom: 8px; font-size: 16px; }
-        .coin-drop { position: absolute; font-size: 24px; pointer-events: none; z-index: 10; }
+        #pile-container { flex: 1; position: relative; margin-bottom: 20px; border-bottom: 2px solid rgba(249,224,118,0.2); overflow: hidden; }
+        .static-coin { position: absolute; font-size: 22px; bottom: 0; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.6)); }
+        
+        .q-text { font-size: 20px; min-height: 70px; text-align: center; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; line-height: 1.4; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .btn-ans { border: 1px solid var(--gold); background: rgba(249,224,118,0.05); color: var(--gold); padding: 14px; border-radius: 12px; cursor: pointer; font-family: inherit; font-size: 16px; transition: 0.2s; }
+        .btn-ans:hover { background: rgba(249,224,118,0.15); transform: translateY(-2px); }
+        .coin-falling { position: absolute; font-size: 26px; pointer-events: none; z-index: 100; }
     </style></head><body>
     <div class="bg"></div>
     <div id="game-root">
-        <div class="card">
+        <div class="main-card">
             <div class="score" id="s">0</div>
-            <div class="gold-area" id="g-area">
-                <svg class="pile-svg" viewBox="0 0 300 100" preserveAspectRatio="none">
-                    <defs><linearGradient id="goldGrad" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#bf953f"/><stop offset="100%" stop-color="#f9e076"/></linearGradient></defs>
-                    <path id="gold-pile" d="M0,100 Q150,100 300,100 L300,100 L0,100 Z" />
-                </svg>
-            </div>
-            <div class="q-box" id="qt"></div>
+            <div id="pile-container"></div>
+            <div class="q-text" id="qt">Загрузка...</div>
             <div id="ctrl"></div>
         </div>
     </div>
     <script>
-    const cfg=JSON.parse(decodeURIComponent("${encodeURIComponent(JSON.stringify(cfg))}"));
-    let sc=0,qi=0,bt=0;
-    const txt = { ru: "ФИНИШ", en: "FINISH", de: "ENDE" };
-
-    function scaleGame() {
-        const scale = Math.min(window.innerWidth / 360, window.innerHeight / 600, 1.2);
-        document.getElementById('game-root').style.transform = \`scale(\${scale * 0.95})\`;
-    }
-    window.addEventListener('resize', scaleGame);
-    window.onload = () => { scaleGame(); init(); };
+    const cfg = JSON.parse(decodeURIComponent("${encodeURIComponent(JSON.stringify(cfg))}"));
+    let score=0, qi=0;
+    const emoji = cfg.pirate ? '☠️' : '🪙';
 
     function init(){
-        if(qi>=cfg.data.length){ document.getElementById('qt').innerText=txt[cfg.lang] || "FINISH"; return; }
-        document.getElementById('qt').innerText=cfg.data[qi].q;
-        const c=document.getElementById('ctrl');
-        c.innerHTML='<div class="grid"></div>';
-        [10,25,50,100].forEach(v=>{
-            const b=document.createElement('button'); b.className='btn'; b.style.color='var(--gold)'; b.innerText=v;
-            b.onclick=()=>{bt=v; showA();};
-            c.querySelector('.grid').appendChild(b);
-        })
-    };
-    function showA(){
-        const c=document.getElementById('ctrl'); c.innerHTML='';
-        [...cfg.data[qi].a].sort(()=>Math.random()-.5).forEach(o=>{
-            const b=document.createElement('button'); b.className='btn btn-ans'; b.innerText=o;
-            b.onclick=()=>{
-                if(o===cfg.data[qi].a[0]){ sc=Math.min(cfg.goal, sc+bt); dropCoins(); } 
-                else { sc=Math.max(0, sc-bt); clearPile(); }
-                upd(); qi++; setTimeout(init, 1000);
+        if(qi >= cfg.data.length){ 
+            document.getElementById('qt').innerText = (cfg.lang === 'ru' ? 'ФИНИШ' : (cfg.lang === 'de' ? 'ENDE' : 'FINISH')); 
+            document.getElementById('ctrl').innerHTML = '';
+            return; 
+        }
+        document.getElementById('qt').innerText = cfg.data[qi].q;
+        const c = document.getElementById('ctrl');
+        c.innerHTML = '<div class="grid"></div>';
+        [...cfg.data[qi].a].sort(() => Math.random() - 0.5).forEach(text => {
+            const b = document.createElement('button');
+            b.className = 'btn-ans';
+            b.innerText = text;
+            b.onclick = () => {
+                if(text === cfg.data[qi].a[0]) {
+                    score += 50;
+                    spawnCoins(8);
+                } else {
+                    score = Math.max(0, score - 50);
+                    shakePile();
+                }
+                document.getElementById('s').innerText = score;
+                qi++;
+                setTimeout(init, 800);
             };
-            c.appendChild(b);
-        })
-    };
-    function upd(){
-        document.getElementById('s').innerText=sc;
-        const pct = (sc/cfg.goal);
-        const h = pct * 100;
-        // Имитация роста горы золота
-        document.getElementById('gold-pile').setAttribute('d', \`M0,100 Q150,\${100-h*2} 300,100 L300,100 L0,100 Z\`);
+            c.querySelector('.grid').appendChild(b);
+        });
     }
-    function clearPile() {
-        if(sc === 0) document.getElementById('gold-pile').setAttribute('d', "M0,100 Q150,100 300,100 L300,100 L0,100 Z");
-    }
-    function dropCoins(){
-        const area = document.getElementById('g-area');
-        for(let i=0; i<8; i++){
-            const c = document.createElement('div');
-            c.className = 'coin-drop';
-            c.innerHTML = cfg.pirate ? '☠️' : '🪙';
-            c.style.left = (Math.random() * 80 + 10) + '%';
-            c.style.top = '-50px';
-            area.appendChild(c);
-            c.animate([{top:'-50px', opacity:1},{top:'80%', opacity:0}], {duration: 600 + Math.random()*400}).onfinish=()=>c.remove();
+
+    function spawnCoins(count) {
+        const container = document.getElementById('pile-container');
+        for(let i=0; i<count; i++) {
+            const startX = Math.random() * 90 + 5;
+            const coin = document.createElement('div');
+            coin.className = 'coin-falling';
+            coin.innerText = emoji;
+            coin.style.left = startX + '%';
+            coin.style.top = '-40px';
+            container.appendChild(coin);
+
+            coin.animate([
+                { top: '-40px', transform: 'rotate(0deg)' },
+                { top: (90 - (score/cfg.goal)*15) + '%', transform: 'rotate('+(Math.random()*360)+'deg)' }
+            ], { duration: 500 + Math.random()*500, easing: 'ease-in' }).onfinish = () => {
+                coin.remove();
+                const sc = document.createElement('div');
+                sc.className = 'static-coin';
+                sc.innerText = emoji;
+                sc.style.left = (startX - 2 + Math.random()*4) + '%';
+                sc.style.bottom = (Math.random() * (score/cfg.goal) * 80) + 'px';
+                container.appendChild(sc);
+            };
         }
     }
+
+    function shakePile() {
+        const container = document.getElementById('pile-container');
+        container.animate([{transform:'translateX(-4px)'},{transform:'translateX(4px)'},{transform:'none'}], {duration:100, iterations:4});
+        const coins = container.querySelectorAll('.static-coin');
+        for(let i=0; i<Math.min(coins.length, 10); i++) {
+            coins[Math.floor(Math.random()*coins.length)].remove();
+        }
+    }
+
+    window.onload = init;
     <\/script></body></html>`;
 }
 
 function updatePreview() {
-    resizePreview();
+    const dev = document.getElementById('device-wrapper');
+    dev.style.width = document.getElementById('width').value + "px";
+    dev.style.height = document.getElementById('height').value + "px";
     document.getElementById('ifr').srcdoc = buildInnerGame();
 }
 
@@ -233,7 +249,7 @@ function getGeniallyCode() {
     document.getElementById('code-modal').style.display = 'flex';
 }
 
-window.onload = () => { addQ("2 + 2 = ?", "4", ["3", "5", "22"]); updatePreview(); };
+window.onload = () => { addQ("2 + 2 = ?", "4", ["3", "5"]); updatePreview(); };
 </script>
 </body>
 </html>
