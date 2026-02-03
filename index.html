@@ -6,139 +6,173 @@
         :root {
             --gold: #f9e076;
             --gold-gradient: linear-gradient(to top, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-            --bg: #0b0b0d;
+            --bg: #111111;
         }
-        body { background: transparent; margin: 0; font-family: 'Segoe UI', sans-serif; color: white; display: flex; justify-content: center; }
-        
+
+        body {
+            background: transparent;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
         .game-card {
-            width: 360px; background: #16161a; border-radius: 28px; padding: 20px;
-            border: 1px solid #333; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            width: 360px;
+            background: #1a1a1a;
+            border-radius: 30px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid #333;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
         }
 
         /* Контейнер свинки */
-        .pig-box { position: relative; width: 220px; height: 160px; margin: 0 auto; }
-        
-        .sand-layer {
-            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            width: 145px; background: var(--gold-gradient);
-            transition: height 1s ease-in-out; border-radius: 0 0 50px 50px; z-index: 1;
+        .pig-box {
+            position: relative;
+            width: 220px;
+            height: 160px;
+            margin: 0 auto 10px;
         }
 
-        .pig-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://i.ibb.co/vz6mYmY/transparent-piggy.png') no-repeat center;
-            background-size: contain; z-index: 2; pointer-events: none; opacity: 0.8;
+        /* Золотой песок внутри */
+        .sand-container {
+            position: absolute;
+            bottom: 32px; /* Позиция дна свинки */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 0%;
+            background: var(--gold-gradient);
+            transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+            border-radius: 0 0 50px 50px;
+            overflow: hidden;
         }
 
-        /* Интерфейс */
-        .question-box { min-height: 60px; font-size: 18px; margin: 15px 0; color: #ddd; }
-        .score-val { font-size: 32px; color: var(--gold); font-weight: bold; margin-bottom: 10px; }
+        /* SVG-свинка (рисуем прямо здесь, чтобы не зависеть от ссылок) */
+        .pig-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            fill: none;
+            stroke: rgba(255,255,255,0.3);
+            stroke-width: 2;
+        }
+
+        /* Тексты и кнопки */
+        .q-text { min-height: 50px; font-size: 18px; margin: 15px 0; color: #eee; }
+        .score { font-size: 38px; color: var(--gold); font-weight: bold; margin-bottom: 5px; }
         
         .btn-group { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
         .btn {
-            background: #222; border: 1px solid var(--gold); color: var(--gold);
-            padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s;
+            background: #222; border: 1.5px solid var(--gold); color: var(--gold);
+            padding: 10px 22px; border-radius: 12px; cursor: pointer;
+            font-weight: bold; transition: 0.2s;
         }
         .btn:hover { background: var(--gold); color: #000; }
         .btn-ans { border-color: #fff; color: #fff; }
 
+        .feedback { font-size: 14px; font-weight: bold; margin: 10px 0; min-height: 20px; }
         .hidden { display: none; }
-        .feedback { font-weight: bold; margin-top: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
 
 <div class="game-card">
     <div class="pig-box">
-        <div id="sand" class="sand-layer" style="height: 0%"></div>
-        <div class="pig-overlay"></div>
+        <div id="sand" class="sand-container"></div>
+        <svg class="pig-svg" viewBox="0 0 200 150">
+            <path d="M100,20 C150,20 190,50 190,90 C190,130 150,145 100,145 C50,145 10,130 10,90 C10,50 50,20 100,20" />
+            <path d="M185,85 L200,85 M200,85 L200,105 L188,100" stroke-width="3"/> <circle cx="160" cy="70" r="2" fill="white"/> <path d="M15,80 Q5,70 15,60" /> </svg>
     </div>
 
-    <div class="score-val" id="total-score">0</div>
-    <div class="question-box" id="q-text">Задание появится здесь...</div>
+    <div class="score" id="total-val">0</div>
+    <div class="q-text" id="question">Emil ... um neun Uhr gefrühstückt.</div>
 
-    <div id="step-bet">
-        <p style="font-size: 12px; color: #777;">ВЫБЕРИТЕ СТАВКУ</p>
+    <div id="bet-screen">
+        <p style="font-size: 11px; color: #777; margin-bottom: 10px;">СДЕЛАЙТЕ СТАВКУ ПЕСКОМ</p>
         <div class="btn-group">
-            <button class="btn" onclick="makeBet(10)">10</button>
-            <button class="btn" onclick="makeBet(25)">25</button>
-            <button class="btn" onclick="makeBet(50)">50</button>
+            <button class="btn" onclick="startStage(10)">10</button>
+            <button class="btn" onclick="startStage(25)">25</button>
+            <button class="btn" onclick="startStage(50)">50</button>
         </div>
     </div>
 
-    <div id="step-ans" class="hidden">
-        <div class="btn-group" id="ans-container"></div>
+    <div id="ans-screen" class="hidden">
+        <div class="btn-group" id="ans-list"></div>
     </div>
 
-    <div id="step-result" class="hidden">
-        <div id="feedback-msg" class="feedback"></div>
-        <button class="btn" style="margin-top:15px;" onclick="nextQuestion()">ДАЛЕЕ</button>
+    <div id="res-screen" class="hidden">
+        <div id="res-msg" class="feedback"></div>
+        <button class="btn" onclick="nextQuestion()">СЛЕДУЮЩИЙ ВОПРОС</button>
     </div>
 </div>
 
 <script>
-    let total = 0;
+    let totalScore = 0;
     let currentBet = 0;
-    let qIndex = 0;
+    let qIdx = 0;
 
-    const questions = [
-        { q: "Emil ... um neun Uhr gefrühstückt.", a: ["hat", "ist"], correct: 0 },
-        { q: "Wir ... gestern im Kino gewesen.", a: ["haben", "sind"], correct: 1 },
-        { q: "Ich ... meine Hausaufgaben gemacht.", a: ["habe", "bin"], correct: 0 }
+    const data = [
+        { q: "Emil ... um neun Uhr gefrühstückt.", a: ["hat", "ist"], c: 0 },
+        { q: "Wir ... gestern im Kino gewesen.", a: ["haben", "sind"], c: 1 },
+        { q: "Ich ... meine Hausaufgaben gemacht.", a: ["habe", "bin"], c: 0 }
     ];
 
-    function init() {
-        document.getElementById('q-text').innerText = questions[qIndex].q;
-    }
-
-    function makeBet(val) {
+    function startStage(val) {
         currentBet = val;
-        document.getElementById('step-bet').classList.add('hidden');
+        document.getElementById('bet-screen').classList.add('hidden');
         
-        // Генерируем кнопки ответов
-        const container = document.getElementById('ans-container');
-        container.innerHTML = '';
-        questions[qIndex].a.forEach((text, i) => {
-            container.innerHTML += `<button class="btn btn-ans" onclick="checkAns(${i})">${text}</button>`;
+        const list = document.getElementById('ans-list');
+        list.innerHTML = '';
+        data[qIdx].a.forEach((text, i) => {
+            list.innerHTML += `<button class="btn btn-ans" onclick="finishStage(${i})">${text}</button>`;
         });
         
-        document.getElementById('step-ans').classList.remove('hidden');
+        document.getElementById('ans-screen').classList.remove('hidden');
     }
 
-    function checkAns(idx) {
-        const isCorrect = idx === questions[qIndex].correct;
-        const msg = document.getElementById('feedback-msg');
+    function finishStage(idx) {
+        const isWin = idx === data[qIdx].c;
+        const msg = document.getElementById('res-msg');
         
-        if(isCorrect) {
-            total += currentBet;
+        if(isWin) {
+            totalScore += currentBet;
             msg.innerText = "ВЕРНО! ПЕСОК ПРИБАВЛЕН";
             msg.style.color = "#4caf50";
         } else {
-            total = Math.max(0, total - currentBet);
-            msg.innerText = "ОШИБКА! ПЕСОК УМЕНЬШИЛСЯ";
+            totalScore = Math.max(0, totalScore - currentBet);
+            msg.innerText = "ОШИБКА! ВЫ ПОТЕРЯЛИ ПЕСОК";
             msg.style.color = "#ff5252";
         }
 
-        updateVisual();
-        document.getElementById('step-ans').classList.add('hidden');
-        document.getElementById('step-result').classList.remove('hidden');
+        updateUI();
+        document.getElementById('ans-screen').classList.add('hidden');
+        document.getElementById('res-screen').classList.remove('hidden');
     }
 
-    function updateVisual() {
-        document.getElementById('total-score').innerText = total;
-        // Наполнение песком (макс 70% высоты)
-        let h = Math.min(70, (total / 200) * 70);
-        document.getElementById('sand').style.height = h + '%';
+    function updateUI() {
+        document.getElementById('total-val').innerText = totalScore;
+        // Наполнение песком (макс 250 очков = 75% высоты)
+        let height = Math.min(75, (totalScore / 250) * 75);
+        document.getElementById('sand').style.height = height + '%';
     }
 
     function nextQuestion() {
-        qIndex = (qIndex + 1) % questions.length;
-        document.getElementById('q-text').innerText = questions[qIndex].q;
-        document.getElementById('step-result').classList.add('hidden');
-        document.getElementById('step-bet').classList.remove('hidden');
+        qIdx = (qIdx + 1) % data.length;
+        document.getElementById('question').innerText = data[qIdx].q;
+        document.getElementById('res-screen').classList.add('hidden');
+        document.getElementById('bet-screen').classList.remove('hidden');
     }
 
-    init();
+    updateUI(); // Стартовая отрисовка
 </script>
 </body>
 </html>
