@@ -2,98 +2,76 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>KGB Game Corp: Sparschwein Editor</title>
+    <title>Sparschwein Editor PRO</title>
     <style>
         :root { --accent: #f9e076; --bg: #0d0d0f; --panel: #16161a; --border: #2d2d33; }
-        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: #e1e1e6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #e1e1e6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Sidebar (Интерфейс KGB) */
-        .sidebar { width: 380px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
-        .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; scrollbar-width: thin; }
+        /* Sidebar KGB Style */
+        .sidebar { width: 400px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 25px; scrollbar-width: thin; }
+        h2 { font-size: 14px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 25px; }
         
-        .section-tag { font-size: 10px; text-transform: uppercase; color: var(--accent); letter-spacing: 1.5px; font-weight: 800; margin: 20px 0 10px; display: flex; align-items: center; gap: 8px; }
-        .section-tag::after { content:''; flex:1; height:1px; background: rgba(249, 224, 118, 0.1); }
-
-        .q-card { background: #1f1f27; border: 1px solid var(--border); padding: 15px; border-radius: 12px; margin-bottom: 15px; position: relative; }
-        .btn-del { position: absolute; top: 10px; right: 10px; color: #ff5252; font-size: 10px; cursor: pointer; font-weight: bold; }
+        .q-card { background: #1f1f27; border: 1px solid var(--border); padding: 15px; border-radius: 14px; margin-bottom: 15px; position: relative; }
+        .btn-del { position: absolute; top: 10px; right: 10px; color: #ff5252; cursor: pointer; font-size: 12px; font-weight: bold; }
         
-        label { display: block; font-size: 10px; color: #888; text-transform: uppercase; margin-top: 10px; font-weight: 800; }
-        input, select { width: 100%; background: #111; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 8px; margin-top: 5px; box-sizing: border-box; outline: none; transition: 0.3s; }
-        input:focus { border-color: var(--accent); }
-
-        .btn-add { background: transparent; border: 1px dashed #444; color: #888; padding: 12px; border-radius: 10px; width: 100%; cursor: pointer; margin-top: 10px; font-weight: bold; }
+        label { display: block; font-size: 10px; color: #888; text-transform: uppercase; margin-top: 12px; font-weight: 800; }
+        input, select { width: 100%; background: #111; border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 8px; margin-top: 5px; box-sizing: border-box; outline: none; }
+        
+        .btn-add { background: transparent; border: 1px dashed #444; color: #888; padding: 12px; border-radius: 10px; width: 100%; cursor: pointer; margin-top: 15px; transition: 0.3s; }
         .btn-add:hover { border-color: var(--accent); color: var(--accent); }
 
-        /* Preview Zone */
-        .preview-zone { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #050505; position: relative; }
-        #ifr-wrap { border: 12px solid #222; border-radius: 45px; overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,0.7); background: #000; }
-        iframe { border: none; width: 100%; height: 100%; }
+        /* Preview Area */
+        .preview-zone { flex: 1; display: flex; align-items: center; justify-content: center; background: #050505; }
+        #phone { border: 12px solid #222; border-radius: 45px; overflow: hidden; background: #000; box-shadow: 0 50px 100px rgba(0,0,0,0.8); }
+        iframe { width: 100%; height: 100%; border: none; }
 
-        .sidebar-footer { padding: 20px; background: #111; border-top: 1px solid var(--border); }
-        .btn-main { background: var(--accent); color: #000; border: none; padding: 16px; width: 100%; border-radius: 14px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* Modal */
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 40px; }
-        .modal-body { background: #1a1a20; padding: 30px; border-radius: 25px; width: 100%; max-width: 800px; border: 1px solid var(--accent); }
-        textarea { width: 100%; height: 350px; background: #000; color: var(--accent); font-family: 'Fira Code', monospace; padding: 15px; border-radius: 12px; font-size: 11px; }
+        .footer { padding: 20px; background: #111; border-top: 1px solid var(--border); }
+        .btn-primary { background: var(--accent); color: #000; border: none; padding: 16px; width: 100%; border-radius: 14px; font-weight: 900; cursor: pointer; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <div class="sidebar-header"><h2 style="margin:0; font-size:18px;">SPARSCHWEIN <span style="font-weight:100; opacity:0.5">PRO</span></h2></div>
     <div class="sidebar-content">
+        <h2>PIGGY BANK EDITOR</h2>
         
-        <div class="section-tag">Параметры Виджета</div>
+        <label>Размеры виджета</label>
         <div style="display:flex; gap:10px">
-            <div style="flex:1"><label>Ширина</label><input type="number" id="pw" value="380"></div>
-            <div style="flex:1"><label>Высота</label><input type="number" id="ph" value="620"></div>
+            <input type="number" id="pw" value="380">
+            <input type="number" id="ph" value="620">
         </div>
-        <label>Фон (URL картинки)</label>
-        <input type="text" id="pbg" placeholder="Вставьте прямую ссылку на изображение">
 
-        <div class="section-tag">Вопросы и Ответы</div>
+        <label>Фон (URL изображения)</label>
+        <input type="text" id="pbg" placeholder="Оставьте пустым для черного фона">
+
         <div id="q-list">
             <div class="q-card">
-                <span class="btn-del" onclick="this.parentElement.remove()">✕ УДАЛИТЬ</span>
+                <span class="btn-del" onclick="this.parentElement.remove()">✕</span>
                 <label>Текст вопроса</label>
-                <input type="text" class="q-txt" value="Как переводится 'Haben'?">
-                <label>Варианты (Первый всегда правильный!)</label>
-                <input type="text" class="q-ans" value="Иметь, Быть, Делать, Идти">
+                <input type="text" class="q-txt" value="Как по-немецки 'Иметь'?">
+                <label>Варианты (Первый - ВЕРНЫЙ)</label>
+                <input type="text" class="q-ans" value="haben, sein, machen, gehen">
             </div>
         </div>
         <button class="btn-add" onclick="addQ()">+ ДОБАВИТЬ ВОПРОС</button>
 
-        <div class="section-tag">Настройки игры</div>
-        <label>Цель (очков)</label>
+        <label>Цель (Баллы)</label>
         <input type="number" id="pgoal" value="500">
-        <label>Язык</label>
-        <select id="plang"><option value="ru">Русский</option><option value="en">English</option><option value="de">Deutsch</option></select>
-
     </div>
-    <div class="sidebar-footer">
-        <button class="btn-main" onclick="refresh()">ОБНОВИТЬ ПРЕВЬЮ</button>
-        <button class="btn-main" onclick="showCode()" style="margin-top:10px; background:#222; color:#fff; border: 1px solid #333;">ПОЛУЧИТЬ КОД</button>
+    <div class="footer">
+        <button class="btn-primary" onclick="refresh()">ОБНОВИТЬ ИГРУ</button>
     </div>
 </div>
 
 <div class="preview-zone">
-    <div id="ifr-wrap"><iframe id="ifr"></iframe></div>
-</div>
-
-<div id="modal">
-    <div class="modal-body">
-        <h3 style="margin-top:0; color:var(--accent)">Код для вставки в Genially</h3>
-        <textarea id="res-code" readonly onclick="this.select()"></textarea>
-        <button class="btn-main" onclick="document.getElementById('modal').style.display='none'" style="margin-top:20px">ЗАКРЫТЬ</button>
-    </div>
+    <div id="phone"><iframe id="ifr"></iframe></div>
 </div>
 
 <script>
 function addQ() {
     const d = document.createElement('div'); d.className = 'q-card';
-    d.innerHTML = `<span class="btn-del" onclick="this.parentElement.remove()">✕ УДАЛИТЬ</span><label>Текст вопроса</label><input type="text" class="q-txt"><label>Варианты</label><input type="text" class="q-ans">`;
+    d.innerHTML = `<span class="btn-del" onclick="this.parentElement.remove()">✕</span><label>Текст вопроса</label><input type="text" class="q-txt"><label>Варианты</label><input type="text" class="q-ans">`;
     document.getElementById('q-list').appendChild(d);
 }
 
@@ -102,45 +80,41 @@ function buildHTML() {
     document.querySelectorAll('.q-card').forEach(c => {
         const t = c.querySelector('.q-txt').value;
         const a = c.querySelector('.q-ans').value.split(',').map(s=>s.trim());
-        if(t && a.length >= 2) questions.push({q:t, a:a});
+        if(t && a.length > 1) questions.push({q:t, a:a});
     });
 
-    const config = {
-        bg: document.getElementById('pbg').value,
-        goal: document.getElementById('pgoal').value,
-        lang: document.getElementById('plang').value
-    };
+    const bg = document.getElementById('pbg').value;
+    const goal = document.getElementById('pgoal').value;
 
-    // Генерируем код виджета (Ваша логика + ТЗ)
     return `<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <style>
         :root { --gold: #f9e076; --gold-d: #bf953f; }
-        body { background: #0a0a0a url('${config.bg}') center/cover; margin:0; font-family: 'Segoe UI', Tahoma, sans-serif; height: 100vh; display:flex; align-items:center; justify-content:center; }
-        .game-card { width: 320px; background: rgba(15,15,18,0.9); padding: 30px; border-radius: 45px; border: 1px solid #333; backdrop-filter: blur(15px); text-align:center; box-shadow: 0 30px 60px rgba(0,0,0,0.8); color:#fff; position: relative; }
-        .pig-box { position: relative; width: 280px; height: 180px; margin: 0 auto; }
-        #sand-rect { transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .score { font-size: 48px; color: var(--gold); font-weight: 900; margin: 10px 0; text-shadow: 0 0 20px rgba(249,224,118,0.3); }
-        .q-area { min-height: 70px; font-size: 18px; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; line-height: 1.3; }
-        .btn-bet { background: #1a1a1e; border: 1px solid #444; color: var(--gold); padding: 10px 15px; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; flex: 1; }
-        .btn-bet:hover { border-color: var(--gold); background: #25252b; }
-        .btn-ans { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 14px; border-radius: 15px; width: 100%; margin-bottom: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; }
+        body { background: #0a0a0a url('${bg}') center/cover; margin:0; font-family: 'Segoe UI', sans-serif; height: 100vh; display:flex; align-items:center; justify-content:center; color:#fff; }
+        .card { width: 330px; background: rgba(20,20,25,0.95); padding: 30px; border-radius: 40px; border:1px solid #333; backdrop-filter: blur(10px); text-align:center; }
+        .pig { position: relative; width: 280px; height: 180px; margin: 0 auto; }
+        #sand-rect { transition: all 1.2s ease; }
+        .score { font-size: 44px; color: var(--gold); font-weight: 800; margin: 10px 0; }
+        .q-area { min-height: 80px; font-size: 18px; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; }
+        .bet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn-bet { background: #1a1a1e; border: 1px solid #444; color: var(--gold); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; }
+        .btn-ans { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 14px; border-radius: 14px; width: 100%; margin-bottom: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn-ans:hover { background: var(--gold); color: #000; }
         .grain { position: absolute; width: 3px; height: 3px; background: var(--gold); border-radius: 50%; pointer-events: none; z-index: 10; }
     </style>
 </head>
 <body>
-<div class="game-card">
-    <div class="pig-box" id="pbox">
+<div class="card">
+    <div class="pig" id="pbox">
         <svg viewBox="0 0 320 220" style="width:100%; height:100%">
             <defs>
                 <mask id="m"><path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="white"/></mask>
                 <linearGradient id="g" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="var(--gold-d)"/><stop offset="100%" stop-color="var(--gold)"/></linearGradient>
             </defs>
             <g mask="url(#m)"><rect id="sand-rect" x="50" y="190" width="250" height="0" fill="url(#g)"/></g>
-            <path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+            <path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2"/>
         </svg>
     </div>
     <div class="score" id="sv">0</div>
@@ -148,68 +122,69 @@ function buildHTML() {
     <div id="ui"></div>
 </div>
 <script>
-    let score=0, qidx=0, bet=0, qs=\${JSON.stringify(questions)};
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    function beep(f){ const o=ctx.createOscillator(), g=ctx.createGain(); o.frequency.value=f; g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.5); o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+0.5); }
+    let s=0, qi=0, bet=0, qs=\${JSON.stringify(questions)};
+    const audio = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function beep(f){
+        const o=audio.createOscillator(), g=audio.createGain();
+        o.frequency.value=f; g.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime+0.5);
+        o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime+0.5);
+    }
 
-    function step1(){
-        if(qidx >= qs.length) { document.getElementById('qt').innerText="FINISH!"; return; }
-        document.getElementById('qt').innerText = qs[qidx].q;
-        const ui = document.getElementById('ui'); ui.innerHTML = '<p style="font-size:11px; color:#666; text-transform:uppercase; margin-bottom:10px">Выберите ставку</p><div style="display:flex; gap:8px"></div>';
+    function init(){
+        if(qi >= qs.length) { document.getElementById('qt').innerText="ПОБЕДА!"; document.getElementById('ui').innerHTML=""; return; }
+        document.getElementById('qt').innerText = qs[qi].q;
+        const ui = document.getElementById('ui'); ui.innerHTML = '<p style="font-size:10px; color:#888; margin-bottom:10px">ВЫБЕРИ СТАВКУ</p><div class="bet-grid"></div>';
         [10, 25, 50, 100].forEach(v => {
             const b = document.createElement('button'); b.className='btn-bet'; b.innerText=v;
-            b.onclick = () => { bet=v; step2(); };
-            ui.querySelector('div').appendChild(b);
+            b.onclick = () => { bet=v; showAns(); };
+            ui.querySelector('.bet-grid').appendChild(b);
         });
     }
 
-    function step2(){
+    function showAns(){
         const ui = document.getElementById('ui'); ui.innerHTML = '';
-        const corr = qs[qidx].a[0];
-        [...qs[qidx].a].sort(()=>Math.random()-0.5).forEach(t => {
+        const corr = qs[qi].a[0];
+        const shuffled = [...qs[qi].a].sort(()=>Math.random()-0.5);
+        shuffled.forEach(t => {
             const b = document.createElement('button'); b.className='btn-ans'; b.innerText=t;
             b.onclick = () => {
-                if(t === corr) { score = Math.min(${config.goal}, score + bet); beep(880); drop(); }
-                else { score = Math.max(0, score - bet); beep(220); }
-                upd(); qidx++; setTimeout(step1, 1200);
+                if(t === corr) { s = Math.min(${goal}, s+bet); beep(880); drop(); }
+                else { s = Math.max(0, s-bet); beep(220); }
+                upd(); qi++; setTimeout(init, 1200);
             };
             ui.appendChild(b);
         });
     }
 
     function upd(){
-        document.getElementById('sv').innerText = score;
-        const h = (score / ${config.goal}) * 140;
+        document.getElementById('sv').innerText = s;
+        const h = (s / ${goal}) * 140;
         const r = document.getElementById('sand-rect');
-        r.setAttribute('y', 190 - h); r.setAttribute('height', h);
+        r.setAttribute('y', 190-h); r.setAttribute('height', h);
     }
 
     function drop(){
         for(let i=0; i<15; i++){
             const g = document.createElement('div'); g.className='grain';
-            g.style.left = (140 + Math.random()*40)+'px'; g.style.top='40px';
+            g.style.left = (140+Math.random()*40)+'px'; g.style.top='50px';
             document.getElementById('pbox').appendChild(g);
             g.animate([{transform:'translateY(0)'},{transform:'translateY(120px)', opacity:0}], 1000).onfinish=()=>g.remove();
         }
     }
-    step1();
+    init();
 <\/script></body></html>`;
 }
 
 function refresh() {
-    const w = document.getElementById('pw').value, h = document.getElementById('ph').value;
-    const wrap = document.getElementById('ifr-wrap');
-    wrap.style.width = w + "px"; wrap.style.height = h + "px";
-    
+    const w = document.getElementById('pw').value;
+    const h = document.getElementById('ph').value;
+    const phone = document.getElementById('phone');
+    phone.style.width = w + "px";
+    phone.style.height = h + "px";
+
     const blob = new Blob([buildHTML()], {type: 'text/html'});
     document.getElementById('ifr').src = URL.createObjectURL(blob);
-}
-
-function showCode() {
-    const w = document.getElementById('pw').value, h = document.getElementById('ph').value;
-    const html = buildHTML().replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-    document.getElementById('res-code').value = `<iframe width="${w}" height="${h}" srcdoc="${html}" frameborder="0" scrolling="no" style="border:none;overflow:hidden;"></iframe>`;
-    document.getElementById('modal').style.display = 'flex';
 }
 
 window.onload = refresh;
