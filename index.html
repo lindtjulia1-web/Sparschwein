@@ -2,141 +2,187 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Редактор: Копилка уверенности v1.0</title>
+    <title>Редактор: Sparschwein Confidence v2.0</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f0f12; color: #fff; margin: 0; display: flex; height: 100vh; }
-        .sidebar { width: 350px; background: #18181c; padding: 20px; border-right: 1px solid #333; overflow-y: auto; box-sizing: border-box; }
-        h2 { color: #ffcc00; font-size: 16px; text-transform: uppercase; margin-bottom: 20px; border-bottom: 2px solid #ffcc00; padding-bottom: 10px;}
-        label { display: block; font-size: 11px; color: #aaa; margin-top: 15px; font-weight: bold; text-transform: uppercase; }
-        input, select { width: 100%; background: #26262e; border: 1px solid #3e3e42; color: #fff; padding: 10px; border-radius: 6px; margin-top: 5px; box-sizing: border-box; outline: none; }
-        .btn-main { background: #ffcc00; color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
-        .btn-main:hover { background: #ffe066; transform: translateY(-2px); }
-        .preview { flex: 1; display: flex; align-items: center; justify-content: center; background: #050505; flex-direction: column; }
-        #ifr-container { border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8); background: #111; }
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 999; }
-        .modal-box { background: #1a1a1e; padding: 30px; border-radius: 15px; width: 600px; text-align: center; border: 1px solid #ffcc00; }
-        #output-code { width: 100%; height: 200px; background: #000; color: #ffcc00; font-family: 'Consolas', monospace; font-size: 12px; margin: 15px 0; padding: 10px; resize: none; border: 1px solid #333; }
+        :root { --accent: #f9e076; --bg: #0f0f12; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Стили боковой панели */
+        .sidebar { width: 360px; background: #18181c; padding: 25px; border-right: 1px solid #333; overflow-y: auto; box-sizing: border-box; }
+        h2 { color: var(--accent); font-size: 18px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        label { display: block; font-size: 11px; color: #888; margin-top: 15px; font-weight: bold; text-transform: uppercase; }
+        input, select { width: 100%; background: #26262e; border: 1px solid #3e3e42; color: #fff; padding: 10px; border-radius: 8px; margin-top: 5px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--accent); }
+        
+        .btn-group { margin-top: 25px; display: flex; flex-direction: column; gap: 10px; }
+        .btn { background: var(--accent); color: #000; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 12px; }
+        .btn:hover { background: #fff; transform: translateY(-2px); }
+        .btn-secondary { background: #333; color: #fff; }
+
+        /* Превью */
+        .preview-zone { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #050505; position: relative; }
+        #ifr-container { background: #111; border-radius: 40px; box-shadow: 0 30px 100px rgba(0,0,0,0.8); overflow: hidden; border: 1px solid #222; }
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* Модальное окно */
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 999; padding: 20px; }
+        .modal-content { background: #1a1a1e; padding: 30px; border-radius: 20px; width: 100%; max-width: 700px; border: 1px solid var(--accent); }
+        textarea { width: 100%; height: 250px; background: #000; color: #0f0; font-family: monospace; padding: 15px; border-radius: 10px; border: 1px solid #333; font-size: 11px; margin: 15px 0; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2>Настройка Копилки</h2>
+    <h2>Настройка виджета</h2>
     
     <label>GitHub Репозиторий</label>
-    <input type="text" id="gh-url" value="https://lindtjulia1-web.github.io/Sparschwein/">
+    <input type="text" id="gh-path" value="https://lindtjulia1-web.github.io/Sparschwein/">
     
-    <label>Язык по умолчанию</label>
-    <select id="def-lang">
-        <option value="RU">Русский</option>
-        <option value="EN">English</option>
-        <option value="DE">Deutsch</option>
+    <label>Язык (стартовый)</label>
+    <select id="start-lang">
+        <option value="ru">Русский</option>
+        <option value="en">English</option>
+        <option value="de">Deutsch</option>
     </select>
 
-    <label>Размер виджета (Ш x В)</label>
+    <label>Ширина и Высота (px)</label>
     <div style="display:flex; gap:10px;">
-        <input type="number" id="pw" value="500">
-        <input type="number" id="ph" value="500">
+        <input type="number" id="w" value="400">
+        <input type="number" id="h" value="550">
     </div>
 
-    <label>Начальный уровень песка (0-100%)</label>
-    <input type="range" id="sand-level" min="0" max="100" value="20">
+    <label>Цель (MAX_SCORE)</label>
+    <input type="number" id="max-score" value="500">
 
-    <button class="btn-main" onclick="refresh()">ОБНОВИТЬ ПРЕДПРОСМОТР</button>
-    <button class="btn-main" style="background:#333; color:#fff;" onclick="openCode()">ПОЛУЧИТЬ КОД</button>
+    <div class="btn-group">
+        <button class="btn" onclick="updatePreview()">Обновить предпросмотр</button>
+        <button class="btn btn-secondary" onclick="showCode()">Получить код для Genially</button>
+    </div>
 </div>
 
-<div class="preview">
-    <div id="ifr-container"><iframe id="ifr" frameborder="0"></iframe></div>
-    <p style="color: #555; margin-top: 15px; font-size: 12px;">Предпросмотр активен</p>
+<div class="preview-zone">
+    <div id="ifr-container">
+        <iframe id="preview-ifr"></iframe>
+    </div>
+    <p style="color:#444; font-size: 12px; margin-top: 20px;">ГЕНЕРАЦИЯ ВИДЖЕТА: Sparschwein Confidence</p>
 </div>
 
 <div id="modal">
-    <div class="modal-box">
-        <h3 style="margin:0; color:#ffcc00">Код для вставки в Genially:</h3>
-        <textarea id="output-code" readonly onclick="this.select()"></textarea>
-        <button class="btn-main" onclick="document.getElementById('modal').style.display='none'">ЗАКРЫТЬ</button>
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:var(--accent)">Код для вставки в Genially</h3>
+        <p style="font-size: 12px; color:#aaa">Скопируйте и вставьте в блок Insert -> Others</p>
+        <textarea id="final-code" readonly></textarea>
+        <button class="btn" onclick="closeModal()" style="width:100%">Закрыть</button>
     </div>
 </div>
 
 <script>
-function buildWidgetHTML() {
-    const gh = document.getElementById('gh-url').value;
-    const lang = document.getElementById('def-lang').value;
-    const sand = document.getElementById('sand-level').value;
+// Функция сборки чистого HTML кода виджета на основе вашего файла
+function generateWidgetHTML() {
+    const lang = document.getElementById('start-lang').value;
+    const maxScore = document.getElementById('max-score').value;
+    const gh = document.getElementById('gh-path').value;
 
     return `<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <style>
-        body { margin: 0; height: 100vh; background: #111; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif; color: white; overflow: hidden; }
-        .pig-container { position: relative; width: 300px; height: 250px; }
-        .pig-svg { width: 100%; height: 100%; fill: none; stroke: #ffcc00; stroke-width: 2; z-index: 2; position: relative; }
-        .sand-container { position: absolute; bottom: 45px; left: 50px; width: 200px; height: 140px; overflow: hidden; clip-path: ellipse(45% 45% at 50% 50%); z-index: 1; }
-        .sand { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, #d4af37, #ffcc00); transition: height 1s ease-in-out; height: ${sand}% ; }
-        .controls { margin-top: 20px; display: flex; gap: 10px; }
-        .btn-lang { padding: 5px 10px; background: #222; border: 1px solid #ffcc00; color: #ffcc00; cursor: pointer; border-radius: 4px; font-size: 12px; }
-        .btn-lang.active { background: #ffcc00; color: #000; }
-        #score { font-size: 48px; font-weight: bold; margin: 10px 0; color: #ffcc00; text-shadow: 0 0 10px rgba(255,204,0,0.5); }
+        :root { --gold: #f9e076; --gold-deep: #bf953f; --error-red: #ff5252; --glass: rgba(255,255,255,0.2); }
+        body { background: #0a0a0a; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; color: #fff; }
+        .game-card { width: 360px; background: #111; border-radius: 40px; padding: 30px; text-align: center; border: 1px solid #222; position: relative; }
+        .lang-switch { position: absolute; top: 20px; right: 20px; display: flex; gap: 5px; }
+        .l-btn { background: #1a1a1a; border: 1px solid #333; color: #555; font-size: 9px; padding: 3px 7px; cursor: pointer; border-radius: 4px; }
+        .l-btn.active { border-color: var(--gold); color: var(--gold); }
+        .pig-box { position: relative; width: 300px; height: 200px; margin: 0 auto; }
+        .pig-svg { width: 100%; height: 100%; overflow: visible; }
+        #sand-rect { transition: all 1.2s ease; }
+        .score { font-size: 50px; color: var(--gold); font-weight: bold; margin: 10px 0; }
+        .q-text { min-height: 60px; font-size: 16px; margin: 15px 0; color: #ccc; }
+        .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 12px; margin: 5px; }
+        .btn:hover { background: var(--gold); color: #000; }
+        .hidden { display: none; }
+        .falling-grain { position: absolute; width: 3px; height: 3px; background: var(--gold); border-radius: 50%; pointer-events: none; }
     </style>
 </head>
 <body>
-    <div class="controls">
-        <button class="btn-lang \${'${lang}'==='RU'?'active':''}" onclick="setL('RU')">RU</button>
-        <button class="btn-lang \${'${lang}'==='EN'?'active':''}" onclick="setL('EN')">EN</button>
-        <button class="btn-lang \${'${lang}'==='DE'?'active':''}" onclick="setL('DE')">DE</button>
+<div class="game-card">
+    <div class="lang-switch">
+        <button class="l-btn \${'${lang}'=='ru'?'active':''}" onclick="setL('ru', this)">RU</button>
+        <button class="l-btn \${'${lang}'=='en'?'active':''}" onclick="setL('en', this)">EN</button>
+        <button class="l-btn \${'${lang}'=='de'?'active':''}" onclick="setL('de', this)">DE</button>
     </div>
-
-    <div class="pig-container">
-        <svg class="pig-svg" viewBox="0 0 200 150">
-            <path d="M100,20 C50,20 10,50 10,85 C10,120 50,140 100,140 C150,140 190,120 190,85 C190,50 150,20 100,20 M170,70 L185,60 M30,140 L40,155 M160,140 L150,155" />
+    <div class="pig-box" id="pbox">
+        <svg class="pig-svg" id="main-pig" viewBox="0 0 320 220">
+            <defs>
+                <mask id="pm"><path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="white"/></mask>
+                <linearGradient id="gg" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stop-color="#bf953f"/><stop offset="50%" stop-color="#f9e076"/><stop offset="100%" stop-color="#fff"/>
+                </linearGradient>
+            </defs>
+            <g mask="url(#pm)"><rect id="sand-rect" x="50" y="190" width="250" height="0" fill="url(#gg)"/></g>
+            <path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="none" stroke="var(--glass)" stroke-width="2"/>
+            <path d="M60,100 L45,100 C42,100 40,103 40,110 C40,117 42,120 45,120 L60,120" stroke="var(--glass)" fill="none" />
+            <path d="M105,62 L100,40 L125,52 M165,52 L175,35 L185,50" stroke="var(--glass)" fill="none" />
+            <path d="M110,190 C110,210 90,210 90,190 M250,185 C250,205 230,205 230,185" stroke="var(--glass)" fill="none" stroke-width="3"/>
         </svg>
-        <div class="sand-container">
-            <div id="sand-fill" class="sand"></div>
-        </div>
     </div>
-
-    <div id="score">${sand}0</div>
-    <div id="label">УВЕРЕННОСТЬ</div>
-
-    <script>
-        const texts = {
-            RU: { label: "УВЕРЕННОСТЬ" },
-            EN: { label: "CONFIDENCE" },
-            DE: { label: "ZUVERSICHT" }
-        };
-        function setL(l) {
-            document.querySelectorAll('.btn-lang').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById('label').innerText = texts[l].label;
+    <div class="score" id="sv">0</div>
+    <div id="q-box">
+        <div class="q-text" id="qt">Уровень уверенности:</div>
+        <div id="scr-start"><button class="btn" onclick="addS(50)">ПОПОЛНИТЬ</button></div>
+    </div>
+</div>
+<script>
+    let s=0, curL='${lang}', ms=${maxScore};
+    const data = { ru:{next:"ДАЛЕЕ", win:"ВЕРНО!"}, en:{next:"NEXT", win:"CORRECT!"}, de:{next:"WEITER", win:"RICHTIG!"} };
+    function setL(l, b){ curL=l; document.querySelectorAll('.l-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); }
+    function addS(v){
+        s = Math.min(ms, s+v);
+        document.getElementById('sv').innerText = s;
+        const h = (s/ms)*140;
+        const r = document.getElementById('sand-rect');
+        r.setAttribute('y', 190-h); r.setAttribute('height', h);
+        dropP();
+    }
+    function dropP(){
+        for(let i=0;i<10;i++){
+            const g=document.createElement('div'); g.className='falling-grain';
+            g.style.left=(150+Math.random()*20)+'px'; g.style.top='40px';
+            document.getElementById('pbox').appendChild(g);
+            g.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(120px)',opacity:0}],800).onfinish=()=>g.remove();
         }
-        // Здесь можно добавить логику подгрузки данных из репозитория ${gh}
-    <\/script>
+    }
+<\/script>
 </body>
 </html>`;
 }
 
-function refresh() {
-    const w = document.getElementById('pw').value, h = document.getElementById('ph').value;
+function updatePreview() {
+    const w = document.getElementById('w').value, h = document.getElementById('h').value;
+    const ifr = document.getElementById('preview-ifr');
     const container = document.getElementById('ifr-container');
-    const ifr = document.getElementById('ifr');
-    container.style.width = w + "px";
-    container.style.height = h + "px";
-    ifr.style.width = "100%";
-    ifr.style.height = "100%";
-    const blob = new Blob([buildWidgetHTML()], {type: 'text/html'});
+    
+    container.style.width = w + 'px';
+    container.style.height = h + 'px';
+    
+    const blob = new Blob([generateWidgetHTML()], {type: 'text/html'});
     ifr.src = URL.createObjectURL(blob);
 }
 
-function openCode() {
-    const html = buildWidgetHTML().replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-    const w = document.getElementById('pw').value;
-    const h = document.getElementById('ph').value;
-    document.getElementById('output-code').value = `<iframe width="${w}" height="${h}" srcdoc="${html}" frameborder="0" scrolling="no" style="border:none; overflow:hidden;"></iframe>`;
+function showCode() {
+    const w = document.getElementById('w').value, h = document.getElementById('h').value;
+    const cleanHTML = generateWidgetHTML().replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    const finalIframe = `<iframe width="${w}" height="${h}" srcdoc="${cleanHTML}" frameborder="0" scrolling="no" style="border:none;overflow:hidden;"></iframe>`;
+    
+    document.getElementById('final-code').value = finalIframe;
     document.getElementById('modal').style.display = 'flex';
 }
-window.onload = refresh;
+
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+// Инициализация
+window.onload = updatePreview;
 </script>
 </body>
 </html>
