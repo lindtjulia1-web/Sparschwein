@@ -28,20 +28,42 @@
             text-align: center;
             border: 1px solid #333;
             box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            position: relative;
         }
 
-        /* Контейнер свинки */
+        /* Выбор языка */
+        .lang-switch {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            display: flex;
+            gap: 5px;
+        }
+        .lang-btn {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #888;
+            font-size: 10px;
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.3s;
+        }
+        .lang-btn.active {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
         .pig-box {
             position: relative;
             width: 220px;
             height: 160px;
-            margin: 0 auto 10px;
+            margin: 10px auto 10px;
         }
 
-        /* Золотой песок внутри */
         .sand-container {
             position: absolute;
-            bottom: 32px; /* Позиция дна свинки */
+            bottom: 32px;
             left: 50%;
             transform: translateX(-50%);
             width: 140px;
@@ -53,7 +75,6 @@
             overflow: hidden;
         }
 
-        /* SVG-свинка (рисуем прямо здесь, чтобы не зависеть от ссылок) */
         .pig-svg {
             position: absolute;
             top: 0;
@@ -66,7 +87,6 @@
             stroke-width: 2;
         }
 
-        /* Тексты и кнопки */
         .q-text { min-height: 50px; font-size: 18px; margin: 15px 0; color: #eee; }
         .score { font-size: 38px; color: var(--gold); font-weight: bold; margin-bottom: 5px; }
         
@@ -86,18 +106,27 @@
 <body>
 
 <div class="game-card">
+    <div class="lang-switch">
+        <button class="lang-btn active" onclick="setLang('ru', this)">RU</button>
+        <button class="lang-btn" onclick="setLang('en', this)">EN</button>
+        <button class="lang-btn" onclick="setLang('de', this)">DE</button>
+    </div>
+
     <div class="pig-box">
         <div id="sand" class="sand-container"></div>
         <svg class="pig-svg" viewBox="0 0 200 150">
             <path d="M100,20 C150,20 190,50 190,90 C190,130 150,145 100,145 C50,145 10,130 10,90 C10,50 50,20 100,20" />
-            <path d="M185,85 L200,85 M200,85 L200,105 L188,100" stroke-width="3"/> <circle cx="160" cy="70" r="2" fill="white"/> <path d="M15,80 Q5,70 15,60" /> </svg>
+            <path d="M185,85 L200,85 M200,85 L200,105 L188,100" stroke-width="3"/>
+            <circle cx="160" cy="70" r="2" fill="white"/>
+            <path d="M15,80 Q5,70 15,60" />
+        </svg>
     </div>
 
     <div class="score" id="total-val">0</div>
-    <div class="q-text" id="question">Emil ... um neun Uhr gefrühstückt.</div>
+    <div class="q-text" id="question"></div>
 
     <div id="bet-screen">
-        <p style="font-size: 11px; color: #777; margin-bottom: 10px;">СДЕЛАЙТЕ СТАВКУ ПЕСКОМ</p>
+        <p id="bet-label" style="font-size: 11px; color: #777; margin-bottom: 10px;"></p>
         <div class="btn-group">
             <button class="btn" onclick="startStage(10)">10</button>
             <button class="btn" onclick="startStage(25)">25</button>
@@ -111,7 +140,7 @@
 
     <div id="res-screen" class="hidden">
         <div id="res-msg" class="feedback"></div>
-        <button class="btn" onclick="nextQuestion()">СЛЕДУЮЩИЙ ВОПРОС</button>
+        <button class="btn" id="next-btn" onclick="nextQuestion()"></button>
     </div>
 </div>
 
@@ -119,12 +148,50 @@
     let totalScore = 0;
     let currentBet = 0;
     let qIdx = 0;
+    let curLang = 'ru';
 
-    const data = [
-        { q: "Emil ... um neun Uhr gefrühstückt.", a: ["hat", "ist"], c: 0 },
-        { q: "Wir ... gestern im Kino gewesen.", a: ["haben", "sind"], c: 1 },
-        { q: "Ich ... meine Hausaufgaben gemacht.", a: ["habe", "bin"], c: 0 }
-    ];
+    const i18n = {
+        ru: {
+            betLabel: "СДЕЛАЙТЕ СТАВКУ ПЕСКОМ",
+            nextBtn: "СЛЕДУЮЩИЙ ВОПРОС",
+            correct: "ВЕРНО! ПЕСОК ПРИБАВЛЕН",
+            wrong: "ОШИБКА! ВЫ ПОТЕРЯЛИ ПЕСОК",
+            questions: [
+                { q: "Эмиль ... завтракал в девять часов.", a: ["hat", "ist"], c: 0 },
+                { q: "Мы ... вчера были в кино.", a: ["haben", "sind"], c: 1 },
+                { q: "Я ... сделал домашнее задание.", a: ["habe", "bin"], c: 0 }
+            ]
+        },
+        en: {
+            betLabel: "PLACE YOUR SAND BET",
+            nextBtn: "NEXT QUESTION",
+            correct: "CORRECT! SAND ADDED",
+            wrong: "WRONG! YOU LOST SAND",
+            questions: [
+                { q: "Emil ... had breakfast at nine o'clock.", a: ["hat", "ist"], c: 0 },
+                { q: "We ... were at the cinema yesterday.", a: ["haben", "sind"], c: 1 },
+                { q: "I ... have done my homework.", a: ["habe", "bin"], c: 0 }
+            ]
+        },
+        de: {
+            betLabel: "WÄHLEN SIE IHREN SAND-EINSATZ",
+            nextBtn: "NÄCHSTE FRAGE",
+            correct: "RICHTIG! SAND HINZUGEFÜGT",
+            wrong: "FALSCH! SAND VERLOREN",
+            questions: [
+                { q: "Emil ... um neun Uhr gefrühstückt.", a: ["hat", "ist"], c: 0 },
+                { q: "Wir ... gestern im Kino gewesen.", a: ["haben", "sind"], c: 1 },
+                { q: "Ich ... meine Hausaufgaben gemacht.", a: ["habe", "bin"], c: 0 }
+            ]
+        }
+    };
+
+    function setLang(lang, btn) {
+        curLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateUI();
+    }
 
     function startStage(val) {
         currentBet = val;
@@ -132,7 +199,7 @@
         
         const list = document.getElementById('ans-list');
         list.innerHTML = '';
-        data[qIdx].a.forEach((text, i) => {
+        i18n[curLang].questions[qIdx].a.forEach((text, i) => {
             list.innerHTML += `<button class="btn btn-ans" onclick="finishStage(${i})">${text}</button>`;
         });
         
@@ -140,39 +207,46 @@
     }
 
     function finishStage(idx) {
-        const isWin = idx === data[qIdx].c;
+        const isWin = idx === i18n[curLang].questions[qIdx].c;
         const msg = document.getElementById('res-msg');
         
         if(isWin) {
             totalScore += currentBet;
-            msg.innerText = "ВЕРНО! ПЕСОК ПРИБАВЛЕН";
+            msg.innerText = i18n[curLang].correct;
             msg.style.color = "#4caf50";
         } else {
             totalScore = Math.max(0, totalScore - currentBet);
-            msg.innerText = "ОШИБКА! ВЫ ПОТЕРЯЛИ ПЕСОК";
+            msg.innerText = i18n[curLang].wrong;
             msg.style.color = "#ff5252";
         }
 
-        updateUI();
+        updateSand();
+        document.getElementById('total-val').innerText = totalScore;
         document.getElementById('ans-screen').classList.add('hidden');
         document.getElementById('res-screen').classList.remove('hidden');
     }
 
     function updateUI() {
+        document.getElementById('question').innerText = i18n[curLang].questions[qIdx].q;
+        document.getElementById('bet-label').innerText = i18n[curLang].betLabel;
+        document.getElementById('next-btn').innerText = i18n[curLang].nextBtn;
         document.getElementById('total-val').innerText = totalScore;
-        // Наполнение песком (макс 250 очков = 75% высоты)
+        updateSand();
+    }
+
+    function updateSand() {
         let height = Math.min(75, (totalScore / 250) * 75);
         document.getElementById('sand').style.height = height + '%';
     }
 
     function nextQuestion() {
-        qIdx = (qIdx + 1) % data.length;
-        document.getElementById('question').innerText = data[qIdx].q;
+        qIdx = (qIdx + 1) % i18n[curLang].questions.length;
         document.getElementById('res-screen').classList.add('hidden');
         document.getElementById('bet-screen').classList.remove('hidden');
+        updateUI();
     }
 
-    updateUI(); // Стартовая отрисовка
+    updateUI();
 </script>
 </body>
 </html>
