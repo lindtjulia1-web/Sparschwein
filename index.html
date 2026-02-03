@@ -2,240 +2,143 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root {
             --gold: #f9e076;
             --gold-gradient: linear-gradient(to top, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-            --bg: #121212;
-            --panel: #1a1a1a;
+            --bg: #0b0b0d;
+        }
+        body { background: transparent; margin: 0; font-family: 'Segoe UI', sans-serif; color: white; display: flex; justify-content: center; }
+        
+        .game-card {
+            width: 360px; background: #16161a; border-radius: 28px; padding: 20px;
+            border: 1px solid #333; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        body {
-            background: transparent;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            color: white;
-            height: 100vh;
+        /* Контейнер свинки */
+        .pig-box { position: relative; width: 220px; height: 160px; margin: 0 auto; }
+        
+        .sand-layer {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            width: 145px; background: var(--gold-gradient);
+            transition: height 1s ease-in-out; border-radius: 0 0 50px 50px; z-index: 1;
         }
 
-        .widget {
-            width: 320px;
-            background: var(--panel);
-            padding: 25px;
-            border-radius: 24px;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            border: 1px solid #333;
-            position: relative;
+        .pig-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://i.ibb.co/vz6mYmY/transparent-piggy.png') no-repeat center;
+            background-size: contain; z-index: 2; pointer-events: none; opacity: 0.8;
         }
 
-        /* Переключатель языков */
-        .lang-select {
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            margin-bottom: 20px;
+        /* Интерфейс */
+        .question-box { min-height: 60px; font-size: 18px; margin: 15px 0; color: #ddd; }
+        .score-val { font-size: 32px; color: var(--gold); font-weight: bold; margin-bottom: 10px; }
+        
+        .btn-group { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .btn {
+            background: #222; border: 1px solid var(--gold); color: var(--gold);
+            padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s;
         }
-
-        .lang-btn {
-            background: #2a2a2a;
-            border: 1px solid #444;
-            color: #888;
-            font-size: 10px;
-            padding: 4px 8px;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: 0.3s;
-        }
-
-        .lang-btn.active {
-            border-color: var(--gold);
-            color: var(--gold);
-            background: #332b12;
-        }
-
-        /* Контейнер для песка и свинки */
-        .pig-container {
-            position: relative;
-            width: 200px;
-            height: 150px;
-            margin: 0 auto;
-        }
-
-        /* SVG Свинка (используем встроенную, чтобы не зависеть от ссылок) */
-        .pig-svg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 3;
-            fill: none;
-            stroke: rgba(255,255,255,0.4);
-            stroke-width: 1.5;
-        }
-
-        /* Маска для песка, чтобы он не выходил за края свинки */
-        .sand-mask {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            overflow: hidden;
-            clip-path: path('M100,20 C140,20 180,45 180,85 C180,125 140,140 100,140 C60,140 20,125 20,85 C20,45 60,20 100,20 Z'); /* Упрощенный контур */
-        }
-
-        .sand-level {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 0%;
-            background: var(--gold-gradient);
-            transition: height 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .score {
-            font-size: 42px;
-            font-weight: bold;
-            color: var(--gold);
-            margin: 15px 0 5px;
-            text-shadow: 0 0 15px rgba(249, 224, 118, 0.3);
-        }
-
-        .status-text {
-            color: #888;
-            font-size: 14px;
-            margin-bottom: 20px;
-            min-height: 20px;
-        }
-
-        .btn-group {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .action-btn {
-            background: transparent;
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            padding: 10px 18px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        .action-btn:hover {
-            background: var(--gold);
-            color: black;
-            transform: translateY(-2px);
-        }
-
-        .reset-btn {
-            margin-top: 10px;
-            background: #333;
-            border: none;
-            color: white;
-            padding: 12px 25px;
-            border-radius: 10px;
-            cursor: pointer;
-        }
+        .btn:hover { background: var(--gold); color: #000; }
+        .btn-ans { border-color: #fff; color: #fff; }
 
         .hidden { display: none; }
+        .feedback { font-weight: bold; margin-top: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<div class="widget">
-    <div class="lang-select">
-        <button class="lang-btn active" onclick="setLang('ru', this)">RU</button>
-        <button class="lang-btn" onclick="setLang('en', this)">EN</button>
-        <button class="lang-btn" onclick="setLang('de', this)">DE</button>
+<div class="game-card">
+    <div class="pig-box">
+        <div id="sand" class="sand-layer" style="height: 0%"></div>
+        <div class="pig-overlay"></div>
     </div>
 
-    <div class="pig-container">
-        <svg class="pig-svg" viewBox="0 0 200 150">
-            <path d="M100,20 C150,20 190,50 190,90 C190,130 150,145 100,145 C50,145 10,130 10,90 C10,50 50,20 100,20 M180,80 L195,75 M30,50 Q20,40 10,50" />
-            <circle cx="160" cy="80" r="3" fill="white" />
-        </svg>
-        <div class="sand-mask">
-            <div id="sand" class="sand-level"></div>
+    <div class="score-val" id="total-score">0</div>
+    <div class="question-box" id="q-text">Задание появится здесь...</div>
+
+    <div id="step-bet">
+        <p style="font-size: 12px; color: #777;">ВЫБЕРИТЕ СТАВКУ</p>
+        <div class="btn-group">
+            <button class="btn" onclick="makeBet(10)">10</button>
+            <button class="btn" onclick="makeBet(25)">25</button>
+            <button class="btn" onclick="makeBet(50)">50</button>
         </div>
     </div>
 
-    <div class="score" id="val">0</div>
-    <div class="status-text" id="status">Золотой запас</div>
-
-    <div id="controls" class="btn-group">
-        <button class="action-btn" onclick="add(10)">10</button>
-        <button class="action-btn" onclick="add(25)">25</button>
-        <button class="action-btn" onclick="add(50)">50</button>
+    <div id="step-ans" class="hidden">
+        <div class="btn-group" id="ans-container"></div>
     </div>
 
-    <button id="reset" class="reset-btn hidden" onclick="reset()">Еще раз</button>
+    <div id="step-result" class="hidden">
+        <div id="feedback-msg" class="feedback"></div>
+        <button class="btn" style="margin-top:15px;" onclick="nextQuestion()">ДАЛЕЕ</button>
+    </div>
 </div>
 
 <script>
-    let score = 0;
-    const target = 300;
-    let currentLang = 'ru';
+    let total = 0;
+    let currentBet = 0;
+    let qIndex = 0;
 
-    const i18n = {
-        ru: { status: "Золотой запас", full: "КОПИЛКА ПОЛНА!", reset: "ЕЩЕ РАЗ" },
-        en: { status: "Gold Reserve", full: "PIGGY IS FULL!", reset: "RESTART" },
-        de: { status: "Goldreserven", full: "SPARSCHWEIN IST VOLL!", reset: "NEUSTART" }
-    };
+    const questions = [
+        { q: "Emil ... um neun Uhr gefrühstückt.", a: ["hat", "ist"], correct: 0 },
+        { q: "Wir ... gestern im Kino gewesen.", a: ["haben", "sind"], correct: 1 },
+        { q: "Ich ... meine Hausaufgaben gemacht.", a: ["habe", "bin"], correct: 0 }
+    ];
 
-    function setLang(lang, btn) {
-        currentLang = lang;
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        updateUI();
+    function init() {
+        document.getElementById('q-text').innerText = questions[qIndex].q;
     }
 
-    function add(n) {
-        score += n;
-        if (score >= target) {
-            score = target;
-            document.getElementById('controls').classList.add('hidden');
-            document.getElementById('reset').classList.remove('hidden');
-        }
-        updateUI();
-    }
-
-    function reset() {
-        score = 0;
-        document.getElementById('controls').classList.remove('hidden');
-        document.getElementById('reset').classList.add('hidden');
-        updateUI();
-    }
-
-    function updateUI() {
-        document.getElementById('val').innerText = score;
-        const percent = (score / target) * 100;
-        document.getElementById('sand').style.height = percent + '%';
+    function makeBet(val) {
+        currentBet = val;
+        document.getElementById('step-bet').classList.add('hidden');
         
-        const label = document.getElementById('status');
-        const btnReset = document.getElementById('reset');
+        // Генерируем кнопки ответов
+        const container = document.getElementById('ans-container');
+        container.innerHTML = '';
+        questions[qIndex].a.forEach((text, i) => {
+            container.innerHTML += `<button class="btn btn-ans" onclick="checkAns(${i})">${text}</button>`;
+        });
         
-        if (score >= target) {
-            label.innerText = i18n[currentLang].full;
-            label.style.color = '#f9e076';
+        document.getElementById('step-ans').classList.remove('hidden');
+    }
+
+    function checkAns(idx) {
+        const isCorrect = idx === questions[qIndex].correct;
+        const msg = document.getElementById('feedback-msg');
+        
+        if(isCorrect) {
+            total += currentBet;
+            msg.innerText = "ВЕРНО! ПЕСОК ПРИБАВЛЕН";
+            msg.style.color = "#4caf50";
         } else {
-            label.innerText = i18n[currentLang].status;
-            label.style.color = '#888';
+            total = Math.max(0, total - currentBet);
+            msg.innerText = "ОШИБКА! ПЕСОК УМЕНЬШИЛСЯ";
+            msg.style.color = "#ff5252";
         }
-        btnReset.innerText = i18n[currentLang].reset;
-    }
-</script>
 
+        updateVisual();
+        document.getElementById('step-ans').classList.add('hidden');
+        document.getElementById('step-result').classList.remove('hidden');
+    }
+
+    function updateVisual() {
+        document.getElementById('total-score').innerText = total;
+        // Наполнение песком (макс 70% высоты)
+        let h = Math.min(70, (total / 200) * 70);
+        document.getElementById('sand').style.height = h + '%';
+    }
+
+    function nextQuestion() {
+        qIndex = (qIndex + 1) % questions.length;
+        document.getElementById('q-text').innerText = questions[qIndex].q;
+        document.getElementById('step-result').classList.add('hidden');
+        document.getElementById('step-bet').classList.remove('hidden');
+    }
+
+    init();
+</script>
 </body>
 </html>
