@@ -2,240 +2,179 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Teacher Panel: Sparschwein Editor</title>
+    <title>Sparschwein Editor PRO</title>
     <style>
-        :root { --accent: #f9e076; --bg: #0d0d0f; --card: #16161a; --border: #2d2d33; --input-bg: #1f1f27; }
-        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: #e1e1e6; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        :root { --accent: #f9e076; --bg: #0f0f12; --panel: #18181c; }
+        body { font-family: system-ui, sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* Навигация слева */
-        .nav-rail { width: 70px; background: #08080a; border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 20px 0; gap: 20px; }
-        .nav-btn { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #555; transition: 0.3s; font-size: 20px; }
-        .nav-btn:hover { color: #fff; background: #1a1a20; }
-        .nav-btn.active { background: var(--accent); color: #000; box-shadow: 0 0 15px rgba(249, 224, 118, 0.3); }
-
-        /* Панель настроек */
-        .sidebar { width: 420px; background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-        .sidebar-header { padding: 25px; border-bottom: 1px solid var(--border); }
-        .sidebar-content { flex: 1; overflow-y: auto; padding: 25px; scrollbar-width: thin; }
+        .sidebar { width: 350px; background: var(--panel); border-right: 1px solid #333; display: flex; flex-direction: column; }
+        .sidebar-content { padding: 20px; overflow-y: auto; flex: 1; }
         
-        h2 { font-size: 18px; margin: 0; color: #fff; letter-spacing: 0.5px; }
-        .section-tag { font-size: 10px; text-transform: uppercase; color: var(--accent); letter-spacing: 1.5px; font-weight: 800; margin: 25px 0 15px 0; display: flex; align-items: center; gap: 8px; }
-        .section-tag::after { content:''; flex:1; height:1px; background: rgba(249, 224, 118, 0.15); }
-
-        .field { margin-bottom: 20px; }
-        label { display: block; font-size: 12px; color: #8a8a93; margin-bottom: 8px; font-weight: 500; }
-        input, select, textarea { width: 100%; background: var(--input-bg); border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 10px; font-size: 14px; outline: none; transition: 0.2s; box-sizing: border-box; }
-        input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(249,224,118,0.05); }
-
-        /* Карточки вопросов */
-        .q-card { background: #111; border: 1px solid var(--border); padding: 15px; border-radius: 14px; margin-bottom: 15px; position: relative; }
-        .btn-add { background: transparent; border: 1px dashed #444; color: #888; padding: 12px; border-radius: 10px; width: 100%; cursor: pointer; transition: 0.3s; font-weight: 600; }
-        .btn-add:hover { border-color: var(--accent); color: var(--accent); background: rgba(249,224,118,0.02); }
-
-        /* Зона превью */
-        .preview-zone { flex: 1; background: #050505; display: flex; align-items: center; justify-content: center; position: relative; }
-        .phone-frame { width: 380px; height: 600px; background: #111; border-radius: 45px; border: 10px solid #222; box-shadow: 0 40px 100px rgba(0,0,0,0.6); overflow: hidden; position: relative; }
+        h2 { color: var(--accent); font-size: 14px; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 1px; }
+        .section { background: #26262e; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #3e3e42; }
+        label { display: block; font-size: 10px; color: #888; margin-top: 10px; font-weight: bold; text-transform: uppercase; }
+        input, select { width: 100%; background: #18181c; border: 1px solid #3e3e42; color: #fff; padding: 10px; border-radius: 8px; margin-top: 5px; box-sizing: border-box; outline: none; }
+        
+        .preview-zone { flex: 1; display: flex; align-items: center; justify-content: center; background: #050505; }
+        #ifr-container { width: 400px; height: 600px; background: #111; border-radius: 40px; border: 8px solid #222; overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,0.5); }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* Футер панели */
-        .sidebar-footer { padding: 20px 25px; border-top: 1px solid var(--border); background: #111; }
-        .btn-primary { background: var(--accent); color: #000; border: none; padding: 16px; border-radius: 14px; font-weight: 800; width: 100%; cursor: pointer; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }
-
-        /* Модалка с кодом */
-        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.94); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .modal-body { background: #1a1a1e; padding: 35px; border-radius: 24px; width: 100%; max-width: 750px; border: 1px solid var(--border); }
-        #code-output { width:100%; height:300px; background:#000; color:#f9e076; font-family:'Fira Code', monospace; padding:15px; border-radius:12px; border:1px solid #333; font-size:11px; margin: 15px 0; }
+        .btn-main { background: var(--accent); color: #000; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        .btn-main:hover { background: #fff; }
+        
+        #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+        .modal-content { background: #1a1a20; padding: 30px; border-radius: 20px; width: 100%; max-width: 800px; border: 1px solid var(--accent); }
+        textarea { width: 100%; height: 300px; background: #000; color: #f9e076; font-family: monospace; padding: 15px; border-radius: 10px; border: 1px solid #333; font-size: 11px; margin: 15px 0; }
     </style>
 </head>
 <body>
 
-<div class="nav-rail">
-    <div class="nav-btn active" onclick="switchTab('content', this)">📁</div>
-    <div class="nav-btn" onclick="switchTab('mechanics', this)">⚙️</div>
-    <div class="nav-btn" onclick="switchTab('progress', this)">📊</div>
-</div>
-
 <div class="sidebar">
-    <div class="sidebar-header"><h2>Настройка Копилки</h2></div>
-    
-    <div class="sidebar-content" id="tab-content">
-        <div id="pane-content">
-            <div class="section-tag">Тексты заданий</div>
-            <div id="questions-container">
-                <div class="q-card">
-                    <label>Вопрос</label>
-                    <input type="text" class="q-txt" value="Столица Германии?">
-                    <label style="margin-top:10px">Варианты (через запятую, первый — верный)</label>
-                    <input type="text" class="q-ans" value="Berlin, Hamburg, Munich">
-                </div>
-            </div>
-            <button class="btn-add" onclick="addQuestionItem()">+ Добавить вопрос</button>
+    <div class="sidebar-content">
+        <h2>Настройки Копилки</h2>
+        
+        <div class="section">
+            <label>Вопрос</label>
+            <input type="text" id="q-txt" value="Ich ... (haben) ein Haus">
+            
+            <label>Варианты (через запятую)</label>
+            <input type="text" id="q-ans" value="habe, hast, hat, haben">
+            
+            <label>Индекс правильного (0-3)</label>
+            <input type="number" id="q-correct" value="0">
         </div>
 
-        <div id="pane-mechanics" style="display:none">
-            <div class="section-tag">Механика ставок</div>
-            <div style="display:flex; gap:10px">
-                <div class="field">
-                    <label>Мин. монета</label>
-                    <input type="number" id="m-min" value="10">
-                </div>
-                <div class="field">
-                    <label>Макс. монета</label>
-                    <input type="number" id="m-max" value="100">
-                </div>
-            </div>
-            <div class="field">
-                <label>Штрафы (утечка песка)</label>
-                <select id="m-penalty"><option value="on">Включены</option><option value="off">Выключены</option></select>
-            </div>
+        <div class="section">
+            <label>Цель (MAX_SCORE)</label>
+            <input type="number" id="p-goal" value="500">
+            
+            <label>Штрафы</label>
+            <select id="p-penalty">
+                <option value="on">Включены</option>
+                <option value="off">Отключены</option>
+            </select>
         </div>
 
-        <div id="pane-progress" style="display:none">
-            <div class="section-tag">Прогресс и Визуал</div>
-            <div class="field">
-                <label>Цель (баллов до заполнения)</label>
-                <input type="number" id="p-goal" value="500">
-            </div>
-            <div class="field">
-                <label>Язык интерфейса</label>
-                <select id="p-lang">
-                    <option value="ru">Русский (RU)</option>
-                    <option value="en">English (EN)</option>
-                    <option value="de">Deutsch (DE)</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <div class="sidebar-footer">
-        <button class="btn-primary" onclick="generateAndPreview()">Обновить & Код</button>
+        <button class="btn-main" onclick="refresh()">Обновить превью</button>
+        <button class="btn-main" onclick="showCode()" style="margin-top:10px; background:#333; color:#fff;">Получить код</button>
     </div>
 </div>
 
 <div class="preview-zone">
-    <div class="phone-frame"><iframe id="preview-ifr"></iframe></div>
+    <div id="ifr-container"><iframe id="ifr"></iframe></div>
 </div>
 
 <div id="modal">
-    <div class="modal-body">
-        <h3 style="margin:0; color:var(--accent)">Код для Genially готов</h3>
-        <p style="font-size: 13px; color:#888">Скопируйте и вставьте в Genially (Вставка -> Другое)</p>
-        <textarea id="code-output" readonly onclick="this.select()"></textarea>
-        <button class="btn-primary" onclick="document.getElementById('modal').style.display='none'">Вернуться к редактору</button>
+    <div class="modal-content">
+        <h3 style="margin:0; color:var(--accent)">Код для Genially</h3>
+        <textarea id="final-code" readonly></textarea>
+        <button class="btn-main" onclick="document.getElementById('modal').style.display='none'">Закрыть</button>
     </div>
 </div>
 
 <script>
-function switchTab(tab, el) {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('pane-content').style.display = tab === 'content' ? 'block' : 'none';
-    document.getElementById('pane-mechanics').style.display = tab === 'mechanics' ? 'block' : 'none';
-    document.getElementById('pane-progress').style.display = tab === 'progress' ? 'block' : 'none';
-}
-
-function addQuestionItem() {
-    const div = document.createElement('div');
-    div.className = 'q-card';
-    div.innerHTML = `<label>Вопрос</label><input type="text" class="q-txt"><label style="margin-top:10px">Варианты</label><input type="text" class="q-ans">`;
-    document.getElementById('questions-container').appendChild(div);
-}
-
 function buildHTML() {
+    const qText = document.getElementById('q-txt').value;
+    const qAns = document.getElementById('q-ans').value.split(',').map(s => s.trim());
+    const qCorr = parseInt(document.getElementById('q-correct').value);
     const goal = document.getElementById('p-goal').value;
-    const penalty = document.getElementById('m-penalty').value;
-    const lang = document.getElementById('p-lang').value;
-    
-    // Сбор вопросов в массив
-    const qs = [];
-    document.querySelectorAll('.q-card').forEach(c => {
-        const txt = c.querySelector('.q-txt').value;
-        const ans = c.querySelector('.q-ans').value.split(',').map(s => s.trim());
-        if(txt) qs.push({q: txt, a: ans, c: 0});
-    });
+    const penalty = document.getElementById('p-penalty').value;
 
+    // ВНИМАНИЕ: Здесь внутри лежит ВЕСЬ твой доработанный код из свинья-копилка.txt
     return `<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <style>
-        :root { --gold: #f9e076; --gold-d: #bf953f; }
-        body { background: #0a0a0a; color: #fff; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        .card { width: 340px; text-align: center; background: #111; border-radius: 40px; padding: 30px; border: 1px solid #222; }
-        .pig-wrap { position: relative; width: 280px; height: 180px; margin: 0 auto; }
-        .sand { position: absolute; bottom: 35px; left: 55px; width: 170px; background: linear-gradient(to top, var(--gold-d), var(--gold)); transition: height 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .score { font-size: 48px; color: var(--gold); font-weight: 800; margin: 10px 0; text-shadow: 0 0 20px rgba(249,224,118,0.3); }
-        .q-area { min-height: 80px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 20px; color: #ccc; }
-        .btn { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 12px; border-radius: 14px; cursor: pointer; margin: 5px; width: 100%; font-weight: bold; transition: 0.3s; }
-        .btn:hover { background: var(--gold); color: #000; }
-        svg { position: relative; z-index: 10; width: 100%; height: 100%; }
-        .confetti { position: absolute; width: 6px; height: 6px; pointer-events: none; z-index: 100; }
+        :root { --gold: #f9e076; --gold-deep: #bf953f; --error-red: #ff5252; --glass-stroke: rgba(255, 255, 255, 0.25); }
+        body { background: #0a0a0a; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        .game-card { width: 340px; background: #111; border-radius: 45px; padding: 30px; text-align: center; border: 1px solid #222; position: relative; }
+        .pig-box { position: relative; width: 280px; height: 190px; margin: 0 auto; }
+        #sand-rect { transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .score { font-size: 44px; color: var(--gold); font-weight: 800; margin: 10px 0; }
+        .q-text { color: #fff; font-size: 18px; min-height: 60px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; }
+        .btn-ans { background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 12px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 8px; transition: 0.2s; }
+        .btn-ans:hover { background: var(--gold); color: #000; }
+        .falling-grain { position: absolute; width: 3px; height: 3px; background: var(--gold); border-radius: 50%; pointer-events: none; z-index: 5; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="pig-wrap">
-            <div id="fill" class="sand" style="height:0px"></div>
-            <svg viewBox="0 0 200 140">
-                <path d="M100,20 C50,20 10,40 10,75 C10,110 50,130 100,130 C150,130 190,110 190,75 C190,40 150,20 100,20" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
-                <circle cx="155" cy="65" r="3" fill="rgba(255,255,255,0.3)"/>
-            </svg>
-        </div>
-        <div class="score" id="sc">0</div>
-        <div class="q-area" id="qt">Загрузка...</div>
-        <div id="btns"></div>
+<div class="game-card">
+    <div class="pig-box" id="pbox">
+        <svg viewBox="0 0 320 220" style="width:100%; height:100%">
+            <defs>
+                <mask id="pm"><path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="white"/></mask>
+                <linearGradient id="gg" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stop-color="var(--gold-deep)"/><stop offset="100%" stop-color="var(--gold)"/>
+                </linearGradient>
+            </defs>
+            <g mask="url(#pm)"><rect id="sand-rect" x="50" y="190" width="250" height="0" fill="url(#gg)"/></g>
+            <path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="none" stroke="var(--glass-stroke)" stroke-width="2"/>
+        </svg>
     </div>
-    <script>
-        let s = 0, idx = 0, qs = \${JSON.stringify(qs)};
-        const t = { ru: "ПОБЕДА!", en: "VICTORY!", de: "SIEG!" };
-        function render() {
-            if(idx >= qs.length) { 
-                document.getElementById('qt').innerHTML = t['${lang}'];
-                document.getElementById('btns').innerHTML = '';
-                return;
-            }
-            const q = qs[idx];
-            document.getElementById('qt').innerText = q.q;
-            const b = document.getElementById('btns'); b.innerHTML = '';
-            q.a.sort(()=>Math.random()-0.5).forEach(a => {
-                const btn = document.createElement('button'); btn.className='btn';
-                btn.innerText = a;
-                btn.onclick = () => check(a === qs[idx].a[0]);
-                b.appendChild(btn);
-            });
+    <div class="score" id="sv">0</div>
+    <div class="q-text">${qText}</div>
+    <div id="ans-list"></div>
+</div>
+<script>
+    let score=0, MAX_SCORE=${goal}, correctIdx=${qCorr}, answers=\${JSON.stringify(qAns)};
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playTone(freq, duration) {
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.type = 'sine'; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function init() {
+        const container = document.getElementById('ans-list');
+        answers.forEach((text, i) => {
+            const b = document.createElement('button'); b.className='btn-ans'; b.innerText=text;
+            b.onclick = () => {
+                if(i === correctIdx) {
+                    score = Math.min(MAX_SCORE, score + 50);
+                    playTone(880, 0.3); dropSand();
+                } else if('${penalty}' === 'on') {
+                    score = Math.max(0, score - 25);
+                    playTone(220, 0.3);
+                }
+                updatePig();
+            };
+            container.appendChild(b);
+        });
+    }
+
+    function updatePig() {
+        document.getElementById('sv').innerText = score;
+        const h = (score / MAX_SCORE) * 140;
+        const r = document.getElementById('sand-rect');
+        r.setAttribute('y', 190 - h); r.setAttribute('height', h);
+    }
+
+    function dropSand() {
+        for(let i=0; i<15; i++) {
+            const g = document.createElement('div'); g.className='falling-grain';
+            g.style.left = (140 + Math.random() * 40) + 'px'; g.style.top = '40px';
+            document.getElementById('pbox').appendChild(g);
+            g.animate([{transform:'translateY(0)'},{transform:'translateY(120px)', opacity:0}], 1000).onfinish=()=>g.remove();
         }
-        function check(win) {
-            if(win) { s = Math.min(${goal}, s + 50); drop(); }
-            else if('${penalty}'==='on') { s = Math.max(0, s - 30); }
-            document.getElementById('sc').innerText = s;
-            document.getElementById('fill').style.height = (s/${goal} * 90) + 'px';
-            idx++; render();
-        }
-        function drop() {
-            for(let i=0; i<10; i++) {
-                const c = document.createElement('div'); c.className='confetti';
-                c.style.left = (120+Math.random()*40)+'px'; c.style.top='40px';
-                c.style.background = i%2==0 ? '#f9e076' : '#fff';
-                document.body.appendChild(c);
-                c.animate([{transform:'translateY(0)'},{transform:\`translate(\${Math.random()*100-50}px, 200px) rotate(360deg)\`, opacity:0}], {duration:1000}).onfinish=()=>c.remove();
-            }
-        }
-        render();
-    <\/script>
-</body></html>`;
+    }
+    init();
+<\/script></body></html>\`;
 }
 
-function generateAndPreview() {
-    const html = buildHTML();
-    const blob = new Blob([html], {type: 'text/html'});
-    document.getElementById('preview-ifr').src = URL.createObjectURL(blob);
-    
-    const cleanCode = html.replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-    document.getElementById('code-output').value = `<iframe width="400" height="600" srcdoc="${cleanCode}" frameborder="0" scrolling="no" style="border:none;overflow:hidden;"></iframe>`;
+function refresh() {
+    const blob = new Blob([buildHTML()], {type: 'text/html'});
+    document.getElementById('ifr').src = URL.createObjectURL(blob);
+}
+
+function showCode() {
+    const html = buildHTML().replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    document.getElementById('final-code').value = \`<iframe width="400" height="650" srcdoc="\${html}" frameborder="0" scrolling="no" style="border:none;overflow:hidden;"></iframe>\`;
     document.getElementById('modal').style.display = 'flex';
 }
-
-window.onload = () => generateAndPreview();
+window.onload = refresh;
 </script>
 </body>
 </html>
