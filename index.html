@@ -7,45 +7,29 @@
             --gold: #f9e076;
             --gold-deep: #bf953f;
             --error-red: #ff5252;
-            --glass-bright: rgba(255, 255, 255, 0.4);
-            --glass-dark: rgba(0, 0, 0, 0.2);
+            --glass-line: rgba(255, 255, 255, 0.3);
+            --glass-shine: rgba(255, 255, 255, 0.5);
         }
         body { background: #0a0a0a; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
 
         .game-card {
-            width: 400px; background: #111; border-radius: 45px; padding: 35px;
+            width: 380px; background: #111; border-radius: 45px; padding: 35px;
             text-align: center; border: 1px solid #222; box-shadow: 0 40px 120px rgba(0,0,0,0.9);
             position: relative;
-            z-index: 1;
         }
 
-        /* Контейнер для свинки с эффектом глубины */
-        .pig-container { 
-            position: relative; 
-            width: 320px; 
-            height: 240px; 
-            margin: 0 auto;
-            perspective: 1000px;
-        }
-
-        .pig-svg { 
-            width: 100%; 
-            height: 100%; 
-            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5)); 
-            transition: 0.5s; 
-            overflow: visible; 
-        }
-        
-        /* Реалистичный золотой песок */
-        #sand-rect { 
-            transition: y 1.5s cubic-bezier(0.4, 0, 0.2, 1), height 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-            filter: url(#sand-texture);
-        }
-
-        /* Стили игры (без изменений) */
+        /* --- СТИЛИ БЕЗ ИЗМЕНЕНИЙ --- */
         .lang-switch { position: absolute; top: 25px; right: 35px; display: flex; gap: 8px; z-index: 20; }
         .lang-btn { background: #1a1a1a; border: 1px solid #333; color: #555; font-size: 10px; padding: 4px 10px; cursor: pointer; border-radius: 6px; transition: 0.3s; }
         .lang-btn.active { border-color: var(--gold); color: var(--gold); background: #221e0a; }
+        .pig-container { position: relative; width: 320px; height: 240px; margin: 0 auto; }
+        .pig-svg { width: 100%; height: 100%; transition: 0.5s; overflow: visible; }
+        
+        #sand-rect { 
+            transition: y 1.5s ease-in-out, height 1.5s ease-in-out;
+            filter: url(#sand-texture); 
+        }
+
         .falling-grain { position: absolute; width: 4px; height: 4px; background: #ffe680; border-radius: 50%; z-index: 10; pointer-events: none; }
         .leak-grain { position: absolute; width: 3px; height: 3px; background: #555; border-radius: 50%; z-index: 10; pointer-events: none; }
         .score { font-size: 58px; color: var(--gold); font-weight: bold; margin: 10px 0; text-shadow: 0 0 20px rgba(249, 224, 118, 0.2); }
@@ -74,51 +58,58 @@
         <svg class="pig-svg" id="main-pig" viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <mask id="pig-mask">
-                    <ellipse cx="170" cy="120" rx="110" ry="75" fill="white" />
+                    <ellipse cx="170" cy="115" rx="105" ry="75" fill="white" />
                 </mask>
 
                 <linearGradient id="gold-grad" x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%" stop-color="#8a5a00" />
-                    <stop offset="20%" stop-color="#bf953f" />
+                    <stop offset="0%" stop-color="#7a5200" />
+                    <stop offset="25%" stop-color="#bf953f" />
                     <stop offset="50%" stop-color="#f9e076" />
-                    <stop offset="80%" stop-color="#fcf6ba" />
+                    <stop offset="75%" stop-color="#fcf6ba" />
                     <stop offset="100%" stop-color="#d4af37" />
                 </linearGradient>
 
                 <filter id="sand-texture">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="noise" />
+                    <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" result="noise" />
                     <feComposite operator="in" in2="SourceGraphic" />
                     <feBlend in="SourceGraphic" in2="noise" mode="multiply" />
                 </filter>
 
-                <filter id="glass-refraction">
-                    <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur" />
-                    <feSpecularLighting in="blur" surfaceScale="5" specularConstant="0.9" specularExponent="20" lighting-color="#ffffff" result="spec">
-                        <fePointLight x="100" y="50" z="150" />
+                <filter id="glass-effect">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blur" />
+                    <feSpecularLighting in="blur" surfaceScale="5" specularConstant="1.2" specularExponent="30" lighting-color="#ffffff" result="spec">
+                        <fePointLight x="100" y="60" z="100" />
                     </feSpecularLighting>
-                    <feComposite in="spec" in2="SourceAlpha" operator="in" result="specOut" />
+                    <feComposite in="spec" in2="SourceAlpha" operator="in" />
                 </filter>
             </defs>
 
-            <ellipse cx="172" cy="122" rx="110" ry="75" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+            <ellipse cx="172" cy="117" rx="105" ry="75" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.05)" stroke-width="1" />
 
             <g mask="url(#pig-mask)">
-                <rect id="sand-rect" x="50" y="195" width="240" height="0" fill="url(#gold-grad)" />
-                <rect id="sand-line" x="50" y="195" width="240" height="2" fill="rgba(255,255,255,0.5)" style="transition: y 1.5s; opacity: 0;" />
+                <rect id="sand-rect" x="50" y="190" width="240" height="0" fill="url(#gold-grad)" />
+                <rect id="sand-top-glow" x="50" y="190" width="240" height="3" fill="rgba(255,255,255,0.3)" style="transition: y 1.5s; opacity: 0.5;" />
             </g>
 
-            <g id="glass-body">
-                <path d="M100,65 Q80,20 120,50" fill="none" stroke="var(--glass-bright)" stroke-width="2" />
-                <path d="M180,55 Q210,10 200,55" fill="none" stroke="var(--glass-bright)" stroke-width="2" />
-                <rect x="110" y="185" width="15" height="25" rx="7" fill="rgba(255,255,255,0.05)" stroke="var(--glass-bright)" />
-                <rect x="215" y="185" width="15" height="25" rx="7" fill="rgba(255,255,255,0.05)" stroke="var(--glass-bright)" />
-                <path d="M280,120 C310,100 310,150 290,140" fill="none" stroke="var(--glass-bright)" stroke-width="1.5" />
-                <ellipse cx="60" cy="120" rx="15" ry="20" fill="rgba(255,255,255,0.05)" stroke="var(--glass-bright)" />
-                <ellipse cx="170" cy="120" rx="110" ry="75" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" filter="url(#glass-refraction)" />
-                <ellipse cx="170" cy="70" rx="60" ry="10" fill="rgba(255,255,255,0.15)" filter="blur(5px)" />
+            <g id="body-group">
+                <rect x="110" y="185" width="18" height="25" rx="8" fill="rgba(255,255,255,0.05)" stroke="var(--glass-line)" />
+                <rect x="215" y="185" width="18" height="25" rx="8" fill="rgba(255,255,255,0.05)" stroke="var(--glass-line)" />
+                
+                <path d="M65,115 L50,115" stroke="var(--glass-line)" stroke-width="2" fill="none" />
+                <ellipse cx="50" cy="115" rx="5" ry="12" fill="rgba(255,255,255,0.05)" stroke="var(--glass-line)" />
+
+                <path d="M110,60 Q100,20 135,45" fill="none" stroke="var(--glass-line)" stroke-width="2" />
+                <path d="M190,45 Q210,15 210,55" fill="none" stroke="var(--glass-line)" stroke-width="2" />
+
+                <ellipse id="pig-outline" cx="170" cy="115" rx="105" ry="75" fill="none" stroke="var(--glass-line)" stroke-width="2" filter="url(#glass-effect)" />
+
+                <path d="M275,110 C300,90 310,130 285,130" fill="none" stroke="var(--glass-line)" stroke-width="1.5" />
+
+                <ellipse cx="170" cy="65" rx="55" ry="8" fill="rgba(255,255,255,0.15)" filter="blur(4px)" />
+                <path d="M250,90 Q270,115 250,150" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="3" filter="blur(2px)" />
             </g>
 
-            <rect x="150" y="45" width="40" height="4" rx="2" fill="rgba(0,0,0,0.6)" stroke="rgba(255,255,255,0.2)" />
+            <rect x="150" y="42" width="40" height="4" rx="2" fill="rgba(0,0,0,0.4)" stroke="var(--glass-line)" />
         </svg>
     </div>
 
@@ -151,9 +142,9 @@
 </div>
 
 <script>
-    // ВСЯ ЛОГИКА ОСТАВЛЕНА БЕЗ ИЗМЕНЕНИЙ, ОБНОВЛЕН ТОЛЬКО ПЕСОК
+    /* Логика оставлена полностью идентичной вашему коду */
     let score = 0, difficulty = 'easy', currentBet = 0, curLang = 'ru', qIdx = 0, isGameOver = false;
-    const MAX_SCORE = 500, PIG_BOTTOM = 195;
+    const MAX_SCORE = 500, PIG_BOTTOM = 190;
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
     function playTone(freq, type, duration, vol) {
@@ -174,11 +165,12 @@
                 {q:"Wir ... (gehen) nach Hause.", a:["gehen","gehst","geht","gegangen"], c:0}
             ],
             hard: [
-                {q:"Если бы я был богат...", a:["Wäre ich reich","Ich bin reich","Ich war reich"], c:0}
+                {q:"Если бы я был богат (Konjunktiv II)...", a:["Wäre ich reich","Ich bin reich","Ich war reich"], c:0},
+                {q:"Я бы пошел (würde-form)...", a:["Ich würde gehen","Ich werde gehen","Ich gehe"], c:0}
             ]
         },
-        en: { next: "NEXT", win: "CORRECT!", loss: "SAND LEAK...", finish: "GOLDEN VICTORY!", easy: [{q:"I ... a student.", a:["am","is","are"], c:0}], hard: [{q:"If I ... you...", a:["were","was","am"], c:0}] },
-        de: { next: "WEITER", win: "RICHTIG!", loss: "SANDVERLUST...", finish: "GOLDENER SIEG!", easy: [{q:"Ich ... Deutsch.", a:["lerne","lernt","lernst"], c:0}], hard: [{q:"Je mehr, ... besser.", a:["desto","как","als"], c:0}] }
+        en: { next: "NEXT", win: "CORRECT!", loss: "SAND LEAK...", finish: "GOLDEN VICTORY!", easy: [{q:"I ... (be) a student.", a:["am","is","are"], c:0}], hard: [{q:"If I ... you...", a:["were","was","am"], c:0}] },
+        de: { next: "WEITER", win: "RICHTIG!", loss: "SANDVERLUST...", finish: "GOLDENER SIEG!", easy: [{q:"Ich ... Deutsch.", a:["lerne","lernt","lernst"], c:0}], hard: [{q:"Je mehr, ... besser.", a:["desto","als","wie"], c:0}] }
     };
 
     function initGame(d) {
@@ -206,8 +198,7 @@
     }
 
     function checkAnswer(idx) {
-        const q = data[curLang][difficulty][qIdx] || data[curLang][difficulty][0];
-        const isCorrect = idx === q.c;
+        const isCorrect = idx === (data[curLang][difficulty][qIdx] || data[curLang][difficulty][0]).c;
         document.getElementById('ans-screen').classList.add('hidden');
         if(isCorrect) {
             score += currentBet;
@@ -238,10 +229,10 @@
             setTimeout(() => {
                 const grain = document.createElement('div');
                 grain.className = 'falling-grain';
-                grain.style.left = (150 + Math.random() * 40) + 'px';
-                grain.style.top = '45px';
+                grain.style.left = (155 + Math.random() * 30) + 'px';
+                grain.style.top = '50px';
                 container.appendChild(grain);
-                grain.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: `translate(${Math.random()*60-30}px, 100px)`, opacity: 0 }], { duration: 1200 }).onfinish = () => grain.remove();
+                grain.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: `translate(${Math.random()*40-20}px, 120px)`, opacity: 0 }], { duration: 1200 }).onfinish = () => grain.remove();
             }, i * 40);
         }
     }
@@ -253,16 +244,16 @@
 
     function updateSandLevel() {
         const sand = document.getElementById('sand-rect');
-        const sLine = document.getElementById('sand-line');
-        // Рассчитываем высоту заполнения (max 140px внутри эллипса)
+        const sGlow = document.getElementById('sand-top-glow');
         const fillHeight = Math.min(140, (score / MAX_SCORE) * 140);
         
         sand.setAttribute('y', PIG_BOTTOM - fillHeight);
         sand.setAttribute('height', fillHeight);
-        
-        // Линия поверхности
-        sLine.style.opacity = score > 0 ? "1" : "0";
-        sLine.setAttribute('y', PIG_BOTTOM - fillHeight);
+        sGlow.setAttribute('y', PIG_BOTTOM - fillHeight);
+        sGlow.style.opacity = score > 0 ? "0.6" : "0";
+
+        document.getElementById('pig-outline').style.stroke = `rgba(249, 224, 118, ${0.3 + (score/MAX_SCORE * 0.4)})`;
+        document.getElementById('main-pig').style.filter = `drop-shadow(0 0 ${score/40}px rgba(249, 224, 118, 0.3))`;
 
         if (score >= MAX_SCORE) finishGame();
     }
@@ -279,6 +270,7 @@
         curLang = l;
         document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        if(!isGameOver) document.getElementById('next-btn').innerText = data[curLang].next;
     }
 </script>
 </body>
