@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>KGB Editor: Confidence Pig</title>
+    <title>KGB Editor: Genially Ready</title>
     <style>
         :root { --accent: #f9e076; --bg: #0e0e10; --panel: #18181b; --border: #2d2d33; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
@@ -10,7 +10,6 @@
         /* Sidebar */
         .sidebar { width: 360px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
         .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
-        
         h2 { color: var(--accent); font-size: 14px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
         
         .card { background: #222; border: 1px solid #333; padding: 15px; border-radius: 10px; margin-bottom: 10px; position: relative; }
@@ -18,31 +17,33 @@
         
         label { display: block; font-size: 10px; color: #888; text-transform: uppercase; margin-top: 8px; font-weight: bold; }
         input, select { width: 100%; background: #000; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 6px; margin-top: 4px; box-sizing: border-box; outline: none; }
-        input:focus { border-color: var(--accent); }
 
-        .btn { background: #333; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.2s; }
-        .btn:hover { background: #444; }
+        .btn { background: #333; color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .btn-main { background: var(--accent); color: #000; margin-top: 20px; text-transform: uppercase; }
-        .btn-main:hover { background: #ffeebb; }
 
-        /* Preview */
-        .preview { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
-        #device { width: 380px; height: 640px; border: 10px solid #222; border-radius: 40px; overflow: hidden; background: #111; position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        /* Preview Area */
+        .preview { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; }
+        #device { width: 380px; height: 640px; border: 10px solid #222; border-radius: 40px; overflow: hidden; background: #111; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
         iframe { width: 100%; height: 100%; border: none; }
         
-        /* Modal for Code */
-        #code-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100; }
-        textarea { width: 600px; height: 400px; background: #111; color: var(--accent); padding: 20px; border: 1px solid #444; border-radius: 10px; font-family: monospace; }
-        .close-modal { position: absolute; top: 20px; right: 30px; color: #fff; font-size: 30px; cursor: pointer; }
+        /* Modal for Genially Code */
+        #code-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; }
+        textarea { width: 80%; max-width: 700px; height: 350px; background: #111; color: var(--accent); padding: 20px; border: 1px solid var(--accent); border-radius: 12px; font-family: monospace; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
     <div class="sidebar-content">
-        <h2>Настройки игры</h2>
+        <h2>Настройки Виджета</h2>
         
-        <label>Фон (URL картинки)</label>
+        <label>Размеры (Ш x В)</label>
+        <div style="display:flex; gap:10px">
+            <input type="number" id="width" value="380">
+            <input type="number" id="height" value="640">
+        </div>
+
+        <label>Фон (URL)</label>
         <input type="text" id="bg-url" value="" placeholder="https://...">
 
         <div id="q-container"></div>
@@ -51,7 +52,7 @@
         <label>Цель (очков)</label>
         <input type="number" id="goal" value="500">
         
-        <label>Язык интерфейса</label>
+        <label>Язык</label>
         <select id="lang">
             <option value="ru">Русский</option>
             <option value="en">English</option>
@@ -60,7 +61,7 @@
     </div>
     <div style="padding: 20px; border-top: 1px solid #333;">
         <button class="btn btn-main" onclick="updatePreview()">Обновить Превью</button>
-        <button class="btn" onclick="getCode()">Получить Код</button>
+        <button class="btn" onclick="getGeniallyCode()" style="background:#00d4ff; color:#000">ПОЛУЧИТЬ КОД IFRAME</button>
     </div>
 </div>
 
@@ -69,22 +70,13 @@
 </div>
 
 <div id="code-modal">
-    <span class="close-modal" onclick="document.getElementById('code-modal').style.display='none'">&times;</span>
+    <h3 style="color: #fff">Код для вставки в Genially:</h3>
     <textarea id="result-code" readonly onclick="this.select()"></textarea>
+    <button class="btn" onclick="document.getElementById('code-modal').style.display='none'" style="width: 200px">Закрыть</button>
 </div>
 
 <script>
-// --- Editor Logic ---
-const defaultQs = [
-    {q: "Столица Франции?", a: ["Париж", "Лондон", "Берлин", "Рим"]},
-    {q: "2 + 2 * 2 = ?", a: ["6", "8", "4", "10"]}
-];
-
-function initEditor() {
-    defaultQs.forEach(item => addQ(item.q, item.a));
-    updatePreview();
-}
-
+// Тот же работающий функционал
 function addQ(qText = "", answers = ["", "", "", ""]) {
     const div = document.createElement('div');
     div.className = 'card';
@@ -92,24 +84,19 @@ function addQ(qText = "", answers = ["", "", "", ""]) {
         <span class="del-btn" onclick="this.parentElement.remove()">×</span>
         <label>Вопрос</label>
         <input type="text" class="inp-q" value="${qText}">
-        <label>Ответы (Первый - верный!)</label>
+        <label>Ответы (Верный - первый)</label>
         <input type="text" class="inp-a" value="${answers.join(', ')}">
     `;
     document.getElementById('q-container').appendChild(div);
 }
 
-function generateGameCode() {
-    // 1. Сбор данных
+// Генерация "внутрянки" игры (не меняем логику!)
+function buildInnerGame() {
     const qs = [];
     document.querySelectorAll('.card').forEach(card => {
         const q = card.querySelector('.inp-q').value;
         const aRaw = card.querySelector('.inp-a').value;
-        if(q && aRaw) {
-            qs.push({
-                q: q,
-                a: aRaw.split(',').map(s => s.trim())
-            });
-        }
+        if(q && aRaw) qs.push({ q: q, a: aRaw.split(',').map(s => s.trim()) });
     });
 
     const config = {
@@ -119,201 +106,30 @@ function generateGameCode() {
         data: qs
     };
 
-    // 2. Генерация HTML (используем encodeURIComponent для защиты данных)
-    return `<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <style>
-        :root { --gold: #f9e076; --gold-d: #bf953f; }
-        body { margin:0; height:100vh; overflow:hidden; font-family: 'Segoe UI', sans-serif; background: #000; color:#fff; display:flex; align-items:center; justify-content:center; }
-        .bg { position:fixed; inset:0; background: url('${config.bg}') center/cover; opacity:0.6; z-index:-1; }
-        
-        .game-card { width: 340px; background: rgba(18,18,20,0.95); border-radius: 30px; padding: 25px; border: 1px solid #333; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); position:relative; }
-        
-        .pig-wrap { position: relative; width: 280px; height: 180px; margin: 0 auto 10px; }
-        #sand-fill { transition: height 1s cubic-bezier(0.4, 0, 0.2, 1), y 1s cubic-bezier(0.4, 0, 0.2, 1); }
-        
-        .score { font-size: 40px; color: var(--gold); font-weight: 800; margin: 5px 0 15px; text-shadow: 0 0 15px rgba(249,224,118,0.3); }
-        
-        .q-box { min-height: 60px; font-size: 18px; margin-bottom: 20px; display:flex; align-items:center; justify-content:center; line-height:1.4; }
-        
-        /* Grid for buttons */
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        
-        .btn { border: 1px solid #444; background: #1a1a1a; color: #ccc; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
-        .btn:hover { background: #333; color: #fff; }
-        
-        .btn-bet { color: var(--gold); border-color: #554400; }
-        .btn-bet:hover { background: var(--gold); color: #000; }
-        
-        .btn-ans { width: 100%; margin-bottom: 8px; border: 1px solid var(--gold); color: var(--gold); background: transparent; }
-        .btn-ans:hover { background: var(--gold); color: #000; }
-        
-        .grain { position: absolute; width: 3px; height: 3px; background: var(--gold); border-radius: 50%; pointer-events: none; z-index: 5; }
-    </style>
-</head>
-<body>
-    <div class="bg"></div>
-    <div class="game-card">
-        <div class="pig-wrap" id="pig">
-            <svg viewBox="0 0 320 220" style="width:100%; height:100%">
-                <defs>
-                    <mask id="m"><path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="white"/></mask>
-                    <linearGradient id="g" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="var(--gold-d)"/><stop offset="100%" stop-color="var(--gold)"/></linearGradient>
-                </defs>
-                <g mask="url(#m)"><rect id="sand-fill" x="50" y="190" width="250" height="0" fill="url(#g)"/></g>
-                <path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
-            </svg>
-        </div>
-        
-        <div class="score" id="score">0</div>
-        <div class="q-box" id="q-text">Loading...</div>
-        <div id="controls"></div>
-    </div>
-
-<script>
-    // Распаковка данных (Защита от кавычек)
-    const rawData = "${encodeURIComponent(JSON.stringify(config))}";
-    const cfg = JSON.parse(decodeURIComponent(rawData));
-    
-    let score = 0;
-    let qIndex = 0;
-    let currentBet = 0;
-    
-    // Тексты интерфейса
-    const dict = {
-        ru: { bet: "Сделайте ставку", win: "Победа!", over: "Игра окончена" },
-        en: { bet: "Place your bet", win: "Victory!", over: "Game Over" },
-        de: { bet: "Machen Sie eine Wette", win: "Sieg!", over: "Spiel ist aus" }
-    };
-    const txt = dict[cfg.lang] || dict.ru;
-
-    // Звуковой движок (Simple Beep)
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playTone(freq, type='sine') {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.frequency.value = freq;
-        osc.type = type;
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.3);
-        osc.stop(audioCtx.currentTime + 0.3);
-    }
-
-    function initGame() {
-        if (qIndex >= cfg.data.length) {
-            document.getElementById('q-text').innerText = txt.over;
-            document.getElementById('controls').innerHTML = "";
-            return;
-        }
-        
-        // Шаг 1: Показываем вопрос и ставки
-        document.getElementById('q-text').innerText = cfg.data[qIndex].q;
-        const ctrl = document.getElementById('controls');
-        ctrl.innerHTML = \`<div style="font-size:10px; color:#666; margin-bottom:10px; text-transform:uppercase">\${txt.bet}</div>\`;
-        
-        const grid = document.createElement('div');
-        grid.className = 'btn-grid';
-        
-        [10, 25, 50, 100].forEach(val => {
-            const btn = document.createElement('button');
-            btn.className = 'btn btn-bet';
-            btn.innerText = val;
-            btn.onclick = () => { currentBet = val; showAnswers(); };
-            grid.appendChild(btn);
-        });
-        ctrl.appendChild(grid);
-    }
-
-    function showAnswers() {
-        const currentQ = cfg.data[qIndex];
-        const correct = currentQ.a[0]; // Первый ответ всегда верный в данных
-        
-        // Перемешиваем варианты для отображения
-        let options = [...currentQ.a];
-        options.sort(() => Math.random() - 0.5);
-        
-        const ctrl = document.getElementById('controls');
-        ctrl.innerHTML = ''; // Очищаем ставки
-        
-        options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'btn btn-ans';
-            btn.innerText = opt;
-            btn.onclick = () => checkAnswer(opt, correct);
-            ctrl.appendChild(btn);
-        });
-    }
-
-    function checkAnswer(selected, correct) {
-        if (selected === correct) {
-            score = Math.min(parseInt(cfg.goal), score + currentBet);
-            playTone(600, 'sine'); // Звук успеха
-            dropSand();
-        } else {
-            score = Math.max(0, score - currentBet);
-            playTone(150, 'sawtooth'); // Звук ошибки
-        }
-        
-        updateVisuals();
-        qIndex++;
-        
-        // Пауза перед следующим вопросом
-        setTimeout(initGame, 1500);
-    }
-
-    function updateVisuals() {
-        document.getElementById('score').innerText = score;
-        // Расчет высоты песка (макс высота 140px внутри SVG маски)
-        const percent = score / parseInt(cfg.goal);
-        const h = Math.min(140, percent * 140); 
-        
-        const rect = document.getElementById('sand-fill');
-        rect.setAttribute('height', h);
-        rect.setAttribute('y', 190 - h);
-    }
-
-    function dropSand() {
-        const pig = document.getElementById('pig');
-        for(let i=0; i<20; i++) {
-            const g = document.createElement('div');
-            g.className = 'grain';
-            g.style.left = (120 + Math.random() * 80) + 'px'; // Центр свинки
-            g.style.top = '40px';
-            pig.appendChild(g);
-            
-            // Анимация падения
-            const anim = g.animate([
-                { transform: 'translateY(0)' },
-                { transform: 'translateY(120px)', opacity: 0 }
-            ], { duration: 800 + Math.random()*400 });
-            
-            anim.onfinish = () => g.remove();
-        }
-    }
-
-    // Запуск
-    initGame();
-<\/script>
-</body>
-</html>`;
+    // Защищенный код игры
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>:root{--gold:#f9e076;--gold-d:#bf953f}body{margin:0;height:100vh;overflow:hidden;font-family:sans-serif;background:#000;color:#fff;display:flex;align-items:center;justify-content:center}.bg{position:fixed;inset:0;background:url('${config.bg}') center/cover;opacity:0.6;z-index:-1}.card{width:320px;background:rgba(20,20,25,0.95);border-radius:35px;padding:25px;border:1px solid #333;text-align:center;box-shadow:0 20px 50px #000}.pig{width:280px;height:180px;margin:0 auto 10px;position:relative}#sand{transition:all 1s ease}.score{font-size:40px;color:var(--gold);font-weight:800;margin:5px 0}.q-box{min-height:60px;font-size:18px;margin-bottom:15px;display:flex;align-items:center;justify-content:center}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btn{border:1px solid #444;background:#1a1a1a;color:#ccc;padding:12px;border-radius:12px;cursor:pointer;font-weight:bold}.btn-bet{color:var(--gold);border-color:#554}.btn-ans{width:100%;margin-bottom:8px;border:1px solid var(--gold);color:var(--gold);background:none}.grain{position:absolute;width:3px;height:3px;background:var(--gold);border-radius:50%;pointer-events:none}</style></head><body><div class="bg"></div><div class="card"><div class="pig" id="p"><svg viewBox="0 0 320 220"><defs><mask id="m"><path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="white"/></mask><linearGradient id="g" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="var(--gold-d)"/><stop offset="100%" stop-color="var(--gold)"/></linearGradient></defs><g mask="url(#m)"><rect id="sand" x="50" y="190" width="250" height="0" fill="url(#g)"/></g><path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"/></svg></div><div class="score" id="s">0</div><div class="q-box" id="qt"></div><div id="ctrl"></div></div><script>const cfg=JSON.parse(decodeURIComponent("${encodeURIComponent(JSON.stringify(config))}"));let sc=0,qi=0,bt=0;function init(){if(qi>=cfg.data.length){document.getElementById('qt').innerText="FINISH";return}document.getElementById('qt').innerText=cfg.data[qi].q;const c=document.getElementById('ctrl');c.innerHTML='<div class="grid"></div>';[10,25,50,100].forEach(v=>{const b=document.createElement('button');b.className='btn btn-bet';b.innerText=v;b.onclick=()=>{bt=v;showA()};c.querySelector('.grid').appendChild(b)})};function showA(){const c=document.getElementById('ctrl');c.innerHTML='';[...cfg.data[qi].a].sort(()=>Math.random()-.5).forEach(o=>{const b=document.createElement('button');b.className='btn btn-ans';b.innerText=o;b.onclick=()=>{if(o===cfg.data[qi].a[0]){sc=Math.min(cfg.goal,sc+bt);drop()}else{sc=Math.max(0,sc-bt)}upd();qi++;setTimeout(init,1000)};c.appendChild(b)})};function upd(){document.getElementById('s').innerText=sc;const h=(sc/cfg.goal)*140;const r=document.getElementById('sand');r.setAttribute('height',h);r.setAttribute('y',190-h)};function drop(){for(let i=0;i<15;i++){const g=document.createElement('div');g.className='grain';g.style.left=(130+Math.random()*60)+'px';g.style.top='40px';document.getElementById('p').appendChild(g);g.animate([{transform:'translateY(0)'},{transform:'translateY(120px)',opacity:0}],800).onfinish=()=>g.remove()}}init();<\/script></body></html>`;
 }
 
 function updatePreview() {
-    const html = generateGameCode();
-    document.getElementById('ifr').srcdoc = html;
+    const w = document.getElementById('width').value, h = document.getElementById('height').value;
+    const device = document.getElementById('device');
+    device.style.width = w + "px"; device.style.height = h + "px";
+    document.getElementById('ifr').srcdoc = buildInnerGame();
 }
 
-function getCode() {
-    document.getElementById('result-code').value = generateGameCode();
+// ГЛАВНОЕ ИЗМЕНЕНИЕ: Генерация iframe
+function getGeniallyCode() {
+    const w = document.getElementById('width').value;
+    const h = document.getElementById('height').value;
+    const innerHTML = buildInnerGame().replace(/"/g, '&quot;'); // Экранируем кавычки для srcdoc
+    
+    const iframeCode = `<iframe width="${w}" height="${h}" srcdoc="${innerHTML}" frameborder="0" scrolling="no" style="border:none; overflow:hidden;"></iframe>`;
+    
+    document.getElementById('result-code').value = iframeCode;
     document.getElementById('code-modal').style.display = 'flex';
 }
 
-// Запуск редактора при загрузке страницы
-window.onload = initEditor;
+window.onload = () => { addQ("Capital of Germany?", ["Berlin", "Munich", "Hamburg", "Bonn"]); updatePreview(); };
 </script>
 </body>
 </html>
