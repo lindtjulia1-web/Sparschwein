@@ -2,117 +2,106 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        :root { 
-            --gold-sand: linear-gradient(to top, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); 
-            --bg: #0b0b0d;
-        }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; background: transparent; color: #fff; overflow: hidden; }
-        
-        .widget-container {
-            width: 380px; margin: 10px auto; padding: 20px;
-            background: rgba(20, 20, 20, 0.95); border-radius: 30px;
-            border: 2px solid #444; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        :root {
+            --gold: #f9e076;
+            --gold-gradient: linear-gradient(to top, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            --bg: #121212;
+            --panel: #1a1a1a;
         }
 
-        /* Языковой переключатель */
-        .lang-bar { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
-        .lang-btn { 
-            background: #222; border: 1px solid #555; color: #aaa; 
-            padding: 4px 8px; cursor: pointer; border-radius: 5px; font-size: 10px;
-        }
-        .lang-btn.active { border-color: #f9e076; color: #f9e076; }
-
-        /* Емкость с песком */
-        .glass-container { position: relative; width: 220px; height: 160px; margin: 0 auto 15px; }
-        
-        .sand-fill { 
-            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
-            width: 140px; background: var(--gold-sand); 
-            transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1; border-radius: 0 0 50px 50px;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        body {
+            background: transparent;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            color: white;
+            height: 100vh;
         }
 
-        /* Текстура песка */
-        .sand-fill::after {
-            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0.15;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        .widget {
+            width: 320px;
+            background: var(--panel);
+            padding: 25px;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            border: 1px solid #333;
+            position: relative;
         }
 
-        .glass-img { position: relative; width: 100%; height: 100%; object-fit: contain; z-index: 2; pointer-events: none; }
-
-        .score { font-size: 36px; color: #f9e076; font-weight: bold; margin: 10px 0; text-shadow: 0 0 15px rgba(212,175,55,0.5); }
-        
-        .controls { display: flex; justify-content: center; gap: 10px; }
-        .btn { 
-            background: #1a1a1a; border: 1px solid #d4af37; color: #d4af37; 
-            padding: 10px 20px; font-size: 16px; cursor: pointer; 
-            border-radius: 12px; transition: 0.2s;
+        /* Переключатель языков */
+        .lang-select {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 20px;
         }
-        .btn:hover { background: #d4af37; color: #000; transform: translateY(-2px); }
-        .hidden { display: none; }
-    </style>
-</head>
-<body>
 
-<div class="widget-container">
-    <div class="lang-bar">
-        <button class="lang-btn active" onclick="changeLang('ru', this)">RU</button>
-        <button class="lang-btn" onclick="changeLang('en', this)">EN</button>
-        <button class="lang-btn" onclick="changeLang('de', this)">DE</button>
-    </div>
-
-    <div class="glass-container">
-        <div id="sand" class="sand-fill" style="height: 0%"></div>
-        <img class="glass-img" src="https://i.ibb.co/pX99S99/glass-pig.png">
-    </div>
-
-    <div class="score" id="score-display">0</div>
-    <p id="label-text" style="color: #888; margin-top: 0; font-size: 14px;">Золотой запас</p>
-
-    <div id="bet-btns" class="controls">
-        <button class="btn" onclick="addSand(10)">10</button>
-        <button class="btn" onclick="addSand(25)">25</button>
-        <button class="btn" onclick="addSand(50)">50</button>
-    </div>
-</div>
-
-<script>
-    let currentScore = 0;
-    const maxCapacity = 250;
-
-    const texts = {
-        ru: { label: "Золотой запас" },
-        en: { label: "Golden Reserve" },
-        de: { label: "Goldreserven" }
-    };
-
-    function changeLang(lang, btn) {
-        document.getElementById('label-text').innerText = texts[lang].label;
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-    }
-
-    function addSand(amount) {
-        currentScore += amount;
-        updateWidget();
-    }
-
-    function updateWidget() {
-        document.getElementById('score-display').innerText = currentScore;
-        
-        // Расчет высоты песка (макс 70% от высоты контейнера)
-        let fillPercent = Math.min(70, (currentScore / maxCapacity) * 70);
-        document.getElementById('sand').style.height = fillPercent + '%';
-        
-        // Эффект легкого «свечения» при наполнении
-        if (currentScore >= maxCapacity) {
-            document.getElementById('sand').style.boxShadow = "0 0 30px #f9e076";
+        .lang-btn {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #888;
+            font-size: 10px;
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.3s;
         }
-    }
-</script>
-</body>
-</html>
+
+        .lang-btn.active {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: #332b12;
+        }
+
+        /* Контейнер для песка и свинки */
+        .pig-container {
+            position: relative;
+            width: 200px;
+            height: 150px;
+            margin: 0 auto;
+        }
+
+        /* SVG Свинка (используем встроенную, чтобы не зависеть от ссылок) */
+        .pig-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            fill: none;
+            stroke: rgba(255,255,255,0.4);
+            stroke-width: 1.5;
+        }
+
+        /* Маска для песка, чтобы он не выходил за края свинки */
+        .sand-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            overflow: hidden;
+            clip-path: path('M100,20 C140,20 180,45 180,85 C180,125 140,140 100,140 C60,140 20,125 20,85 C20,45 60,20 100,20 Z'); /* Упрощенный контур */
+        }
+
+        .sand-level {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: var(--gold-gradient);
+            transition: height 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .score {
+            font-size: 42px;
+            font-weight: bold;
+            color: var(--gold);
