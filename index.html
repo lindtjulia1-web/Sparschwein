@@ -6,7 +6,6 @@
         :root {
             --gold: #f9e076;
             --gold-gradient: linear-gradient(to top, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-            --bg: #111111;
         }
 
         body {
@@ -31,7 +30,6 @@
             position: relative;
         }
 
-        /* Выбор языка */
         .lang-switch {
             position: absolute;
             top: 15px;
@@ -47,35 +45,43 @@
             padding: 4px 8px;
             cursor: pointer;
             border-radius: 6px;
-            transition: 0.3s;
         }
         .lang-btn.active {
             border-color: var(--gold);
             color: var(--gold);
         }
 
-        .pig-box {
+        /* Контейнер для свинки и маскированного песка */
+        .pig-wrapper {
             position: relative;
             width: 220px;
             height: 160px;
-            margin: 10px auto 10px;
+            margin: 10px auto;
         }
 
-        .sand-container {
+        /* Слой песка с маской по форме свинки */
+        .sand-mask-container {
             position: absolute;
-            bottom: 32px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 140px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Маска, ограничивающая песок контуром свинки */
+            clip-path: path('M100,20 C150,20 190,50 190,90 C190,130 150,145 100,145 C50,145 10,130 10,90 C10,50 50,20 100,20');
+            z-index: 1;
+        }
+
+        .sand-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
             height: 0%;
             background: var(--gold-gradient);
             transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1;
-            border-radius: 0 0 50px 50px;
-            overflow: hidden;
         }
 
-        .pig-svg {
+        .pig-outline {
             position: absolute;
             top: 0;
             left: 0;
@@ -83,12 +89,13 @@
             height: 100%;
             z-index: 2;
             fill: none;
-            stroke: rgba(255,255,255,0.3);
+            stroke: rgba(255,255,255,0.4);
             stroke-width: 2;
+            pointer-events: none;
         }
 
         .q-text { min-height: 50px; font-size: 18px; margin: 15px 0; color: #eee; }
-        .score { font-size: 38px; color: var(--gold); font-weight: bold; margin-bottom: 5px; }
+        .score { font-size: 38px; color: var(--gold); font-weight: bold; }
         
         .btn-group { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
         .btn {
@@ -112,9 +119,12 @@
         <button class="lang-btn" onclick="setLang('de', this)">DE</button>
     </div>
 
-    <div class="pig-box">
-        <div id="sand" class="sand-container"></div>
-        <svg class="pig-svg" viewBox="0 0 200 150">
+    <div class="pig-wrapper">
+        <div class="sand-mask-container">
+            <div id="sand" class="sand-fill"></div>
+        </div>
+        
+        <svg class="pig-outline" viewBox="0 0 200 150">
             <path d="M100,20 C150,20 190,50 190,90 C190,130 150,145 100,145 C50,145 10,130 10,90 C10,50 50,20 100,20" />
             <path d="M185,85 L200,85 M200,85 L200,105 L188,100" stroke-width="3"/>
             <circle cx="160" cy="70" r="2" fill="white"/>
@@ -154,8 +164,8 @@
         ru: {
             betLabel: "СДЕЛАЙТЕ СТАВКУ ПЕСКОМ",
             nextBtn: "СЛЕДУЮЩИЙ ВОПРОС",
-            correct: "ВЕРНО! ПЕСОК ПРИБАВЛЕН",
-            wrong: "ОШИБКА! ВЫ ПОТЕРЯЛИ ПЕСОК",
+            correct: "ВЕРНО!",
+            wrong: "ОШИБКА!",
             questions: [
                 { q: "Эмиль ... завтракал в девять часов.", a: ["hat", "ist"], c: 0 },
                 { q: "Мы ... вчера были в кино.", a: ["haben", "sind"], c: 1 },
@@ -165,8 +175,8 @@
         en: {
             betLabel: "PLACE YOUR SAND BET",
             nextBtn: "NEXT QUESTION",
-            correct: "CORRECT! SAND ADDED",
-            wrong: "WRONG! YOU LOST SAND",
+            correct: "CORRECT!",
+            wrong: "WRONG!",
             questions: [
                 { q: "Emil ... had breakfast at nine o'clock.", a: ["hat", "ist"], c: 0 },
                 { q: "We ... were at the cinema yesterday.", a: ["haben", "sind"], c: 1 },
@@ -176,8 +186,8 @@
         de: {
             betLabel: "WÄHLEN SIE IHREN SAND-EINSATZ",
             nextBtn: "NÄCHSTE FRAGE",
-            correct: "RICHTIG! SAND HINZUGEFÜGT",
-            wrong: "FALSCH! SAND VERLOREN",
+            correct: "RICHTIG!",
+            wrong: "FALSCH!",
             questions: [
                 { q: "Emil ... um neun Uhr gefrühstückt.", a: ["hat", "ist"], c: 0 },
                 { q: "Wir ... gestern im Kino gewesen.", a: ["haben", "sind"], c: 1 },
@@ -196,20 +206,17 @@
     function startStage(val) {
         currentBet = val;
         document.getElementById('bet-screen').classList.add('hidden');
-        
         const list = document.getElementById('ans-list');
         list.innerHTML = '';
         i18n[curLang].questions[qIdx].a.forEach((text, i) => {
             list.innerHTML += `<button class="btn btn-ans" onclick="finishStage(${i})">${text}</button>`;
         });
-        
         document.getElementById('ans-screen').classList.remove('hidden');
     }
 
     function finishStage(idx) {
         const isWin = idx === i18n[curLang].questions[qIdx].c;
         const msg = document.getElementById('res-msg');
-        
         if(isWin) {
             totalScore += currentBet;
             msg.innerText = i18n[curLang].correct;
@@ -219,7 +226,6 @@
             msg.innerText = i18n[curLang].wrong;
             msg.style.color = "#ff5252";
         }
-
         updateSand();
         document.getElementById('total-val').innerText = totalScore;
         document.getElementById('ans-screen').classList.add('hidden');
@@ -235,7 +241,8 @@
     }
 
     function updateSand() {
-        let height = Math.min(75, (totalScore / 250) * 75);
+        // Максимальное заполнение при 300 очках (85% высоты контейнера)
+        let height = Math.min(85, (totalScore / 300) * 85);
         document.getElementById('sand').style.height = height + '%';
     }
 
