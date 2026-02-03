@@ -5,7 +5,7 @@
     <style>
         :root {
             --gold: #f9e076;
-            --gold-gradient: linear-gradient(to top, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            --gold-deep: #bf953f;
             --error-red: #ff5252;
         }
         body { background: #0a0a0a; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
@@ -32,7 +32,7 @@
             filter: url(#shimmer);
         }
 
-        .falling-grain { position: absolute; width: 4px; height: 4px; background: var(--gold); border-radius: 50%; z-index: 10; pointer-events: none; }
+        .falling-grain { position: absolute; width: 4px; height: 4px; background: #ffe680; border-radius: 50%; z-index: 10; pointer-events: none; }
         .leak-grain { position: absolute; width: 3px; height: 3px; background: #555; border-radius: 50%; z-index: 10; pointer-events: none; }
         
         .confetti { position: absolute; width: 8px; height: 8px; z-index: 100; pointer-events: none; border-radius: 2px; }
@@ -41,7 +41,7 @@
         .q-text { min-height: 80px; font-size: 18px; color: #ddd; margin: 15px 0; line-height: 1.4; display: flex; align-items: center; justify-content: center; }
         
         .btn-group { display: flex; flex-direction: column; gap: 10px; align-items: center; }
-        .row { display: flex; gap: 10px; justify-content: center; width: 100%; }
+        .row { display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap; }
         
         .btn {
             background: transparent; border: 1px solid var(--gold); color: var(--gold);
@@ -49,7 +49,7 @@
             text-transform: uppercase; letter-spacing: 1px;
         }
         .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(249, 224, 118, 0.4); }
-        .btn-ans { border-color: #333; color: #fff; width: 100%; }
+        .btn-ans { border-color: #333; color: #fff; width: 45%; font-size: 12px; padding: 10px; }
 
         .feedback { font-size: 14px; font-weight: bold; margin-bottom: 10px; min-height: 20px; }
         .hidden { display: none; }
@@ -79,14 +79,14 @@
                 </mask>
                 <linearGradient id="gold-grad" x1="0" y1="1" x2="0" y2="0">
                     <stop offset="0%" stop-color="#bf953f" />
-                    <stop offset="50%" stop-color="#fcf6ba" />
-                    <stop offset="100%" stop-color="#aa771c" />
+                    <stop offset="30%" stop-color="#f9e076" />
+                    <stop offset="60%" stop-color="#fcf6ba" />
+                    <stop offset="100%" stop-color="#b38728" />
                 </linearGradient>
                 <filter id="shimmer">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" result="noise">
-                        <animate attributeName="baseFrequency" values="0.8;0.85;0.8" dur="2s" repeatCount="indefinite" />
-                    </feTurbulence>
-                    <feComposite operator="in" in="noise" in2="SourceGraphic" />
+                    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" result="noise" />
+                    <feColorMatrix type="matrix" values="1 0 0 0 0.9  0 1 0 0 0.7  0 0 1 0 0.2  0 0 0 1 0" />
+                    <feComposite operator="in" in2="SourceGraphic" />
                 </filter>
             </defs>
 
@@ -124,7 +124,7 @@
         </div>
 
         <div id="ans-screen" class="hidden">
-            <div class="btn-group" id="ans-list"></div>
+            <div class="row" id="ans-list"></div>
         </div>
 
         <div id="res-screen" class="hidden">
@@ -164,52 +164,52 @@
         ru: { 
             next: "ДАЛЕЕ", win: "ВЕРНО!", loss: "УТЕЧКА ПЕСКА...", finish: "ЗОЛОТОЕ ИЗОБИЛИЕ!",
             easy: [
-                {q:"Ich ... (haben) ein Haus.", a:["habe","hast"], c:0},
-                {q:"Du ... (sein) schön.", a:["bist","sind"], c:0},
-                {q:"Wir ... (gehen) nach Hause.", a:["gehen","gehst"], c:0},
-                {q:"Er ... (essen) Apfel.", a:["isst","essen"], c:0},
-                {q:"Sie ... (trinken) Wasser.", a:["trinkt","trinken"], c:0}
+                {q:"Ich ... (haben) ein Haus.", a:["habe","hast","hat","haben"], c:0},
+                {q:"Du ... (sein) schön.", a:["bist","ist","sind","bin"], c:0},
+                {q:"Wir ... (gehen) nach Hause.", a:["gehen","gehst","geht","gegangen"], c:0},
+                {q:"Er ... (essen) Apfel.", a:["isst","essen","esst","esse"], c:0},
+                {q:"Sie ... (trinken) Wasser.", a:["trinkt","trinken","trinkst","getrunken"], c:0}
             ],
             hard: [
-                {q:"Если бы я был богат (Konjunktiv II)...", a:["Wäre ich reich","Ich bin reich"], c:0},
-                {q:"Я бы пошел (würde-form)...", a:["Ich würde gehen","Ich werde gehen"], c:0},
-                {q:"Несмотря на дождь...", a:["Trotz des Regens","Wegen dem Regen"], c:0},
-                {q:"Я жду тебя (Präposition)...", a:["Ich warte auf dich","Ich warte für dich"], c:0},
-                {q:"Она сказала, что придет...", a:["..., dass sie kommt","..., weil sie kommt"], c:0}
+                {q:"Если бы я был богат (Konjunktiv II)...", a:["Wäre ich reich","Ich bin reich","Ich war reich","Würde ich reich"], c:0},
+                {q:"Я бы пошел (würde-form)...", a:["Ich würde gehen","Ich werde gehen","Ich bin gegangen","Ich gehe"], c:0},
+                {q:"Несмотря на дождь...", a:["Trotz des Regens","Wegen dem Regen","Bei dem Regen","Trotz dem Regen"], c:0},
+                {q:"Я жду тебя (Präposition)...", a:["Ich warte auf dich","Ich warte für dich","Ich warte dich","Ich warte an dich"], c:0},
+                {q:"Она сказала, что придет...", a:["..., dass sie kommt","..., weil sie kommt","..., ob она kommt","..., когда sie kommt"], c:0}
             ]
         },
         en: { 
             next: "NEXT", win: "CORRECT!", loss: "SAND LEAK...", finish: "GOLDEN VICTORY!",
             easy: [
-                {q:"I ... (be) a student.", a:["am","is"], c:0},
-                {q:"They ... (play) football.", a:["play","plays"], c:0},
-                {q:"She ... (like) pizza.", a:["likes","like"], c:0},
-                {q:"We ... (go) to school.", a:["go","goes"], c:0},
-                {q:"He ... (have) a dog.", a:["has","have"], c:0}
+                {q:"I ... (be) a student.", a:["am","is","are","be"], c:0},
+                {q:"They ... (play) football.", a:["play","plays","playing","played"], c:0},
+                {q:"She ... (like) pizza.", a:["likes","like","liking","liked"], c:0},
+                {q:"We ... (go) to school.", a:["go","goes","going","gone"], c:0},
+                {q:"He ... (have) a dog.", a:["has","have","having","had"], c:0}
             ],
             hard: [
-                {q:"If I ... you, I would go.", a:["were","was"], c:0},
-                {q:"She ... here for 5 years.", a:["has been","is"], c:0},
-                {q:"By tomorrow, I ... it.", a:["will have done","will do"], c:0},
-                {q:"I look forward to ... you.", a:["seeing","see"], c:0},
-                {q:"Hardly ... when it rain.", a:["had I left","I left"], c:0}
+                {q:"If I ... you, I would go.", a:["were","was","am","be"], c:0},
+                {q:"She ... here for 5 years.", a:["has been","is","was","has being"], c:0},
+                {q:"By tomorrow, I ... it.", a:["will have done","will do","did","have done"], c:0},
+                {q:"I look forward to ... you.", a:["seeing","see","to see","seen"], c:0},
+                {q:"Hardly ... when it rain.", a:["had I left","I left","I have left","did I leave"], c:0}
             ]
         },
         de: { 
             next: "WEITER", win: "RICHTIG!", loss: "SANDVERLUST...", finish: "GOLDENER SIEG!",
             easy: [
-                {q:"Ich ... (lernen) Deutsch.", a:["lerne","lernst"], c:0},
-                {q:"Das ... (sein) gut.", a:["ist","sind"], c:0},
-                {q:"Mein Vater ... (arbeiten).", a:["arbeitet","arbeiten"], c:0},
-                {q:"Das Wetter ... (sein) kalt.", a:["ist","sind"], c:0},
-                {q:"Wo ... (wohnen) du?", a:["wohnst","wohnen"], c:0}
+                {q:"Ich ... (lernen) Deutsch.", a:["lerne","lernst","lernt","lernen"], c:0},
+                {q:"Das ... (sein) gut.", a:["ist","sind","bin","seid"], c:0},
+                {q:"Mein Vater ... (arbeiten).", a:["arbeitet","arbeiten","arbeitest","gearbeitet"], c:0},
+                {q:"Das Wetter ... (sein) kalt.", a:["ist","sind","war","wäre"], c:0},
+                {q:"Wo ... (wohnen) du?", a:["wohnst","wohnen","wohnt","wohnte"], c:0}
             ],
             hard: [
-                {q:"Nachdem er ... (essen), ging er.", a:["gegessen hatte","aß"], c:0},
-                {q:"Das Haus, ... ich wohne.", a:["in dem","das"], c:0},
-                {q:"Statt ... (helfen), schlief er.", a:["zu helfen","hilft"], c:0},
-                {q:"Je mehr, ... besser.", a:["desto","als"], c:0},
-                {q:"Er tut так, als ... er reich.", a:["wäre","ist"], c:0}
+                {q:"Nachdem er ... (essen), ging er.", a:["gegessen hatte","aß","essen","hat gegessen"], c:0},
+                {q:"Das Haus, ... ich wohne.", a:["in dem","das","welches","worin"], c:0},
+                {q:"Statt ... (helfen), schlief er.", a:["zu helfen","hilft","helfen","geholfen"], c:0},
+                {q:"Je mehr, ... besser.", a:["desto","als","wie","umso"], c:0},
+                {q:"Er tut so, als ... er reich.", a:["wäre","ist","sei","war"], c:0}
             ]
         }
     };
@@ -269,7 +269,6 @@
 
     function nextAction() {
         qIdx++;
-        // Если вопросы в текущем уровне кончились
         if (qIdx >= data[curLang][difficulty].length) {
             if (difficulty === 'easy') {
                 difficulty = 'hard';
@@ -277,7 +276,6 @@
                 document.getElementById('diff-tag').innerText = `LEVEL: BONUS HARD`;
                 showBetScreen();
             } else {
-                // Если кончились и в харде, но золото не набрано - повторяем хард рандомно или по кругу
                 qIdx = 0;
                 showBetScreen();
             }
@@ -358,7 +356,6 @@
         curLang = l;
         document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        // Обновляем текст кнопки, если она видна
         if(!isGameOver) {
              document.getElementById('next-btn').innerText = data[curLang].next;
         }
