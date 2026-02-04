@@ -2,241 +2,269 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>KGB Pirate Editor Fix</title>
     <style>
-        :root { --accent: #f9e076; --bg: #1e1e24; --panel: #2a2a32; --border: #3d3d45; --green: #4caf50; --red: #f44336; }
-        body { font-family: 'Segoe UI', sans-serif; background: #000; color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
-        .sidebar { width: 380px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 10; }
-        .sidebar-content { flex: 1; overflow-y: auto; padding: 25px; }
-        h2 { color: var(--accent); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin: 25px 0 10px; border-left: 3px solid var(--accent); padding-left: 10px; }
-        
-        .card { background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 15px; border-radius: 20px; margin-bottom: 15px; position: relative; }
-        .del-btn { position: absolute; top: 12px; right: 15px; color: var(--red); cursor: pointer; font-size: 11px; }
-        
-        label { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; margin-top: 8px; }
-        input, select { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 12px; margin-top: 5px; box-sizing: border-box; outline: none; }
-        
-        .btn { background: #3d3d45; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 15px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .btn-main { background: #ffb347; color: #000; } 
-        .btn-code { background: #00d4ff; color: #000; } 
+        :root {
+            --gold: #f9e076;
+            --gold-deep: #bf953f;
+            --error-red: #ff5252;
+            --glass-stroke: rgba(255, 255, 255, 0.25);
+        }
+        body { background: #0a0a0a; margin: 0; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
 
-        .preview { flex: 1; background: #0c0c0e; display: flex; align-items: center; justify-content: center; }
-        #device-wrapper { border: 4px solid var(--accent); position: relative; overflow: hidden; transition: 0.3s; background-size: cover; background-position: center; }
-        iframe { width: 100%; height: 100%; border: none; }
+        .game-card {
+            width: 380px; background: #111; border-radius: 45px; padding: 35px;
+            text-align: center; border: 1px solid #222; box-shadow: 0 40px 120px rgba(0,0,0,0.9);
+            position: relative;
+        }
+
+        .lang-switch { position: absolute; top: 25px; right: 35px; display: flex; gap: 8px; z-index: 20; }
+        .lang-btn {
+            background: #1a1a1a; border: 1px solid #333; color: #555;
+            font-size: 10px; padding: 4px 10px; cursor: pointer; border-radius: 6px; transition: 0.3s;
+        }
+        .lang-btn.active { border-color: var(--gold); color: var(--gold); background: #221e0a; }
+
+        .pig-container { position: relative; width: 300px; height: 220px; margin: 0 auto; }
+        .pig-svg { width: 100%; height: 100%; transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1); overflow: visible; }
         
-        #code-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 100; flex-direction: column; }
-        textarea { width: 80%; height: 50%; background: #111; color: var(--accent); padding: 20px; border: 1px solid var(--accent); border-radius: 20px; }
-        .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        #sand-rect { 
+            transition: y 1.5s ease-in-out, height 1.5s ease-in-out;
+            filter: url(#sand-texture); /* Улучшенная текстура песка */
+        }
+
+        /* Эффект объемного стекла */
+        .glass-body { fill: rgba(255, 255, 255, 0.03); stroke: rgba(255, 255, 255, 0.15); stroke-width: 1; }
+        .glass-edge { fill: none; stroke: rgba(255, 255, 255, 0.3); stroke-width: 0.5; }
+        
+        @keyframes flash {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; filter: brightness(1.5) drop-shadow(0 0 15px white); }
+            100% { opacity: 0.3; }
+        }
+        .glass-glint { animation: flash 0.8s ease-out; }
+
+        .falling-grain { position: absolute; width: 4px; height: 4px; background: #ffe680; border-radius: 50%; z-index: 10; pointer-events: none; }
+        .leak-grain { position: absolute; width: 3px; height: 3px; background: #555; border-radius: 50%; z-index: 10; pointer-events: none; }
+        .confetti { position: absolute; width: 8px; height: 8px; z-index: 100; pointer-events: none; border-radius: 2px; }
+
+        .score { font-size: 58px; color: var(--gold); font-weight: bold; margin: 10px 0; text-shadow: 0 0 20px rgba(249, 224, 118, 0.2); }
+        .q-text { min-height: 80px; font-size: 18px; color: #ddd; margin: 15px 0; line-height: 1.4; display: flex; align-items: center; justify-content: center; }
+        
+        .btn-group { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .row { display: flex; gap: 10px; justify-content: center; width: 100%; flex-wrap: wrap; }
+        
+        .btn {
+            background: transparent; border: 1px solid var(--gold); color: var(--gold);
+            padding: 12px 24px; border-radius: 14px; cursor: pointer; font-weight: bold; transition: 0.2s;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn:hover { background: var(--gold); color: #000; box-shadow: 0 0 20px rgba(249, 224, 118, 0.4); }
+        .btn-ans { border-color: #333; color: #fff; width: 45%; font-size: 12px; padding: 10px; }
+
+        .feedback { font-size: 14px; font-weight: bold; margin-bottom: 10px; min-height: 20px; }
+        .hidden { display: none; }
+        
+        .shake { animation: shake 0.4s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <div class="sidebar-content">
-        <h2>Запуск и Тексты</h2>
-        <label>Заголовок при запуске</label>
-        <input type="text" id="start-title" value="Готовы к игре?">
-        <label>Текст кнопки запуска</label>
-        <input type="text" id="start-btn-text" value="НАЧАТЬ">
-        <label>Цвет текста</label>
-        <input type="color" id="textColor" value="#ffffff">
-
-        <h2>Эффекты билборда</h2>
-        <div class="color-grid">
-            <div><label>Цвет рамки</label><input type="color" id="borderColor" value="#f9e076"></div>
-            <div><label>Толщина (px)</label><input type="number" id="borderWidth" value="4"></div>
-        </div>
-        <label>Закругление (px)</label>
-        <input type="range" id="borderRadius" min="0" max="150" value="40">
-        <label>Свечение</label>
-        <input type="number" id="shadowBlur" value="15">
-
-        <h2>Оформление</h2>
-        <label>Фон (URL картинки)</label>
-        <input type="text" id="bg-url" placeholder="https://..." value="">
-        <label>Шрифт</label>
-        <select id="fontFamily">
-            <option value="'Montserrat', sans-serif">Montserrat</option>
-            <option value="'Segoe UI', sans-serif">Segoe UI</option>
-            <option value="'Acme', sans-serif">Acme</option>
-        </select>
-        <label>Размер шрифта (px)</label>
-        <input type="range" id="fontSize" min="12" max="32" value="20">
-
-        <h2>Цвета интерфейса</h2>
-        <div class="color-grid">
-            <div><label>Цвет кнопок</label><input type="color" id="btnColor" value="#f9e076"></div>
-            <div><label>Прозрачность</label><input type="range" id="btnAlpha" min="0" max="1" step="0.1" value="0.2"></div>
-        </div>
-        <label>Язык интерфейса</label>
-        <select id="lang">
-            <option value="ru">Русский</option>
-            <option value="en">English</option>
-            <option value="de">Deutsch</option>
-        </select>
-
-        <h2>Размер виджета</h2>
-        <div class="color-grid">
-            <input type="number" id="width" value="400">
-            <input type="number" id="height" value="600">
-        </div>
-
-        <h2>Вопросы</h2>
-        <div id="q-container"></div>
-        <button class="btn" onclick="addQ()">+ ДОБАВИТЬ ВОПРОС</button>
+<div class="game-card">
+    <div class="lang-switch">
+        <button class="lang-btn active" onclick="setLang('ru', this)">RU</button>
+        <button class="lang-btn" onclick="setLang('en', this)">EN</button>
+        <button class="lang-btn" onclick="setLang('de', this)">DE</button>
     </div>
-    
-    <div style="padding: 20px; border-top: 1px solid var(--border);">
-        <button class="btn btn-main" onclick="updatePreview()">ОБНОВИТЬ ПРЕВЬЮ</button>
-        <button class="btn btn-code" onclick="getGeniallyCode()">ПОЛУЧИТЬ КОД</button>
+
+    <div class="pig-container" id="pig-box">
+        <svg class="pig-svg" id="main-pig" viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <filter id="sand-texture" x="0" y="0" width="100%" height="100%">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="noise" />
+                    <feDiffuseLighting in="noise" lighting-color="#f9e076" surfaceScale="2">
+                        <feDistantLight azimuth="45" elevation="60" />
+                    </feDiffuseLighting>
+                    <feComposite operator="in" in2="SourceGraphic" />
+                </filter>
+
+                <radialGradient id="glass-grad" cx="50%" cy="40%" r="50%">
+                    <stop offset="0%" stop-color="rgba(255,255,255,0.12)" />
+                    <stop offset="100%" stop-color="rgba(255,255,255,0.02)" />
+                </radialGradient>
+
+                <linearGradient id="gold-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#fcf6ba" />
+                    <stop offset="50%" stop-color="#f9e076" />
+                    <stop offset="100%" stop-color="#bf953f" />
+                </linearGradient>
+
+                <mask id="pig-mask">
+                    <path d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" fill="white" />
+                </mask>
+            </defs>
+
+            <path id="pig-body" d="M60,110 C60,70 110,50 170,50 C250,50 290,80 290,125 C290,165 240,190 170,190 C100,190 60,160 60,110" 
+                  fill="url(#glass-grad)" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
+
+            <g mask="url(#pig-mask)">
+                <rect id="sand-rect" x="50" y="190" width="250" height="0" fill="url(#gold-fill)" />
+            </g>
+
+            <path class="glass-edge" d="M60,100 L45,100 C42,100 40,103 40,110 C40,117 42,120 45,120 L60,120" stroke-width="1.5" />
+            <ellipse class="glass-edge" cx="40" cy="110" rx="3" ry="10" />
+
+            <path class="glass-edge" d="M105,62 L100,40 L125,52" stroke-width="1.5" stroke-linejoin="round" />
+            <path class="glass-edge" d="M165,52 L175,35 L185,50" stroke-width="1.5" stroke-linejoin="round" />
+
+            <path class="glass-edge" d="M290,125 C310,120 315,140 305,145 C295,150 290,135 300,130 C305,128 310,132 308,138" stroke-width="1.2" />
+
+            <path class="glass-body" d="M110,190 C110,210 90,210 90,190" stroke-width="2" />
+            <path class="glass-body" d="M140,195 C140,215 120,215 120,195" stroke-width="2" />
+            <path class="glass-body" d="M220,195 C220,215 200,215 200,195" stroke-width="2" />
+            <path class="glass-body" d="M250,185 C250,205 230,205 230,185" stroke-width="2" />
+
+            <ellipse cx="170" cy="50" rx="20" ry="3" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
+            <rect x="155" y="48" width="30" height="4" rx="2" fill="rgba(0,0,0,0.3)" />
+        </svg>
     </div>
-</div>
 
-<div class="preview">
-    <div id="device-wrapper"><iframe id="ifr"></iframe></div>
-</div>
-
-<div id="code-modal">
-    <textarea id="result-code" readonly></textarea>
-    <button class="btn" onclick="document.getElementById('code-modal').style.display='none'" style="width: 200px">ЗАКРЫТЬ</button>
+    <div id="diff-tag" style="font-size: 10px; color: #444; margin-top: 10px; letter-spacing: 2px;">LEVEL: SELECT</div>
+    <div class="score" id="total-val">0</div>
+    <div id="question-box">
+        <div class="q-text" id="question">Выберите сложность:</div>
+        <div id="diff-screen" class="btn-group">
+            <div class="row"><button class="btn" onclick="initGame('easy')">EASY</button><button class="btn" onclick="initGame('hard')">HARD</button></div>
+        </div>
+        <div id="bet-screen" class="hidden">
+            <div class="row"><button class="btn" onclick="askQuestion(10)">10</button><button class="btn" onclick="askQuestion(25)">25</button><button class="btn" onclick="askQuestion(50)">50</button></div>
+        </div>
+        <div id="ans-screen" class="hidden"><div class="row" id="ans-list"></div></div>
+        <div id="res-screen" class="hidden">
+            <div id="res-msg" class="feedback"></div>
+            <button class="btn" id="next-btn" onclick="nextAction()"></button>
+            <button class="btn hidden" id="restart-btn" onclick="location.reload()">RESTART</button>
+        </div>
+    </div>
 </div>
 
 <script>
-// Вспомогательная функция для HEX -> RGBA
-function hexToRgba(hex, alpha) {
-    let r = parseInt(hex.slice(1, 3), 16),
-        g = parseInt(hex.slice(3, 5), 16),
-        b = parseInt(hex.slice(5, 7), 16);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
+    let score = 0, difficulty = 'easy', currentBet = 0, curLang = 'ru', qIdx = 0, isGameOver = false;
+    const MAX_SCORE = 500, PIG_BOTTOM = 190;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-function addQ(qText = "2 + 2 = ?", correct = "4", wrongs = ["3", "5"]) {
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.innerHTML = `
-        <span class="del-btn" onclick="this.parentElement.remove()">УДАЛИТЬ</span>
-        <label>Вопрос</label><input type="text" class="inp-q" value="${qText}">
-        <label style="color:var(--green)">Верный ответ</label><input type="text" class="inp-correct" value="${correct}">
-        <label style="color:var(--red)">Ложные (через запятую)</label><input type="text" class="inp-wrong" value="${wrongs.join(', ')}">
-    `;
-    document.getElementById('q-container').appendChild(div);
-}
+    function playTone(freq, type, duration, vol) {
+        const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
+    }
 
-function buildInnerGame() {
-    const questions = [];
-    document.querySelectorAll('.card').forEach(card => {
-        const q = card.querySelector('.inp-q').value;
-        const correct = card.querySelector('.inp-correct').value.trim();
-        const wrongs = card.querySelector('.inp-wrong').value.split(',').map(s => s.trim());
-        if(q && correct) questions.push({ q, a: [correct, ...wrongs] });
-    });
-
-    const cfg = {
-        bg: document.getElementById('bg-url').value,
-        radius: document.getElementById('borderRadius').value,
-        startTitle: document.getElementById('start-title').value,
-        startBtn: document.getElementById('start-btn-text').value,
-        textColor: document.getElementById('textColor').value,
-        borderColor: document.getElementById('borderColor').value,
-        borderWidth: document.getElementById('borderWidth').value,
-        shadowBlur: document.getElementById('shadowBlur').value,
-        lang: document.getElementById('lang').value,
-        font: document.getElementById('fontFamily').value,
-        fontSize: document.getElementById('fontSize').value,
-        btnColor: document.getElementById('btnColor').value,
-        btnRgba: hexToRgba(document.getElementById('btnColor').value, document.getElementById('btnAlpha').value),
-        coinUrl: "https://r.jina.ai/i/0582d96c808b490fbc23315a6766627a",
-        data: questions
+    const data = {
+        ru: { next: "ДАЛЕЕ", win: "ВЕРНО!", loss: "УТЕЧКА ПЕСКА...", finish: "ЗОЛОТОЕ ИЗОБИЛИЕ!",
+            easy: [{q:"Ich ... (haben) ein Haus.", a:["habe","hast","hat","haben"], c:0},{q:"Du ... (sein) schön.", a:["bist","ist","sind","bin"], c:0},{q:"Wir ... (gehen) nach Hause.", a:["gehen","gehst","geht","gegangen"], c:0},{q:"Er ... (essen) Apfel.", a:["isst","essen","esst","esse"], c:0},{q:"Sie ... (trinken) Wasser.", a:["trinkt","trinken","trinkst","getrunken"], c:0}],
+            hard: [{q:"Если бы я был богат (Konjunktiv II)...", a:["Wäre ich reich","Ich bin reich","Ich war reich","Würde я reich"], c:0},{q:"Я бы пошел (würde-form)...", a:["Ich würde gehen","Ich werde gehen","Ich bin gegangen","Ich gehe"], c:0},{q:"Несмотря на дождь...", a:["Trotz des Regens","Wegen dem Regen","Bei dem Regen","Trotz dem Regen"], c:0},{q:"Я жду тебя (Präposition)...", a:["Ich warте auf dich","Ich warte für dich","Ich warте dich","Ich warте an dich"], c:0},{q:"Она сказала, что придет...", a:["..., dass sie приходит","..., weil sie kommt","..., ob она kommt","..., когда sie приходит"], c:0}]
+        },
+        en: { next: "NEXT", win: "CORRECT!", loss: "SAND LEAK...", finish: "GOLDEN VICTORY!",
+            easy: [{q:"I ... (be) a student.", a:["am","is","are","be"], c:0},{q:"They ... (play) football.", a:["play","plays","playing","played"], c:0},{q:"She ... (like) pizza.", a:["likes","like","liking","liked"], c:0},{q:"We ... (go) to school.", a:["go","goes","going","gone"], c:0},{q:"He ... (have) a dog.", a:["has","have","having","had"], c:0}],
+            hard: [{q:"If I ... you, I would go.", a:["were","was","am","be"], c:0},{q:"She ... here for 5 years.", a:["has been","is","was","has being"], c:0},{q:"By tomorrow, I ... it.", a:["will have done","will do","did","have done"], c:0},{q:"I look forward to ... you.", a:["seeing","see","to see","seen"], c:0},{q:"Hardly ... when it rain.", a:["had I left","I left","I have left","did I leave"], c:0}]
+        },
+        de: { next: "WEITER", win: "RICHTIG!", loss: "SANDVERLUST...", finish: "GOLDENER SIEG!",
+            easy: [{q:"Ich ... (lernen) Deutsch.", a:["lerne","lernst","lernt","lernen"], c:0},{q:"Das ... (sein) gut.", a:["ist","sind","bin","seid"], c:0},{q:"Mein Vater ... (arbeiten).", a:["arbeitet","arbeiten","arbeitest","gearbeitet"], c:0},{q:"Das Wetter ... (sein) kalt.", a:["ist","sind","war","wäre"], c:0},{q:"Wo ... (wohnen) du?", a:["wohnst","wohnen","wohnt","wohnte"], c:0}],
+            hard: [{q:"Nachdem er ... (essen), ging er.", a:["gegessen hatte","aß","essen","hat gegessen"], c:0},{q:"Das Haus, ... ich wohne.", a:["in dem","das","welches","worin"], c:0},{q:"Stатт ... (helfen), schlief er.", a:["zu helfen","hilft","helfen","geholfen"], c:0},{q:"Je mehr, ... besser.", a:["desto","als","wie","umso"], c:0},{q:"Er tut so, als ... er reich.", a:["wäre","ist","sei","war"], c:0}]
+        }
     };
 
-    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
-    <style>
-        body { margin:0; height:100vh; font-family:${cfg.font}; background:transparent; color:${cfg.textColor}; overflow:hidden; }
-        .game-shell { 
-            position:relative; width:100%; height:100%; 
-            border:${cfg.borderWidth}px solid ${cfg.borderColor}; 
-            border-radius:${cfg.radius}px; box-sizing:border-box;
-            background: url('${cfg.bg}') center/cover no-repeat;
-            box-shadow: 0 0 ${cfg.shadowBlur}px ${cfg.borderColor};
-        }
-        .overlay { position:absolute; inset:0; background:rgba(0,0,0,0.4); border-radius:${cfg.radius}px; z-index:1; }
-        .content { position:relative; z-index:2; height:100%; display:flex; flex-direction:column; padding:20px; text-align:center; justify-content: space-between; }
-        .score { font-size:40px; font-weight:bold; color:${cfg.btnColor}; }
-        .btn-ans, .btn-start { 
-            background:${cfg.btnRgba}; border:2px solid ${cfg.btnColor}; color:${cfg.btnColor}; 
-            padding:15px; border-radius:15px; margin:5px; cursor:pointer; font-weight:bold; font-size:16px;
-        }
-        .coin { position:absolute; width:40px; z-index:10; }
-        .screen { position:absolute; inset:0; display:none; flex-direction:column; justify-content:center; align-items:center; z-index:20; background:rgba(0,0,0,0.8); border-radius:${cfg.radius}px; }
-        .active { display:flex; }
-    </style></head><body>
-    <div class="game-shell">
-        <div class="overlay"></div>
-        <div id="start-screen" class="screen active">
-            <h1>${cfg.startTitle}</h1>
-            <button class="btn-start" onclick="start()"> ${cfg.startBtn} </button>
-        </div>
-        <div class="content">
-            <div class="score" id="s">0</div>
-            <div id="coins-area" style="flex:1; position:relative;"></div>
-            <div id="q-text" style="margin-bottom:10px; font-weight:bold;"></div>
-            <div id="ans-grid" style="display:grid; gap:5px;"></div>
-        </div>
-    </div>
-    <script>
-        const cfg = JSON.parse(decodeURIComponent("${encodeURIComponent(JSON.stringify(cfg))}"));
-        let score=0, qi=0;
-        
-        function start() { document.getElementById('start-screen').classList.remove('active'); showQ(); }
+    function initGame(d) { if (audioCtx.state === 'suspended') audioCtx.resume(); difficulty = d; qIdx = 0; document.getElementById('diff-tag').innerText = `LEVEL: ${d.toUpperCase()}`; document.getElementById('diff-screen').classList.add('hidden'); showBetScreen(); }
+    function showBetScreen() { if(isGameOver) return; document.getElementById('res-screen').classList.add('hidden'); document.getElementById('bet-screen').classList.remove('hidden'); document.getElementById('question').innerText = (curLang === 'ru' ? "Выберите ставку:" : "Choose bet:"); }
+    function askQuestion(bet) { currentBet = bet; document.getElementById('bet-screen').classList.add('hidden'); const q = data[curLang][difficulty][qIdx]; document.getElementById('question').innerText = q.q; const list = document.getElementById('ans-list'); list.innerHTML = ''; q.a.forEach((txt, i) => { list.innerHTML += `<button class="btn btn-ans" onclick="checkAnswer(${i})">${txt}</button>`; }); document.getElementById('ans-screen').classList.remove('hidden'); }
 
-        function showQ() {
-            if(qi >= cfg.data.length) { document.getElementById('q-text').innerText = "ФИНИШ"; return; }
-            const q = cfg.data[qi];
-            document.getElementById('q-text').innerText = q.q;
-            const grid = document.getElementById('ans-grid');
-            grid.innerHTML = '';
-            [...q.a].sort(() => Math.random()-0.5).forEach(txt => {
-                const b = document.createElement('button');
-                b.className = 'btn-ans'; b.innerText = txt;
-                b.onclick = () => {
-                    if(txt === q.a[0]) { score += 50; drop(); }
-                    document.getElementById('s').innerText = score;
-                    qi++; setTimeout(showQ, 600);
-                };
-                grid.appendChild(b);
-            });
+    function checkAnswer(idx) {
+        const isCorrect = idx === data[curLang][difficulty][qIdx].c;
+        document.getElementById('ans-screen').classList.add('hidden');
+        if(isCorrect) {
+            score += currentBet;
+            playTone(880, 'sine', 0.1, 0.2); setTimeout(() => playTone(1320, 'sine', 0.2, 0.1), 100);
+            dropSandEffect();
+            triggerGlint(); 
+            document.getElementById('res-msg').style.color = "var(--gold)";
+        } else {
+            score = Math.max(0, score - currentBet);
+            playTone(150, 'sawtooth', 0.3, 0.1);
+            leakSandEffect();
+            document.getElementById('res-msg').style.color = "var(--error-red)";
         }
+        document.getElementById('total-val').innerText = score;
+        document.getElementById('res-msg').innerText = isCorrect ? data[curLang].win : data[curLang].loss;
+        document.getElementById('next-btn').innerText = data[curLang].next;
+        document.getElementById('res-screen').classList.remove('hidden');
+        updateSandLevel();
+    }
 
-        function drop() {
-            for(let i=0; i<5; i++) {
-                const c = document.createElement('img');
-                c.src = cfg.coinUrl; c.className = 'coin';
-                c.style.left = Math.random()*80 + '%'; c.style.top = '-40px';
-                document.getElementById('coins-area').appendChild(c);
-                c.animate([{top:'-40px'}, {top:'90%'}], {duration:800+Math.random()*400, fill:'forwards'});
-            }
-        }
-    <\/script></body></html>`;
-}
+    function triggerGlint() {
+        const pig = document.getElementById('main-pig');
+        pig.classList.add('glass-glint');
+        setTimeout(() => pig.classList.remove('glass-glint'), 800);
+    }
 
-function updatePreview() {
-    const wrap = document.getElementById('device-wrapper');
-    wrap.style.width = document.getElementById('width').value + 'px';
-    wrap.style.height = document.getElementById('height').value + 'px';
-    wrap.style.borderRadius = document.getElementById('borderRadius').value + 'px';
-    wrap.style.borderColor = document.getElementById('borderColor').value;
+    function nextAction() { qIdx++; if (qIdx >= data[curLang][difficulty].length) { qIdx = 0; showBetScreen(); } else { showBetScreen(); } }
     
-    document.getElementById('ifr').srcdoc = buildInnerGame();
-}
+    function dropSandEffect() {
+        const container = document.getElementById('pig-box');
+        for(let i=0; i<15; i++) {
+            setTimeout(() => {
+                const grain = document.createElement('div'); grain.className = 'falling-grain';
+                grain.style.left = (160 + Math.random() * 20) + 'px'; grain.style.top = '50px';
+                container.appendChild(grain);
+                grain.animate([{ transform: 'translateY(0)', opacity: 1 }, { transform: `translate(${Math.random()*40-20}px, 100px)`, opacity: 0 }], { duration: 1000 }).onfinish = () => grain.remove();
+            }, i * 40);
+        }
+    }
 
-function getGeniallyCode() {
-    const html = buildInnerGame().replace(/"/g, '&quot;');
-    document.getElementById('result-code').value = `<iframe width="100%" height="100%" srcdoc="${html}" frameborder="0"></iframe>`;
-    document.getElementById('code-modal').style.display = 'flex';
-}
+    function leakSandEffect() {
+        document.getElementById('pig-box').classList.add('shake');
+        setTimeout(() => document.getElementById('pig-box').classList.remove('shake'), 400);
+        const container = document.getElementById('pig-box');
+        for(let i=0; i<10; i++) {
+            const grain = document.createElement('div'); grain.className = 'leak-grain';
+            grain.style.left = (120 + Math.random() * 80) + 'px'; grain.style.top = '190px';
+            container.appendChild(grain);
+            grain.animate([{ opacity: 1 }, { transform: 'translateY(50px)', opacity: 0 }], 600).onfinish = () => grain.remove();
+        }
+    }
 
-window.onload = () => { addQ(); updatePreview(); };
+    function updateSandLevel() {
+        const sand = document.getElementById('sand-rect');
+        const fillHeight = Math.min(140, (score / MAX_SCORE) * 140);
+        sand.setAttribute('y', PIG_BOTTOM - fillHeight);
+        sand.setAttribute('height', fillHeight);
+        document.getElementById('main-pig').style.filter = `drop-shadow(0 0 ${score/20}px rgba(249, 224, 118, 0.4))`;
+        if (score >= MAX_SCORE) finishGame();
+    }
+
+    function finishGame() {
+        isGameOver = true;
+        playTone(523.25, 'sine', 0.2, 0.2); setTimeout(() => playTone(659.25, 'sine', 0.2, 0.2), 150); setTimeout(() => playTone(783.99, 'sine', 0.4, 0.3), 300);
+        for(let i=0; i<60; i++) {
+            const c = document.createElement('div'); c.className = 'confetti';
+            c.style.left = Math.random() * 100 + '%'; c.style.top = '-10px';
+            c.style.backgroundColor = ['#f9e076', '#bf953f', '#fff', '#aa771c'][Math.floor(Math.random()*4)];
+            document.body.appendChild(c);
+            c.animate([{ transform: 'translateY(0) rotate(0deg)', opacity: 1 }, { transform: `translate(${Math.random()*300-150}px, 110vh) rotate(${Math.random()*720}deg)`, opacity: 0 }], { duration: 3000 + Math.random()*2000 }).onfinish = () => c.remove();
+        }
+        document.getElementById('next-btn').classList.add('hidden');
+        document.getElementById('restart-btn').classList.remove('hidden');
+        document.getElementById('res-msg').innerText = data[curLang].finish;
+        document.getElementById('question').innerText = "🏆";
+    }
+
+    function setLang(l, btn) { curLang = l; document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); if(!isGameOver) { document.getElementById('next-btn').innerText = data[curLang].next; } }
 </script>
 </body>
 </html>
