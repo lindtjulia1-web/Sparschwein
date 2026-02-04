@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>KGB Pile Editor Pro + Squid Pig</title>
+    <title>KGB Pile Editor Pro + Stakes</title>
     <style>
         :root { --accent: #f9e076; --bg: #1e1e24; --panel: #2a2a32; --border: #3d3d45; --green: #4caf50; --red: #f44336; }
         body { font-family: 'Segoe UI', sans-serif; background: #000; color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
@@ -17,8 +17,13 @@
         .sidebar-content label { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; margin-top: 8px; }
         .sidebar-content input, .sidebar-content select { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 12px; margin-top: 5px; box-sizing: border-box; outline: none; }
         
+        .check-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; cursor: pointer; }
+        .check-row input { width: auto; margin: 0; cursor: pointer; }
+        .check-row span { font-size: 11px; color: #eee; }
+
         .btn { background: #3d3d45; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 15px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
         .btn-main { background: #ffb347; color: #000; margin-top: 20px; } 
+        .btn-main:hover { background: #ffa02e; }
         .btn-code { background: #77dd77; color: #000; margin-top: 8px; } 
 
         .preview { flex: 1; background: #0c0c0e; display: flex; align-items: center; justify-content: center; }
@@ -44,27 +49,49 @@
 <div class="sidebar">
     <div class="sidebar-content">
         <h2>Запуск и Тексты</h2>
+        <label>Заголовок при запуске</label>
         <input type="text" id="start-title" value="Готовы к игре?">
         <label>Текст кнопки запуска</label>
         <input type="text" id="start-btn-text" value="НАЧАТЬ">
-        <label>Цвет текста</label>
+        <label>Цвет текста (вопросы/заголовки)</label>
         <input type="color" id="textColor" value="#ffffff">
+
+        <h2>Финальный фидбек</h2>
+        <label>Текст после завершения</label>
+        <input type="text" id="end-text" placeholder="Стандартный текст">
+
+        <h2>Настройки копилки</h2>
+        <div class="color-grid">
+            <div><label>Цвет контура свинки</label><input type="color" id="pigColor" value="#ffffff"></div>
+            <div><label>Толщина контура</label><input type="number" id="pigStroke" value="3" min="1" max="10"></div>
+        </div>
 
         <h2>Эффекты билборда</h2>
         <div class="color-grid">
             <div><label>Цвет рамки</label><input type="color" id="borderColor" value="#f9e076" onchange="updatePreview()"></div>
             <div><label>Толщина (px)</label><input type="number" id="borderWidth" value="4"></div>
         </div>
+        <div class="color-grid">
+            <div><label>Свечение</label><input type="number" id="shadowBlur" value="15"></div>
+            <div><label>Цвет свечения</label><input type="color" id="shadowColor" value="#f9e076"></div>
+        </div>
 
         <h2>Оформление</h2>
-        <label>Фон (https://img.genially.com/666ae277f4d337001522cf25/806d64ec-2a2a-45d8-b39e-8d9742d5a412.png)</label>
-        <input type="text" id="bg-url" placeholder="https://img.genially.com/666ae277f4d337001522cf25/806d64ec-2a2a-45d8-b39e-8d9742d5a412.png" onchange="updatePreview()">
+        <label>Фон (URL картинки)</label>
+        <input type="text" id="bg-url" placeholder="https://..." onchange="updatePreview()">
         
         <label>Шрифт</label>
         <select id="fontFamily" onchange="updatePreview()">
+            <option value="'ABeeZee', sans-serif">ABeeZee</option>
             <option value="'Montserrat', sans-serif">Montserrat</option>
             <option value="'Acme', sans-serif">Acme</option>
         </select>
+        
+        <label>Размер шрифта (px)</label>
+        <input type="range" id="fontSize" min="12" max="32" value="20" oninput="updatePreview()">
+
+        <h2>Алгоритмы</h2>
+        <label class="check-row"><input type="checkbox" id="randomOrder"><span>Рандомный порядок вопросов</span></label>
 
         <h2>Размер виджета</h2>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -99,101 +126,159 @@
 </div>
 
 <div id="code-modal">
+    <h3 style="color: #fff">Код для Genially:</h3>
     <textarea id="result-code" readonly onclick="this.select()"></textarea>
     <button class="btn" onclick="document.getElementById('code-modal').style.display='none'" style="width: 200px">ЗАКРЫТЬ</button>
 </div>
 
 <script>
 function addQ(qText, correct, wrongs) {
+    qText = qText || "";
+    correct = correct || "";
+    wrongs = wrongs || ["", ""];
     const div = document.createElement('div');
     div.className = 'card';
+    const wrongsStr = Array.isArray(wrongs) ? wrongs.join(', ') : wrongs;
     div.innerHTML = '<span class="del-btn" onclick="this.parentElement.remove()">УДАЛИТЬ</span>' +
-        '<label>Вопрос</label><input type="text" class="inp-q" value="'+(qText||"")+'">' +
-        '<label style="color:var(--green)">✓ Верный</label>' +
-        '<input type="text" class="inp-correct" value="'+(correct||"")+'">' +
+        '<label>Вопрос</label><input type="text" class="inp-q" value="' + qText + '">' +
+        '<label style="color:var(--green)">✓ Верный ответ</label>' +
+        '<input type="text" class="inp-correct" value="' + correct + '">' +
         '<label style="color:var(--red)">× Ложные</label>' +
-        '<input type="text" class="inp-wrong" value="'+(wrongs||"")+'">';
+        '<input type="text" class="inp-wrong" value="' + wrongsStr + '">';
     document.getElementById('q-container').appendChild(div);
 }
 
 function hexToRgba(hex, alpha) {
-    let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+    let r = parseInt(hex.slice(1, 3), 16);
+    let g = parseInt(hex.slice(3, 5), 16);
+    let b = parseInt(hex.slice(5, 7), 16);
     return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
 }
 
 function buildInnerGame() {
+    const cards = Array.from(document.querySelectorAll('#q-container .card'));
+    const finalQs = cards.map(function(c) {
+        const qVal = c.querySelector('.inp-q').value.trim();
+        const corr = c.querySelector('.inp-correct').value.trim();
+        const wrongs = c.querySelector('.inp-wrong').value.split(',').map(function(x) { return x.trim(); }).filter(function(x) { return x; });
+        return { q: qVal, a: [corr].concat(wrongs) };
+    }).filter(function(x) { return x.q && x.a.length > 1; });
+
     const cfg = {
         bg: document.getElementById('bg-url').value,
-        title: document.getElementById('start-title').value,
-        btnText: document.getElementById('start-btn-text').value,
+        startTitle: document.getElementById('start-title').value,
+        startBtn: document.getElementById('start-btn-text').value,
+        endText: document.getElementById('end-text').value,
         textColor: document.getElementById('textColor').value,
         borderColor: document.getElementById('borderColor').value,
         borderWidth: document.getElementById('borderWidth').value,
-        btnColor: document.getElementById('btnColor').value,
-        btnRgba: hexToRgba(document.getElementById('btnColor').value, document.getElementById('btnAlpha').value),
+        shadowColor: document.getElementById('shadowColor').value,
+        shadowBlur: document.getElementById('shadowBlur').value,
+        pigColor: document.getElementById('pigColor').value,
+        pigStroke: document.getElementById('pigStroke').value,
         lang: document.getElementById('lang').value,
         font: document.getElementById('fontFamily').value,
-        data: Array.from(document.querySelectorAll('.card')).map(c => ({
-            q: c.querySelector('.inp-q').value,
-            a: [c.querySelector('.inp-correct').value, ...c.querySelector('.inp-wrong').value.split(',').map(x => x.trim())]
-        })).filter(x => x.q)
+        fontSize: document.getElementById('fontSize').value,
+        btnColor: document.getElementById('btnColor').value,
+        btnRgba: hexToRgba(document.getElementById('btnColor').value, document.getElementById('btnAlpha').value),
+        data: finalQs 
     };
 
-    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
-        body { margin:0; height:100vh; overflow:hidden; font-family:${cfg.font}; background:#000; color:${cfg.textColor}; display:flex; flex-direction:column; border:${cfg.borderWidth}px solid ${cfg.borderColor}; box-sizing:border-box; }
-        .bg { position:fixed; inset:0; background:url(${cfg.bg}) center/cover; opacity:0.4; z-index:-1; }
-        #pile-container { flex:1.2; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-        .glass-pig { width:85%; height:85%; background:url('https://i.ibb.co/LhyM4pC/Copilot-20260202-085849.jpg') no-repeat center/contain; z-index:5; position:relative; pointer-events:none; filter: drop-shadow(0 0 15px rgba(255,255,255,0.2)); }
-        .coins-inside { position:absolute; bottom:25%; left:50%; transform:translateX(-50%); width:35%; height:25%; display:flex; flex-wrap:wrap-reverse; justify-content:center; align-content:flex-start; z-index:4; overflow:hidden; }
-        .stored-coin { width:22px; height:22px; background:radial-gradient(circle at 30% 30%, #fffbea, #ffd700 40%, #8b6914); border-radius:50%; border:1px solid #5a4408; margin:-2px; position:relative; box-shadow:0 2px 4px rgba(0,0,0,0.5); }
-        .stored-coin::after { content:"☠"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:rgba(0,0,0,0.5); }
-        .falling-coin { position:absolute; width:45px; height:45px; z-index:10; left:50%; transform:translateX(-50%); animation: coinFall 0.9s cubic-bezier(0.6, 0, 0.4, 1) forwards; }
-        @keyframes coinFall { 0% { top:-60px; transform:translateX(-50%) rotate(0deg) scale(0.5); opacity:0; } 20% { opacity:1; } 100% { top:40%; transform:translateX(-50%) rotate(360deg) scale(1); opacity:0; } }
-        .ui-wrap { flex:1; display:flex; flex-direction:column; padding:10px; z-index:20; background:rgba(0,0,0,0.5); border-top:1px solid rgba(255,255,255,0.1); justify-content:center; }
-        .label-q { font-size:2.8vh; text-align:center; margin-bottom:10px; font-weight:bold; text-transform:uppercase; }
-        .btn-grid { display:grid; gap:8px; width:100%; }
-        .btn-ans { background:${cfg.btnRgba}; border:2px solid ${cfg.btnColor}; color:${cfg.btnColor}; padding:1.5vh; border-radius:15px; cursor:pointer; font-weight:bold; font-size:2.2vh; transition:0.2s; }
-        .btn-ans:hover { background:${cfg.btnColor}; color:#000; }
-        .screen { position:absolute; inset:0; background:rgba(0,0,0,0.9); display:flex; align-items:center; justify-content:center; z-index:100; flex-direction:column; text-align:center; }
-    </style></head><body>
-        <div class="bg"></div>
-        <div id="start" class="screen"><h1>${cfg.title}</h1><button class="btn-ans" style="padding:20px 40px" onclick="this.parentElement.remove()"> ${cfg.btnText} </button></div>
-        <div id="pile-container"><div class="coins-inside" id="coins"></div><div class="glass-pig"></div></div>
-        <div class="ui-wrap"><div class="label-q" id="q-txt"></div><div class="btn-grid" id="ctrl"></div></div>
-    <script>
-        let qi=0; const data=${JSON.stringify(cfg.data)};
-        function next() {
-            if(qi>=data.length) { document.getElementById('q-txt').innerText="ФИНИШ!"; document.getElementById('ctrl').innerHTML=""; return; }
-            document.getElementById('q-txt').innerText = data[qi].q;
-            const c = document.getElementById('ctrl'); c.innerHTML='';
-            let answers = [...data[qi].a];
-            answers.sort(() => Math.random() - 0.5).forEach(t => {
-                const b = document.createElement('button'); b.className='btn-ans'; b.innerText=t;
-                b.onclick = () => { if(t===data[qi].a[0]) drop(); qi++; next(); };
-                c.appendChild(b);
-            });
-        }
-        function drop() {
-            const coin = document.createElement('div'); coin.className='falling-coin';
-            coin.innerHTML = '<div class="stored-coin" style="width:40px;height:40px"></div>';
-            document.getElementById('pile-container').appendChild(coin);
-            setTimeout(() => { coin.remove();
-                for(let i=0; i<3; i++) {
-                   const s = document.createElement('div'); s.className='stored-coin';
-                   document.getElementById('coins').appendChild(s);
-                }
-            }, 850);
-        }
-        next();
-    <\/script></body></html>`;
+    const fontName = cfg.font.split(',')[0].replace(/'/g, '');
+    const gFont = 'https://fonts.googleapis.com/css2?family=' + fontName.replace(/ /g, '+') + '&display=swap';
+    
+    const html = '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+    '<link href="' + gFont + '" rel="stylesheet"><style>' +
+    '@keyframes shine {' +
+    '0%{border-color:' + cfg.borderColor + ';box-shadow:0 0 ' + cfg.shadowBlur + 'px ' + cfg.shadowColor + ';}' +
+    '50%{border-color:#fff;box-shadow:0 0 ' + (parseInt(cfg.shadowBlur)+10) + 'px #fff,inset 0 0 10px ' + cfg.shadowColor + ';}' +
+    '100%{border-color:' + cfg.borderColor + ';box-shadow:0 0 ' + cfg.shadowBlur + 'px ' + cfg.shadowColor + ';}}' +
+    '@keyframes coinFall{0%{transform:translateY(-200px) rotate(0deg) scale(0.8);opacity:0;}30%{opacity:1;}' +
+    '100%{transform:translateY(var(--fall-y)) rotate(720deg) scale(1);opacity:1;}}' +
+    '@keyframes coinShine{0%,100%{filter:brightness(1);}50%{filter:brightness(1.4);}}' +
+    'body{margin:0;height:100vh;overflow:hidden;font-family:' + cfg.font + ';background:#000;color:' + cfg.textColor + ';display:flex;align-items:center;justify-content:center;}' +
+    '.bg-layer{position:fixed;inset:0;background:url(' + cfg.bg + ') center/cover no-repeat;opacity:0.5;z-index:-1;}' +
+    '#game-root{width:100%;height:100%;position:relative;display:flex;flex-direction:column;padding:20px;box-sizing:border-box;' +
+    'border:' + cfg.borderWidth + 'px solid ' + cfg.borderColor + ';animation:shine 3s infinite ease-in-out;}' +
+    '.score{font-size:44px;color:' + cfg.btnColor + ';font-weight:800;text-align:center;margin-bottom:5px;}' +
+    '#pile-container{flex:1;position:relative;border-bottom:2px solid ' + cfg.btnRgba + ';overflow:hidden;display:flex;align-items:center;justify-content:center;}' +
+    '.piggy-bank{width:240px;height:200px;position:relative;z-index:5;}' +
+    '.coins-inside{position:absolute;bottom:30%;left:50%;transform:translateX(-50%);width:150px;height:70px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;z-index:4;}' +
+    '.coin{position:absolute;width:55px;height:55px;pointer-events:none;z-index:10;}' +
+    '.coin-face{width:100%;height:100%;border-radius:50%;' +
+    'background:radial-gradient(circle at 35% 35%,#fff4a3 0%,#ffd95a 20%,#d4a645 40%,#8b6508 60%,#d4a645 80%,#ffd95a 100%);' +
+    'border:3px solid #8b6508;box-shadow:0 6px 20px rgba(0,0,0,0.7),inset 0 3px 8px rgba(255,255,255,0.5),inset 0 -3px 8px rgba(0,0,0,0.4);position:relative;overflow:hidden;}' +
+    '.coin-face::before{content:"";position:absolute;inset:8px;border-radius:50%;border:2px solid #8b6508;box-shadow:inset 0 0 15px rgba(0,0,0,0.3);}' +
+    '.coin-face::after{content:"\\2620";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px;' +
+    'color:#5a4408;text-shadow:0 2px 3px rgba(255,255,255,0.4),0 -1px 2px rgba(0,0,0,0.3);}' +
+    '.stored-coin{width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffd95a 0%,#d4a645 50%,#8b6508 100%);' +
+    'border:2px solid #8b6508;margin:1px;box-shadow:0 3px 8px rgba(0,0,0,0.5);animation:coinShine 2s ease-in-out infinite;}' +
+    '.label-sm{font-size:' + cfg.fontSize + 'px;text-align:center;margin:15px 0;text-transform:uppercase;min-height:1.2em;display:flex;align-items:center;justify-content:center;}' +
+    '.grid{display:grid;grid-template-columns:1fr;gap:10px;}' +
+    '.btn-ans,.btn-stake,.btn-start{border:1.5px solid ' + cfg.btnColor + ';background:' + cfg.btnRgba + ';color:' + cfg.btnColor + ';' +
+    'padding:14px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:bold;transition:0.2s;}' +
+    '.btn-ans:hover{background:' + hexToRgba(cfg.btnColor, 0.4) + ';transform:scale(1.02);}' +
+    '.screen{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;align-items:center;text-align:center;z-index:100;background:rgba(0,0,0,0.8);}' +
+    '.active{display:flex;}' +
+    '</style></head><body><div class="bg-layer"></div><div id="game-root">' +
+    '<div id="start-screen" class="screen active"><h1 style="margin:0 20px 30px">' + cfg.startTitle + '</h1>' +
+    '<button class="btn-start" style="width:200px" onclick="startGame()">' + cfg.startBtn + '</button></div>' +
+    '<div id="game-content" style="flex:1;display:none;flex-direction:column">' +
+    '<div class="score" id="s">0</div><div id="pile-container">' +
+    '<svg class="piggy-bank" viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg">' +
+    '<ellipse cx="120" cy="110" rx="80" ry="55" fill="none" stroke="' + cfg.pigColor + '" stroke-width="' + cfg.pigStroke + '" stroke-linecap="round"/>' +
+    '<ellipse cx="175" cy="85" rx="38" ry="32" fill="none" stroke="' + cfg.pigColor + '" stroke-width="' + cfg.pigStroke + '"/>' +
+    '<ellipse cx="192" cy="90" rx="16" ry="13" fill="none" stroke="' + cfg.pigColor + '" stroke-width="' + cfg.pigStroke + '"/>' +
+    '<circle cx="186" cy="90" r="3" fill="' + cfg.pigColor + '"/><circle cx="198" cy="90" r="3" fill="' + cfg.pigColor + '"/>' +
+    '<circle cx="168" cy="78" r="6" fill="' + cfg.pigColor + '"/><circle cx="168" cy="78" r="3" fill="#000"/>' +
+    '<path d="M 165 60 Q 160 45, 170 50 Q 175 55, 168 65" fill="none" stroke="' + cfg.pigColor + '" stroke-width="' + cfg.pigStroke + '" stroke-linecap="round"/>' +
+    '<rect x="95" y="75" width="35" height="5" rx="2" fill="none" stroke="' + cfg.pigColor + '" stroke-width="' + cfg.pigStroke + '"/>' +
+    '<rect x="85" y="155" width="14" height="30" rx="7" fill="none" stroke="' + cfg.pigColor + '" stroke-width="' + cfg.pigStroke + '"/>' +
+    '<rect x="120" y="155" width="14" height="30" rx="7" fill="none" stroke="' + cfg.pigColor + '" stroke-width="' + cfg.pigStroke + '"/>' +
+    '<rect x="140" y="155" width="14" height="30" rx="7" fill="none" stroke="' + cfg.pigColor + '" stroke-width="' + cfg.pigStroke + '"/>' +
+    '<path d="M 50 105 Q 30 100, 32 115 Q 35 125, 42 118 Q 45 113, 48 110" fill="none" stroke="' + cfg.pigColor + '" stroke-width="' + cfg.pigStroke + '" stroke-linecap="round"/>' +
+    '</svg><div class="coins-inside" id="coins-inside"></div></div>' +
+    '<div class="label-sm" id="ui-label"></div><div id="ctrl" class="grid"></div></div></div>' +
+    '<script>var cfg=' + JSON.stringify(cfg) + ';var score=0,qi=0,currentStake=0,coinsCount=0;' +
+    'var dict={ru:{stake:"Ставка",finish:"Конец!"},en:{stake:"Stake",finish:"Finish!"},de:{stake:"Einsatz",finish:"Ende!"}}[cfg.lang];' +
+    'function startGame(){document.getElementById("start-screen").classList.remove("active");' +
+    'document.getElementById("game-content").style.display="flex";showStakes();}' +
+    'function showFinish(){document.getElementById("ui-label").innerText=cfg.endText||dict.finish;' +
+    'document.getElementById("ctrl").innerHTML="";}' +
+    'function showStakes(){if(qi>=cfg.data.length){showFinish();return;}' +
+    'document.getElementById("ui-label").innerText=dict.stake;var c=document.getElementById("ctrl");c.innerHTML="";' +
+    '[10,25,50,100].forEach(function(val){var b=document.createElement("button");b.className="btn-stake";b.innerText=val;' +
+    'b.onclick=function(){currentStake=val;showQuestion();};c.appendChild(b);});}' +
+    'function showQuestion(){document.getElementById("ui-label").innerText=cfg.data[qi].q;var c=document.getElementById("ctrl");c.innerHTML="";' +
+    'var ans=cfg.data[qi].a.slice();ans.sort(function(){return Math.random()-0.5;});' +
+    'ans.forEach(function(text){var b=document.createElement("button");b.className="btn-ans";b.innerText=text;' +
+    'b.onclick=function(){if(text===cfg.data[qi].a[0]){score+=currentStake;dropCoins(Math.ceil(currentStake/10));}' +
+    'else{var toRemove=Math.ceil(currentStake/10);score=Math.max(0,score-currentStake);removeCoins(toRemove);}' +
+    'document.getElementById("s").innerText=score;qi++;setTimeout(qi>=cfg.data.length?showFinish:showStakes,1500);};c.appendChild(b);});}' +
+    'function dropCoins(count){var container=document.getElementById("pile-container");' +
+    'for(var i=0;i<count;i++){(function(idx){setTimeout(function(){var coin=document.createElement("div");coin.className="coin";' +
+    'coin.innerHTML="<div class=\\"coin-face\\"></div>";var startX=30+Math.random()*40;var fallY=180+Math.random()*30;' +
+    'coin.style.left=startX+"%";coin.style.top="-100px";coin.style.setProperty("--fall-y",fallY+"px");' +
+    'container.appendChild(coin);coin.style.animation="coinFall 1.2s cubic-bezier(0.5,0,0.5,1) forwards";' +
+    'setTimeout(function(){coin.remove();addStoredCoin();},1200);},idx*180);})(i);}}' +
+    'function addStoredCoin(){var inside=document.getElementById("coins-inside");var coin=document.createElement("div");' +
+    'coin.className="stored-coin";coin.style.animationDelay=(Math.random()*2)+"s";inside.appendChild(coin);coinsCount++;}' +
+    'function removeCoins(count){var inside=document.getElementById("coins-inside");' +
+    'for(var i=0;i<count&&coinsCount>0;i++){if(inside.lastChild){inside.lastChild.remove();coinsCount--;}}}' +
+    '<\/script></body></html>';
+    
+    return html;
 }
 
 function updatePreview() {
     const dev = document.getElementById('device-wrapper');
-    dev.style.setProperty('--shad', document.getElementById('shadowColor')?.value || '#f9e076');
+    const sCol = document.getElementById('shadowColor').value;
+    dev.style.setProperty('--shad', sCol);
     dev.style.width = document.getElementById('width').value + 'px';
     dev.style.height = document.getElementById('height').value + 'px';
     dev.style.border = document.getElementById('borderWidth').value + 'px solid ' + document.getElementById('borderColor').value;
+    const bgUrl = document.getElementById('bg-url').value;
+    dev.style.backgroundImage = bgUrl ? 'url(' + bgUrl + ')' : 'none';
     document.getElementById('ifr').srcdoc = buildInnerGame();
 }
 
@@ -203,7 +288,10 @@ function getGeniallyCode() {
     document.getElementById('code-modal').style.display = 'flex';
 }
 
-window.onload = () => { addQ('Где лежат дублоны?', 'В свинье', 'В море, В банке'); updatePreview(); };
+window.onload = function() { 
+    addQ('Сколько золотых в сундуке?', '100', ['50', '200']); 
+    updatePreview(); 
+};
 </script>
 </body>
 </html>
