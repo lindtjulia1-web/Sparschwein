@@ -45,20 +45,19 @@
         <label>Кнопка старта</label>
         <input type="text" id="start-btn-text" value="В БОЙ">
         
-        <h2>Визуал Копилки</h2>
-        <div class="color-grid">
-            <div><label>Цвет свинки</label><input type="color" id="pigColor" value="#ffc0cb"></div>
-            <div><label>Стекло</label><input type="range" id="pigAlpha" min="0.1" max="0.7" step="0.1" value="0.3"></div>
-        </div>
+        <h2>Визуал (URL картинок)</h2>
+        <label>Картинка копилки</label>
+        <input type="text" id="pig-img-url" placeholder="https://..." value="https://cdn-icons-png.flaticon.com/512/2353/2353594.png" onchange="updatePreview()">
+        <label>Картинка монетки</label>
+        <input type="text" id="coin-img-url" placeholder="https://..." value="https://cdn-icons-png.flaticon.com/512/1055/1055833.png" onchange="updatePreview()">
 
         <h2>Оформление</h2>
         <label>Фон (URL)</label>
         <input type="text" id="bg-url" placeholder="https://..." onchange="updatePreview()">
         <label>Шрифт</label>
         <select id="fontFamily" onchange="updatePreview()">
-            <option value="'Segoe UI', sans-serif">Segoe UI (Standart)</option>
+            <option value="'Segoe UI', sans-serif">Segoe UI</option>
             <option value="'ABeeZee', sans-serif">ABeeZee</option>
-            <option value="'Abel', sans-serif">Abel</option>
             <option value="'Aclonica', sans-serif">Aclonica</option>
             <option value="'Acme', sans-serif">Acme</option>
             <option value="'Georgia', serif">Georgia</option>
@@ -136,8 +135,8 @@ function buildInnerGame() {
         bg: document.getElementById('bg-url').value,
         title: document.getElementById('start-title').value,
         btn: document.getElementById('start-btn-text').value,
-        pigC: document.getElementById('pigColor').value,
-        pigA: document.getElementById('pigAlpha').value,
+        pigImg: document.getElementById('pig-img-url').value,
+        coinImg: document.getElementById('coin-img-url').value,
         fz: document.getElementById('fontSize').value,
         br: document.getElementById('borderRadius').value,
         ff: document.getElementById('fontFamily').value,
@@ -157,33 +156,25 @@ function buildInnerGame() {
         #root { height:100%; display:flex; flex-direction:column; padding:${cfg.pt}vmin ${cfg.pr}vmin ${cfg.pb}vmin ${cfg.pl}vmin; position:relative; box-sizing:border-box; }
         .score { font-size:10vmin; color:#f9e076; font-weight:900; text-align:center; margin-bottom:2vmin; }
         #pile-box { flex:1; position:relative; display:flex; justify-content:center; align-items:center; }
-        .pig { width:60vmin; z-index:5; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); }
-        .coins { position:absolute; width:30vmin; height:20vmin; z-index:4; transform: translateY(4vmin); }
-        .stored-coin { position:absolute; width:3.5vmin; height:3.5vmin; border-radius:50%; background:radial-gradient(circle at 30% 30%, #fff9a3, #ffd700, #b8860b); border:1px solid #6b5411; animation: shine 3s infinite; }
-        .falling-coin { position:absolute; left:50%; width:8vmin; height:8vmin; z-index:10; border-radius:50%; background:radial-gradient(circle at 35% 35%, #fffbea, #ffd700, #8b6914); border:2px solid #5a4408; pointer-events:none; }
+        .pig { width:65vmin; height:auto; z-index:5; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); object-fit: contain; }
+        .coins { position:absolute; width:30vmin; height:20vmin; z-index:4; transform: translateY(6vmin); }
+        .stored-coin { position:absolute; width:5vmin; height:5vmin; background:url(${cfg.coinImg}) center/cover no-repeat; animation: shine 3s infinite; }
+        .falling-coin { position:absolute; left:50%; width:10vmin; height:10vmin; z-index:10; background:url(${cfg.coinImg}) center/cover no-repeat; pointer-events:none; }
         .ui { min-height:35%; display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:2vmin; }
         .label { font-size:${cfg.fz}vmin; text-align:center; margin-bottom:3vmin; font-weight:bold; min-height:3em; display:flex; align-items:center; justify-content:center; }
         .grid { display:grid; gap:2vmin; }
         button { border:2px solid #f9e076; background:rgba(0,0,0,0.6); color:#f9e076; padding:3vmin; border-radius:15px; cursor:pointer; font-weight:bold; font-size:4vmin; transition:0.2s; }
         button:hover { background:rgba(249,224,118,0.2); }
         .screen { position:absolute; inset:0; background:rgba(0,0,0,0.95); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; text-align:center; padding:5vmin; border-radius:${cfg.br}px; }
-        @keyframes fall { 0% { transform:translate(-50%,-40vmin); opacity:0; } 20% { opacity:1; } 100% { transform:translate(-50%,25vmin); opacity:0; } }
-        @keyframes shine { 0%, 100% { filter:brightness(1); } 50% { filter:brightness(1.8) drop-shadow(0 0 3px gold); } }
+        @keyframes fall { 0% { transform:translate(-50%,-50vmin); opacity:0; } 20% { opacity:1; } 100% { transform:translate(-50%,20vmin); opacity:0; } }
+        @keyframes shine { 0%, 100% { filter:brightness(1); } 50% { filter:brightness(1.4) drop-shadow(0 0 5px gold); } }
     </style></head><body>
         <div class="bg"></div>
         <div id="root">
             <div id="start-sc" class="screen"><h2>${cfg.title}</h2><button onclick="start()">${cfg.btn}</button></div>
             <div class="score" id="score-val">0</div>
             <div id="pile-box">
-                <svg class="pig" viewBox="0 0 250 200">
-                    <path d="M210,100 C210,150 170,180 125,180 C80,180 40,150 40,100 C40,50 80,20 125,20 C170,20 210,50 210,100" fill="${cfg.pigC}" opacity="${cfg.pigA}" stroke="#fff" stroke-width="2"/>
-                    <circle cx="50" cy="100" r="15" fill="${cfg.pigC}" opacity="${cfg.pigA}" stroke="#fff" stroke-width="2"/>
-                    <circle cx="45" cy="95" r="2.5" fill="#333"/> <circle cx="45" cy="105" r="2.5" fill="#333"/>
-                    <path d="M70,40 Q60,10 90,25 M180,40 Q190,10 160,25" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-                    <rect x="70" y="175" width="15" height="20" rx="5" fill="${cfg.pigC}" opacity="${cfg.pigA}" stroke="#fff" stroke-width="2"/>
-                    <rect x="165" y="175" width="15" height="20" rx="5" fill="${cfg.pigC}" opacity="${cfg.pigA}" stroke="#fff" stroke-width="2"/>
-                    <rect x="110" y="25" width="30" height="6" rx="3" fill="#000" opacity="0.6"/>
-                </svg>
+                <img src="${cfg.pigImg}" class="pig">
                 <div class="coins" id="coin-pile"></div>
             </div>
             <div class="ui">
@@ -245,9 +236,9 @@ function buildInnerGame() {
             const s = document.createElement('div'); s.className = 'stored-coin';
             const r = Math.pow(Math.random(), 0.6) * 12; 
             const a = Math.random() * Math.PI * 2;
-            s.style.left = (15 + Math.cos(a)*r) + 'vmin';
-            s.style.top = (10 + Math.sin(a)*(r*0.4) - (12-r)*0.5) + 'vmin';
-            s.style.animationDelay = Math.random()*2+'s';
+            s.style.left = (12 + Math.cos(a)*r) + 'vmin';
+            s.style.top = (8 + Math.sin(a)*(r*0.4) - (12-r)*0.5) + 'vmin';
+            s.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
             p.appendChild(s);
         }
 
