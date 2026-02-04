@@ -154,24 +154,20 @@ function buildInnerGame() {
         body { margin:0; height:100vh; overflow:hidden; font-family:${cfg.ff}; background:#000; color:#fff; border:4px solid #f9e076; box-sizing:border-box; border-radius:${cfg.br}px; }
         .bg { position:fixed; inset:0; background:url(${cfg.bg}) center/cover; opacity:0.4; z-index:-1; }
         #root { height:100%; display:flex; flex-direction:column; padding:${cfg.pt}vmin ${cfg.pr}vmin ${cfg.pb}vmin ${cfg.pl}vmin; position:relative; box-sizing:border-box; }
-        .score { font-size:10vmin; color:#f9e076; font-weight:900; text-align:center; margin-bottom:2vmin; z-index:20; }
+        .score { font-size:10vmin; color:#f9e076; font-weight:900; text-align:center; margin-bottom:2vmin; }
         #pile-box { flex:1; position:relative; display:flex; justify-content:center; align-items:center; }
-        .pig { width:65vmin; height:auto; z-index:10; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); object-fit: contain; pointer-events: none; }
-        /* Контейнер кучи теперь жестко привязан к центру свинки */
-        .coins { position:absolute; left: 50%; top: 50%; transform: translate(-50%, -40%); width:30vmin; height:20vmin; z-index:5; pointer-events:none; }
-        .stored-coin { position:absolute; width:6vmin; height:6vmin; background:url(${cfg.coinImg}) center/cover no-repeat; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4)); }
-        .falling-coin { position:absolute; left:50%; width:10vmin; height:10vmin; z-index:15; background:url(${cfg.coinImg}) center/cover no-repeat; pointer-events:none; }
-        .ui { min-height:35%; display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:2vmin; z-index:20; }
+        .pig { width:65vmin; height:auto; z-index:5; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); object-fit: contain; }
+        .coins { position:absolute; width:30vmin; height:20vmin; z-index:4; transform: translateY(6vmin); }
+        .stored-coin { position:absolute; width:5vmin; height:5vmin; background:url(${cfg.coinImg}) center/cover no-repeat; animation: shine 3s infinite; }
+        .falling-coin { position:absolute; left:50%; width:10vmin; height:10vmin; z-index:10; background:url(${cfg.coinImg}) center/cover no-repeat; pointer-events:none; }
+        .ui { min-height:35%; display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:2vmin; }
         .label { font-size:${cfg.fz}vmin; text-align:center; margin-bottom:3vmin; font-weight:bold; min-height:3em; display:flex; align-items:center; justify-content:center; }
         .grid { display:grid; gap:2vmin; }
         button { border:2px solid #f9e076; background:rgba(0,0,0,0.6); color:#f9e076; padding:3vmin; border-radius:15px; cursor:pointer; font-weight:bold; font-size:4vmin; transition:0.2s; }
         button:hover { background:rgba(249,224,118,0.2); }
         .screen { position:absolute; inset:0; background:rgba(0,0,0,0.95); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; text-align:center; padding:5vmin; border-radius:${cfg.br}px; }
-        @keyframes fall { 
-            0% { transform:translate(-50%,-60vmin) rotate(0deg); opacity:0; } 
-            20% { opacity:1; } 
-            100% { transform:translate(-50%,0vmin) rotate(180deg); opacity:0.9; } 
-        }
+        @keyframes fall { 0% { transform:translate(-50%,-50vmin); opacity:0; } 20% { opacity:1; } 100% { transform:translate(-50%,20vmin); opacity:0; } }
+        @keyframes shine { 0%, 100% { filter:brightness(1); } 50% { filter:brightness(1.4) drop-shadow(0 0 5px gold); } }
     </style></head><body>
         <div class="bg"></div>
         <div id="root">
@@ -187,7 +183,7 @@ function buildInnerGame() {
             </div>
         </div>
     <script>
-        let qi=0, score=0, stake=0, coinCount=0; 
+        let qi=0, score=0, stake=0; 
         let rawData = ${JSON.stringify(cfg.data)};
         const data = ${cfg.rnd} ? rawData.sort(() => Math.random() - 0.5) : rawData;
         const dict = {
@@ -228,44 +224,27 @@ function buildInnerGame() {
             for(let i=0; i<n; i++) {
                 setTimeout(() => {
                     const f = document.createElement('div'); f.className = 'falling-coin';
-                    document.getElementById('coin-pile').appendChild(f);
-                    f.style.animation = 'fall 0.6s ease-in forwards';
-                    setTimeout(() => { f.remove(); add(); }, 550);
-                }, i*80);
+                    document.getElementById('pile-box').appendChild(f);
+                    f.style.animation = 'fall 1.2s forwards';
+                    setTimeout(() => { f.remove(); add(); }, 1100);
+                }, i*120);
             }
         }
 
         function add() {
-            coinCount++;
             const p = document.getElementById('coin-pile');
             const s = document.createElement('div'); s.className = 'stored-coin';
-            
-            // Физика горки (центровка x и рост y)
-            const spread = 12; // Ширина основания горки
-            const randX = (Math.random() + Math.random() + Math.random() - 1.5) / 1.5; 
-            const x = randX * spread; 
-            
-            // Высота кучи: чем ближе к центру (randX -> 0), тем выше горка
-            const coneHeight = (1 - Math.abs(randX)) * 4; 
-            const growth = Math.min(10, coinCount * 0.12); // Плавный рост всей кучи вверх
-            const y = coneHeight + growth;
-
-            s.style.left = (15 + x - 3) + 'vmin'; // 15 - половина ширины контейнера (30/2)
-            s.style.bottom = y + 'vmin';
-            s.style.transform = 'rotate(' + (Math.random() * 60 - 30) + 'deg)';
-            s.style.zIndex = coinCount; 
-            
+            const r = Math.pow(Math.random(), 0.6) * 12; 
+            const a = Math.random() * Math.PI * 2;
+            s.style.left = (12 + Math.cos(a)*r) + 'vmin';
+            s.style.top = (8 + Math.sin(a)*(r*0.4) - (12-r)*0.5) + 'vmin';
+            s.style.transform = 'rotate(' + (Math.random()*360) + 'deg)';
             p.appendChild(s);
         }
 
         function remove(n) {
             const p = document.getElementById('coin-pile');
-            for(let i=0; i<n; i++) {
-                if(p.lastChild) {
-                    p.lastChild.remove();
-                    coinCount = Math.max(0, coinCount - 1);
-                }
-            }
+            for(let i=0; i<n; i++) if(p.lastChild) p.lastChild.remove();
         }
 
         function finish() {
