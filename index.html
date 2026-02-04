@@ -17,13 +17,8 @@
         .sidebar-content label { display: block; font-size: 10px; color: #aaa; text-transform: uppercase; margin-top: 8px; }
         .sidebar-content input, .sidebar-content select { width: 100%; background: #111; border: 1px solid #444; color: #fff; padding: 10px; border-radius: 12px; margin-top: 5px; box-sizing: border-box; outline: none; }
         
-        .check-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; cursor: pointer; }
-        .check-row input { width: auto; margin: 0; cursor: pointer; }
-        .check-row span { font-size: 11px; color: #eee; }
-
         .btn { background: #3d3d45; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 15px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
         .btn-main { background: #ffb347; color: #000; margin-top: 20px; } 
-        .btn-main:hover { background: #ffa02e; }
         .btn-code { background: #77dd77; color: #000; margin-top: 8px; } 
 
         .preview { flex: 1; background: #0c0c0e; display: flex; align-items: center; justify-content: center; }
@@ -36,11 +31,7 @@
         .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         input[type="color"] { padding: 2px; height: 38px; cursor: pointer; border-radius: 10px; }
 
-        @keyframes billboard {
-            0% { filter: brightness(1) drop-shadow(0 0 2px var(--shad)); }
-            50% { filter: brightness(1.5) drop-shadow(0 0 15px var(--shad)); }
-            100% { filter: brightness(1) drop-shadow(0 0 2px var(--shad)); }
-        }
+        @keyframes billboard { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.3) drop-shadow(0 0 10px var(--shad)); } }
         .anim-border { animation: billboard 2s infinite ease-in-out; }
     </style>
 </head>
@@ -48,53 +39,26 @@
 
 <div class="sidebar">
     <div class="sidebar-content">
-        <h2>Запуск и Тексты</h2>
-        <label>Заголовок при запуске</label>
-        <input type="text" id="start-title" value="Готовы к игре?">
-        <label>Текст кнопки запуска</label>
-        <input type="text" id="start-btn-text" value="НАЧАТЬ">
-        <label>Цвет текста (вопросы/заголовки)</label>
-        <input type="color" id="textColor" value="#ffffff">
-
-        <h2>Финальный фидбек</h2>
-        <label>Текст после завершения</label>
-        <input type="text" id="end-text" placeholder="Стандартный текст">
-
-        <h2>Настройки копилки</h2>
+        <h2>Запуск</h2>
+        <label>Заголовок</label>
+        <input type="text" id="start-title" value="Сокровища Пирата">
+        <label>Кнопка старта</label>
+        <input type="text" id="start-btn-text" value="В БОЙ">
+        
+        <h2>Визуал Копилки</h2>
         <div class="color-grid">
-            <div><label>Цвет стекла</label><input type="color" id="pigColor" value="#c9d6df"></div>
-            <div><label>Прозрачность</label><input type="range" id="pigAlpha" min="0.1" max="0.5" step="0.05" value="0.15"></div>
-        </div>
-
-        <h2>Эффекты билборда</h2>
-        <div class="color-grid">
-            <div><label>Цвет рамки</label><input type="color" id="borderColor" value="#f9e076" onchange="updatePreview()"></div>
-            <div><label>Толщина (px)</label><input type="number" id="borderWidth" value="4"></div>
-        </div>
-        <div class="color-grid">
-            <div><label>Свечение</label><input type="number" id="shadowBlur" value="15"></div>
-            <div><label>Цвет свечения</label><input type="color" id="shadowColor" value="#f9e076"></div>
+            <div><label>Цвет свинки</label><input type="color" id="pigColor" value="#ffc0cb"></div>
+            <div><label>Стекло</label><input type="range" id="pigAlpha" min="0.1" max="0.7" step="0.1" value="0.3"></div>
         </div>
 
         <h2>Оформление</h2>
-        <label>Фон (URL картинки)</label>
+        <label>Фон (URL)</label>
         <input type="text" id="bg-url" placeholder="https://..." onchange="updatePreview()">
-        
-        <label>Шрифт</label>
-        <select id="fontFamily" onchange="updatePreview()">
-            <option value="'ABeeZee', sans-serif">ABeeZee</option>
-            <option value="'Montserrat', sans-serif">Montserrat</option>
-            <option value="'Acme', sans-serif">Acme</option>
-        </select>
-        
-        <label>Размер шрифта (px)</label>
-        <input type="range" id="fontSize" min="12" max="32" value="20" oninput="updatePreview()">
+        <label>Шрифт (px)</label>
+        <input type="range" id="fontSize" min="14" max="28" value="20" oninput="updatePreview()">
 
-        <h2>Алгоритмы</h2>
-        <label class="check-row"><input type="checkbox" id="randomOrder"><span>Рандомный порядок вопросов</span></label>
-
-        <h2>Размер виджета</h2>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <h2>Экран</h2>
+        <div class="color-grid">
             <input type="number" id="width" value="400" onchange="updatePreview()">
             <input type="number" id="height" value="600" onchange="updatePreview()">
         </div>
@@ -103,17 +67,14 @@
         <div id="q-container"></div>
         <button class="btn" onclick="addQ()">+ ДОБАВИТЬ ВОПРОС</button>
 
-        <h2>Кнопки</h2>
-        <div class="color-grid">
-            <div><label>Цвет кнопок</label><input type="color" id="btnColor" value="#f9e076"></div>
-            <div><label>Прозрачность</label><input type="range" id="btnAlpha" min="0" max="1" step="0.1" value="0.1"></div>
-        </div>
-        <label>Язык</label>
+        <label>Язык виджета</label>
         <select id="lang">
             <option value="ru">Русский</option>
             <option value="en">English</option>
             <option value="de">Deutsch</option>
         </select>
+
+        <input type="hidden" id="shadowColor" value="#f9e076">
     </div>
     <div style="padding: 20px; border-top: 1px solid var(--border);">
         <button class="btn btn-main" onclick="updatePreview()">ОБНОВИТЬ ПРЕВЬЮ</button>
@@ -126,237 +87,167 @@
 </div>
 
 <div id="code-modal">
-    <h3 style="color: #fff">Код для Genially:</h3>
     <textarea id="result-code" readonly onclick="this.select()"></textarea>
     <button class="btn" onclick="document.getElementById('code-modal').style.display='none'" style="width: 200px">ЗАКРЫТЬ</button>
 </div>
 
 <script>
-function addQ(qText, correct, wrongs) {
-    qText = qText || "";
-    correct = correct || "";
-    wrongs = wrongs || ["", ""];
+function addQ(q, c, w) {
     const div = document.createElement('div');
     div.className = 'card';
-    const wrongsStr = Array.isArray(wrongs) ? wrongs.join(', ') : wrongs;
-    div.innerHTML = '<span class="del-btn" onclick="this.parentElement.remove()">УДАЛИТЬ</span>' +
-        '<label>Вопрос</label><input type="text" class="inp-q" value="' + qText + '">' +
-        '<label style="color:var(--green)">✓ Верный ответ</label>' +
-        '<input type="text" class="inp-correct" value="' + correct + '">' +
-        '<label style="color:var(--red)">× Ложные</label>' +
-        '<input type="text" class="inp-wrong" value="' + wrongsStr + '">';
+    div.innerHTML = `<span class="del-btn" onclick="this.parentElement.remove()">УДАЛИТЬ</span>
+        <label>Вопрос</label><input type="text" class="inp-q" value="${q||''}">
+        <label style="color:var(--green)">✓ Верный</label><input type="text" class="inp-correct" value="${c||''}">
+        <label style="color:var(--red)">× Ложные</label><input type="text" class="inp-wrong" value="${w||''}">`;
     document.getElementById('q-container').appendChild(div);
 }
 
-function hexToRgba(hex, alpha) {
-    let r = parseInt(hex.slice(1, 3), 16);
-    let g = parseInt(hex.slice(3, 5), 16);
-    let b = parseInt(hex.slice(5, 7), 16);
-    return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
-}
-
 function buildInnerGame() {
-    const cards = Array.from(document.querySelectorAll('#q-container .card'));
-    const finalQs = cards.map(function(c) {
-        const qVal = c.querySelector('.inp-q').value.trim();
-        const corr = c.querySelector('.inp-correct').value.trim();
-        const wrongs = c.querySelector('.inp-wrong').value.split(',').map(function(x) { return x.trim(); }).filter(function(x) { return x; });
-        return { q: qVal, a: [corr].concat(wrongs) };
-    }).filter(function(x) { return x.q && x.a.length > 1; });
+    const data = Array.from(document.querySelectorAll('.card')).map(c => ({
+        q: c.querySelector('.inp-q').value,
+        a: [c.querySelector('.inp-correct').value, ...c.querySelector('.inp-wrong').value.split(',').map(x => x.trim())]
+    })).filter(x => x.q);
 
     const cfg = {
         bg: document.getElementById('bg-url').value,
-        startTitle: document.getElementById('start-title').value,
-        startBtn: document.getElementById('start-btn-text').value,
-        endText: document.getElementById('end-text').value,
-        textColor: document.getElementById('textColor').value,
-        borderColor: document.getElementById('borderColor').value,
-        borderWidth: document.getElementById('borderWidth').value,
-        shadowColor: document.getElementById('shadowColor').value,
-        shadowBlur: document.getElementById('shadowBlur').value,
-        pigColor: document.getElementById('pigColor').value,
-        pigAlpha: document.getElementById('pigAlpha').value,
+        title: document.getElementById('start-title').value,
+        btn: document.getElementById('start-btn-text').value,
+        pigC: document.getElementById('pigColor').value,
+        pigA: document.getElementById('pigAlpha').value,
+        fz: document.getElementById('fontSize').value,
         lang: document.getElementById('lang').value,
-        font: document.getElementById('fontFamily').value,
-        fontSize: document.getElementById('fontSize').value,
-        btnColor: document.getElementById('btnColor').value,
-        btnRgba: hexToRgba(document.getElementById('btnColor').value, document.getElementById('btnAlpha').value),
-        data: finalQs 
+        data: data
     };
 
-    const fontName = cfg.font.split(',')[0].replace(/'/g, '');
-    const gFont = 'https://fonts.googleapis.com/css2?family=' + fontName.replace(/ /g, '+') + '&display=swap';
-    
-    const html = '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
-    '<link href="' + gFont + '" rel="stylesheet"><style>' +
-    '@keyframes shine {' +
-    '0%{border-color:' + cfg.borderColor + ';box-shadow:0 0 ' + cfg.shadowBlur + 'px ' + cfg.shadowColor + ';}' +
-    '50%{border-color:#fff;box-shadow:0 0 ' + (parseInt(cfg.shadowBlur)+10) + 'px #fff,inset 0 0 10px ' + cfg.shadowColor + ';}' +
-    '100%{border-color:' + cfg.borderColor + ';box-shadow:0 0 ' + cfg.shadowBlur + 'px ' + cfg.shadowColor + ';}}' +
-    '@keyframes coinFall{0%{transform:translate(-50%, -200px) rotate(0deg) scale(0.5);opacity:0;}' +
-    '20%{opacity:1;transform:translate(-50%, -100px) rotate(180deg) scale(0.8);}' +
-    '100%{transform:translate(-50%, 150px) rotate(720deg) scale(1);opacity:0;}}' +
-    '@keyframes coinShine{0%,100%{filter:brightness(1);}50%{filter:brightness(1.6) drop-shadow(0 0 6px #ffd700);}}' +
-    'body{margin:0;height:100vh;overflow:hidden;font-family:' + cfg.font + ';background:#000;color:' + cfg.textColor + ';display:flex;align-items:center;justify-content:center;}' +
-    '.bg-layer{position:fixed;inset:0;background:url(' + cfg.bg + ') center/cover no-repeat;opacity:0.5;z-index:-1;}' +
-    '#game-root{width:100%;height:100%;position:relative;display:flex;flex-direction:column;padding:20px;box-sizing:border-box;' +
-    'border:' + cfg.borderWidth + 'px solid ' + cfg.borderColor + ';animation:shine 3s infinite ease-in-out;}' +
-    '.score{font-size:36px;color:' + cfg.btnColor + ';font-weight:800;text-align:center;margin-bottom:8px;text-shadow:0 0 20px ' + cfg.btnColor + ';}' +
-    '#pile-container{flex:0.7;position:relative;overflow:visible;display:flex;align-items:center;justify-content:center;}' +
-    '.piggy-bank{width:200px;height:185px;position:relative;z-index:5;filter:drop-shadow(0 12px 35px rgba(255,255,255,0.15));}' +
-    '.coins-inside{position:absolute;top:54%;left:50%;transform:translate(-50%, -50%);width:70px;height:50px;z-index:4;overflow:hidden;position:relative;}' +
-    '.stored-coin{width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fffbea 0%,#ffd700 25%,#d4a645 60%,#8b6914 100%);' +
-    'border:1.5px solid #6b5411;box-shadow:0 1px 4px rgba(0,0,0,0.8),inset 0.5px 0.5px 1px rgba(255,255,255,0.5);animation:coinShine 3s ease-in-out infinite;position:absolute;}' +
-    '.coin{position:absolute;width:45px;height:45px;pointer-events:none;z-index:10;left:50%;}' +
-    '.coin-face{width:100%;height:100%;border-radius:50%;' +
-    'background:radial-gradient(circle at 28% 25%,#fffbea 0%,#ffd700 8%,#ffed4e 18%,#ffc425 35%,#d4a645 55%,#b8860b 75%,#8b6914 100%);' +
-    'border:3px solid #6b5411;box-shadow:0 6px 20px rgba(0,0,0,0.85),0 2px 8px rgba(0,0,0,0.6),inset -3px -3px 6px rgba(0,0,0,0.5),inset 2px 2px 6px rgba(255,255,255,0.4);position:relative;}' +
-    '.coin-face::before{content:"";position:absolute;top:6px;left:6px;width:12px;height:12px;background:radial-gradient(circle,rgba(255,255,255,0.95) 0%,rgba(255,255,255,0) 70%);border-radius:50%;filter:blur(1px);}' +
-    '.coin-face::after{content:"₽";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;' +
-    'color:#6b5411;text-shadow:1px 1px 2px rgba(255,255,255,0.6),-1px -1px 1px rgba(0,0,0,0.4);}' +
-    '.label-sm{font-size:' + cfg.fontSize + 'px;text-align:center;margin:10px 0;text-transform:uppercase;min-height:1.2em;display:flex;align-items:center;justify-content:center;font-weight:600;}' +
-    '.grid{display:grid;grid-template-columns:1fr;gap:10px;}' +
-    '.btn-ans,.btn-stake,.btn-start{border:2px solid ' + cfg.btnColor + ';background:' + cfg.btnRgba + ';color:' + cfg.btnColor + ';' +
-    'padding:14px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:bold;transition:0.2s;font-size:16px;}' +
-    '.btn-ans:hover,.btn-stake:hover,.btn-start:hover{background:' + hexToRgba(cfg.btnColor, 0.4) + ';transform:scale(1.03);box-shadow:0 0 20px ' + hexToRgba(cfg.btnColor, 0.5) + ';}' +
-    '.screen{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;align-items:center;text-align:center;z-index:100;background:rgba(0,0,0,0.85);}' +
-    '.active{display:flex;}' +
-    '</style></head><body><div class="bg-layer"></div><div id="game-root">' +
-    '<div id="start-screen" class="screen active"><h1 style="margin:0 20px 30px;font-size:32px">' + cfg.startTitle + '</h1>' +
-    '<button class="btn-start" style="width:200px;font-size:18px" onclick="startGame()">' + cfg.startBtn + '</button></div>' +
-    '<div id="game-content" style="flex:1;display:none;flex-direction:column">' +
-    '<div class="score" id="s">0</div><div id="pile-container">' +
-    '<svg class="piggy-bank" viewBox="0 0 340 280" xmlns="http://www.w3.org/2000/svg">' +
-    '<defs>' +
-    '<radialGradient id="glassBody" cx="35%" cy="30%">' +
-    '<stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.4"/>' +
-    '<stop offset="40%" style="stop-color:' + cfg.pigColor + ';stop-opacity:' + cfg.pigAlpha + '"/>' +
-    '<stop offset="100%" style="stop-color:#90a4ae;stop-opacity:0.25"/>' +
-    '</radialGradient>' +
-    '<radialGradient id="glassSnout" cx="35%" cy="25%">' +
-    '<stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.45"/>' +
-    '<stop offset="60%" style="stop-color:' + cfg.pigColor + ';stop-opacity:' + cfg.pigAlpha + '"/>' +
-    '<stop offset="100%" style="stop-color:#90a4ae;stop-opacity:0.2"/>' +
-    '</radialGradient>' +
-    '<filter id="glassBlur"><feGaussianBlur in="SourceGraphic" stdDeviation="0.5"/></filter>' +
-    '<filter id="glow"><feGaussianBlur stdDeviation="3" result="coloredBlur"/>' +
-    '<feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>' +
-    '</defs>' +
-    '<g opacity="0.95">' +
-    '<ellipse cx="170" cy="140" rx="115" ry="72" fill="url(#glassBody)" stroke="#e8f4f8" stroke-width="3" stroke-linecap="round" opacity="0.9"/>' +
-    '<ellipse cx="170" cy="140" rx="115" ry="72" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>' +
-    '<ellipse cx="145" cy="110" rx="35" ry="28" fill="rgba(255,255,255,0.15)" opacity="0.6"/>' +
-    '<ellipse cx="205" cy="115" rx="28" ry="22" fill="rgba(255,255,255,0.12)" opacity="0.5"/>' +
-    '<ellipse cx="70" cy="135" rx="32" ry="27" fill="url(#glassSnout)" stroke="#e8f4f8" stroke-width="3" stroke-linecap="round" opacity="0.85"/>' +
-    '<ellipse cx="70" cy="135" rx="32" ry="27" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.25"/>' +
-    '<ellipse cx="78" cy="128" rx="5" ry="7" fill="rgba(50,50,50,0.6)"/>' +
-    '<ellipse cx="62" cy="128" rx="5" ry="7" fill="rgba(50,50,50,0.6)"/>' +
-    '<ellipse cx="78" cy="142" rx="4.5" ry="6.5" fill="rgba(50,50,50,0.5)"/>' +
-    '<ellipse cx="62" cy="142" rx="4.5" ry="6.5" fill="rgba(50,50,50,0.5)"/>' +
-    '<circle cx="205" cy="125" r="10" fill="rgba(20,20,20,0.7)"/>' +
-    '<circle cx="208" cy="122" r="3.5" fill="#000"/>' +
-    '<ellipse cx="207" cy="120" rx="1.5" ry="2" fill="rgba(255,255,255,0.6)"/>' +
-    '<circle cx="145" cy="125" r="10" fill="rgba(20,20,20,0.7)"/>' +
-    '<circle cx="148" cy="122" r="3.5" fill="#000"/>' +
-    '<ellipse cx="147" cy="120" rx="1.5" ry="2" fill="rgba(255,255,255,0.6)"/>' +
-    '<path d="M155,75 Q160,50 170,53 Q175,45 185,53 Q195,50 200,70" fill="none" stroke="#e8f4f8" stroke-width="3.5" stroke-linecap="round" opacity="0.8"/>' +
-    '<path d="M155,75 Q160,50 170,53 Q175,45 185,53 Q195,50 200,70" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity="0.3"/>' +
-    '<line x1="165" y1="55" x2="165" y2="70" stroke="#e8f4f8" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>' +
-    '<line x1="180" y1="50" x2="180" y2="65" stroke="#e8f4f8" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>' +
-    '<line x1="195" y1="55" x2="195" y2="70" stroke="#e8f4f8" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>' +
-    '<rect x="155" y="87" width="35" height="11" rx="5.5" fill="rgba(40,40,40,0.5)" stroke="#e8f4f8" stroke-width="3" opacity="0.8"/>' +
-    '<rect x="155" y="87" width="35" height="11" rx="5.5" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.25"/>' +
-    '<rect x="158" y="90" width="29" height="5" rx="2.5" fill="rgba(0,0,0,0.6)"/>' +
-    '<path d="M275,130 Q290,125 292,115 Q293,105 285,103 Q277,102 272,110 Q270,118 275,125" fill="none" stroke="#e8f4f8" stroke-width="3.5" stroke-linecap="round" opacity="0.75"/>' +
-    '<path d="M275,127 Q278,125 280,121 Q281,117 279,114 Q277,112 274,113 Q272,115 272,118 Q273,121 275,122" fill="none" stroke="#e8f4f8" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>' +
-    '<ellipse cx="276" cy="118" rx="8" ry="10" fill="rgba(255,255,255,0.1)"/>' +
-    '<g opacity="0.85">' +
-    '<rect x="75" y="200" width="26" height="50" rx="13" fill="url(#glassBody)" stroke="#e8f4f8" stroke-width="3" stroke-linecap="round"/>' +
-    '<rect x="75" y="200" width="26" height="50" rx="13" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.2"/>' +
-    '<path d="M75,235 L75,245 Q75,248 78,248 L98,248 Q101,248 101,245 L101,235" fill="rgba(200,220,230,0.2)" stroke="#e8f4f8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
-    '<ellipse cx="88" cy="218" rx="8" ry="12" fill="rgba(255,255,255,0.08)"/>' +
-    '</g>' +
-    '<g opacity="0.85">' +
-    '<rect x="135" y="205" width="26" height="50" rx="13" fill="url(#glassBody)" stroke="#e8f4f8" stroke-width="3" stroke-linecap="round"/>' +
-    '<rect x="135" y="205" width="26" height="50" rx="13" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.2"/>' +
-    '<path d="M135,240 L135,250 Q135,253 138,253 L158,253 Q161,253 161,250 L161,240" fill="rgba(200,220,230,0.2)" stroke="#e8f4f8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
-    '<ellipse cx="148" cy="223" rx="8" ry="12" fill="rgba(255,255,255,0.08)"/>' +
-    '</g>' +
-    '<g opacity="0.85">' +
-    '<rect x="195" y="205" width="26" height="50" rx="13" fill="url(#glassBody)" stroke="#e8f4f8" stroke-width="3" stroke-linecap="round"/>' +
-    '<rect x="195" y="205" width="26" height="50" rx="13" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.2"/>' +
-    '<path d="M195,240 L195,250 Q195,253 198,253 L218,253 Q221,253 221,250 L221,240" fill="rgba(200,220,230,0.2)" stroke="#e8f4f8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
-    '<ellipse cx="208" cy="223" rx="8" ry="12" fill="rgba(255,255,255,0.08)"/>' +
-    '</g>' +
-    '<g opacity="0.85">' +
-    '<rect x="255" y="200" width="26" height="50" rx="13" fill="url(#glassBody)" stroke="#e8f4f8" stroke-width="3" stroke-linecap="round"/>' +
-    '<rect x="255" y="200" width="26" height="50" rx="13" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.2"/>' +
-    '<path d="M255,235 L255,245 Q255,248 258,248 L278,248 Q281,248 281,245 L281,235" fill="rgba(200,220,230,0.2)" stroke="#e8f4f8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
-    '<ellipse cx="268" cy="218" rx="8" ry="12" fill="rgba(255,255,255,0.08)"/>' +
-    '</g>' +
-    '<ellipse cx="120" cy="115" rx="18" ry="25" fill="rgba(255,255,255,0.25)" filter="url(#glassBlur)"/>' +
-    '<ellipse cx="180" cy="95" rx="22" ry="18" fill="rgba(255,255,255,0.2)" filter="url(#glassBlur)"/>' +
-    '<ellipse cx="220" cy="125" rx="15" ry="20" fill="rgba(255,255,255,0.18)" filter="url(#glassBlur)"/>' +
-    '</g></svg><div class="coins-inside" id="coins-inside"></div></div>' +
-    '<div class="label-sm" id="ui-label"></div><div id="ctrl" class="grid"></div></div></div>' +
-    '<script>var cfg=' + JSON.stringify(cfg) + ';var score=0,qi=0,currentStake=0,coinsCount=0;' +
-    'var coinPyramid=[[0,35,6],[1,30,5],[2,25,4],[3,21,3],[4,18,2],[5,15,1]];' +
-    'var dict={ru:{stake:"Ставка",finish:"Конец!"},en:{stake:"Stake",finish:"Finish!"},de:{stake:"Einsatz",finish:"Ende!"}}[cfg.lang];' +
-    'function startGame(){document.getElementById("start-screen").classList.remove("active");' +
-    'document.getElementById("game-content").style.display="flex";showStakes();}' +
-    'function showFinish(){document.getElementById("ui-label").innerText=cfg.endText||dict.finish;' +
-    'document.getElementById("ctrl").innerHTML="";}' +
-    'function showStakes(){if(qi>=cfg.data.length){showFinish();return;}' +
-    'document.getElementById("ui-label").innerText=dict.stake;var c=document.getElementById("ctrl");c.innerHTML="";' +
-    '[10,25,50,100].forEach(function(val){var b=document.createElement("button");b.className="btn-stake";b.innerText=val;' +
-    'b.onclick=function(){currentStake=val;showQuestion();};c.appendChild(b);});}' +
-    'function showQuestion(){document.getElementById("ui-label").innerText=cfg.data[qi].q;var c=document.getElementById("ctrl");c.innerHTML="";' +
-    'var ans=cfg.data[qi].a.slice();ans.sort(function(){return Math.random()-0.5;});' +
-    'ans.forEach(function(text){var b=document.createElement("button");b.className="btn-ans";b.innerText=text;' +
-    'b.onclick=function(){if(text===cfg.data[qi].a[0]){score+=currentStake;dropCoins(Math.ceil(currentStake/10));}' +
-    'else{var toRemove=Math.ceil(currentStake/10);score=Math.max(0,score-currentStake);removeCoins(toRemove);}' +
-    'document.getElementById("s").innerText=score;qi++;setTimeout(qi>=cfg.data.length?showFinish:showStakes,1800);};c.appendChild(b);});}' +
-    'function dropCoins(count){var container=document.getElementById("pile-container");' +
-    'for(var i=0;i<count;i++){(function(idx){setTimeout(function(){var coin=document.createElement("div");coin.className="coin";' +
-    'coin.innerHTML="<div class=\\"coin-face\\"></div>";coin.style.left="50%";coin.style.top="-100px";' +
-    'container.appendChild(coin);coin.style.animation="coinFall 1.6s cubic-bezier(0.5,0.05,0.5,0.95) forwards";' +
-    'setTimeout(function(){coin.remove();addStoredCoin();},1600);},idx*220);})(i);}}' +
-    'function addStoredCoin(){var inside=document.getElementById("coins-inside");if(coinsCount>=36)return;' +
-    'var layer=Math.floor(coinsCount/6);if(layer>=coinPyramid.length)layer=coinPyramid.length-1;' +
-    'var posInLayer=coinsCount%coinPyramid[layer][2];' +
-    'var rowY=coinPyramid[layer][0]*8;var rowWidth=coinPyramid[layer][1];' +
-    'var spacing=coinPyramid[layer][2]>1?rowWidth/(coinPyramid[layer][2]-1):rowWidth/2;' +
-    'var posX=coinPyramid[layer][2]>1?posInLayer*spacing:(rowWidth/2);' +
-    'var coin=document.createElement("div");coin.className="stored-coin";' +
-    'coin.style.bottom=rowY+"px";coin.style.left=(35-rowWidth/2+posX)+"px";' +
-    'coin.style.animationDelay=(Math.random()*2)+"s";inside.appendChild(coin);coinsCount++;}' +
-    'function removeCoins(count){var inside=document.getElementById("coins-inside");' +
-    'for(var i=0;i<count&&coinsCount>0;i++){if(inside.lastChild){inside.lastChild.remove();coinsCount--;}}}' +
-    '<\/script></body></html>';
-    
-    return html;
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <style>
+        body { margin:0; height:100vh; overflow:hidden; font-family:sans-serif; background:#000; color:#fff; border:4px solid #f9e076; box-sizing:border-box; }
+        .bg { position:fixed; inset:0; background:url(${cfg.bg}) center/cover; opacity:0.4; z-index:-1; }
+        #root { height:100%; display:flex; flex-direction:column; padding:20px; position:relative; box-sizing:border-box; }
+        .score { font-size:48px; color:#f9e076; font-weight:900; text-align:center; margin-bottom:10px; }
+        #pile-box { flex:1; position:relative; display:flex; justify-content:center; align-items:center; }
+        .pig { width:240px; z-index:5; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); }
+        .coins { position:absolute; width:130px; height:80px; z-index:4; transform: translateY(15px); }
+        .stored-coin { position:absolute; width:14px; height:14px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #fff9a3, #ffd700, #b8860b); border:1px solid #6b5411; animation: shine 3s infinite; }
+        .falling-coin { position:absolute; left:50%; width:35px; height:35px; z-index:10; border-radius:50%; background:radial-gradient(circle at 35% 35%, #fffbea, #ffd700, #8b6914); border:2px solid #5a4408; pointer-events:none; }
+        .ui { height:180px; display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:10px; }
+        .label { font-size:${cfg.fz}px; text-align:center; margin-bottom:15px; font-weight:bold; min-height:3em; display:flex; align-items:center; justify-content:center; }
+        .grid { display:grid; gap:8px; height:110px; }
+        button { border:2px solid #f9e076; background:rgba(0,0,0,0.6); color:#f9e076; padding:12px; border-radius:15px; cursor:pointer; font-weight:bold; font-size:16px; transition:0.2s; }
+        button:hover { background:rgba(249,224,118,0.2); }
+        .screen { position:absolute; inset:0; background:rgba(0,0,0,0.95); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; text-align:center; padding:20px; }
+        @keyframes fall { 0% { transform:translate(-50%,-200px); opacity:0; } 20% { opacity:1; } 100% { transform:translate(-50%,120px); opacity:0; } }
+        @keyframes shine { 0%, 100% { filter:brightness(1); } 50% { filter:brightness(1.8) drop-shadow(0 0 3px gold); } }
+    </style></head><body>
+        <div class="bg"></div>
+        <div id="root">
+            <div id="start-sc" class="screen"><h2>${cfg.title}</h2><button onclick="start()">${cfg.btn}</button></div>
+            <div class="score" id="score-val">0</div>
+            <div id="pile-box">
+                <svg class="pig" viewBox="0 0 250 200">
+                    <path d="M210,100 C210,150 170,180 125,180 C80,180 40,150 40,100 C40,50 80,20 125,20 C170,20 210,50 210,100" fill="${cfg.pigC}" opacity="${cfg.pigA}" stroke="#fff" stroke-width="2"/>
+                    <circle cx="50" cy="100" r="15" fill="${cfg.pigC}" opacity="${cfg.pigA}" stroke="#fff" stroke-width="2"/>
+                    <circle cx="45" cy="95" r="2.5" fill="#333"/> <circle cx="45" cy="105" r="2.5" fill="#333"/>
+                    <path d="M70,40 Q60,10 90,25 M180,40 Q190,10 160,25" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+                    <rect x="70" y="175" width="15" height="20" rx="5" fill="${cfg.pigC}" opacity="${cfg.pigA}" stroke="#fff" stroke-width="2"/>
+                    <rect x="165" y="175" width="15" height="20" rx="5" fill="${cfg.pigC}" opacity="${cfg.pigA}" stroke="#fff" stroke-width="2"/>
+                    <rect x="110" y="25" width="30" height="6" rx="3" fill="#000" opacity="0.6"/>
+                </svg>
+                <div class="coins" id="coin-pile"></div>
+            </div>
+            <div class="ui">
+                <div class="label" id="q-label"></div>
+                <div id="btn-grid" class="grid"></div>
+            </div>
+        </div>
+    <script>
+        let qi=0, score=0, stake=0; 
+        const data = ${JSON.stringify(cfg.data)};
+        const dict = {
+            ru: { stake: "ВЫБЕРИТЕ СТАВКУ", finish: "ИГРА ОКОНЧЕНА!" },
+            en: { stake: "CHOOSE STAKE", finish: "GAME OVER!" },
+            de: { stake: "EINSATZ WÄHLEN", finish: "SPIEL BEENDET!" }
+        }['${cfg.lang}'];
+
+        function start() { document.getElementById('start-sc').style.display='none'; showStakes(); }
+
+        function showStakes() {
+            if(qi >= data.length) { finish(); return; }
+            document.getElementById('q-label').innerText = dict.stake;
+            const g = document.getElementById('btn-grid');
+            g.innerHTML = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px"></div>';
+            [10,25,50,100].forEach(v => {
+                const b = document.createElement('button'); b.innerText = v;
+                b.onclick = () => { stake = v; showQ(); }; g.firstChild.appendChild(b);
+            });
+        }
+
+        function showQ() {
+            document.getElementById('q-label').innerText = data[qi].q;
+            const g = document.getElementById('btn-grid'); g.innerHTML = '';
+            [...data[qi].a].sort(()=>Math.random()-0.5).forEach(t => {
+                const b = document.createElement('button'); b.innerText = t;
+                b.onclick = () => {
+                    if(t === data[qi].a[0]) { score += stake; drop(Math.ceil(stake/10)); }
+                    else { score = Math.max(0, score - stake); remove(Math.ceil(stake/10)); }
+                    document.getElementById('score-val').innerText = score;
+                    qi++; setTimeout(showStakes, 1500);
+                }; g.appendChild(b);
+            });
+        }
+
+        function drop(n) {
+            for(let i=0; i<n; i++) {
+                setTimeout(() => {
+                    const f = document.createElement('div'); f.className = 'falling-coin';
+                    document.getElementById('pile-box').appendChild(f);
+                    f.style.animation = 'fall 1.2s forwards';
+                    setTimeout(() => { f.remove(); add(); }, 1100);
+                }, i*120);
+            }
+        }
+
+        function add() {
+            const p = document.getElementById('coin-pile');
+            const s = document.createElement('div'); s.className = 'stored-coin';
+            const r = Math.pow(Math.random(), 0.6) * 55;
+            const a = Math.random() * Math.PI * 2;
+            s.style.left = (65 + Math.cos(a)*r) + 'px';
+            s.style.top = (65 + Math.sin(a)*(r*0.4) - (55-r)*0.5) + 'px';
+            s.style.animationDelay = Math.random()*2+'s';
+            p.appendChild(s);
+        }
+
+        function remove(n) {
+            const p = document.getElementById('coin-pile');
+            for(let i=0; i<n; i++) if(p.lastChild) p.lastChild.remove();
+        }
+
+        function finish() {
+            document.getElementById('q-label').innerText = dict.finish;
+            document.getElementById('btn-grid').innerHTML = '<button onclick="location.reload()">RESTART</button>';
+        }
+    <\/script></body></html>`;
 }
 
 function updatePreview() {
     const dev = document.getElementById('device-wrapper');
-    const sCol = document.getElementById('shadowColor').value;
-    dev.style.setProperty('--shad', sCol);
     dev.style.width = document.getElementById('width').value + 'px';
     dev.style.height = document.getElementById('height').value + 'px';
-    dev.style.border = document.getElementById('borderWidth').value + 'px solid ' + document.getElementById('borderColor').value;
+    dev.style.setProperty('--shad', document.getElementById('shadowColor').value);
     const bgUrl = document.getElementById('bg-url').value;
-    dev.style.backgroundImage = bgUrl ? 'url(' + bgUrl + ')' : 'none';
+    dev.style.backgroundImage = bgUrl ? `url(${bgUrl})` : 'none';
     document.getElementById('ifr').srcdoc = buildInnerGame();
 }
 
 function getGeniallyCode() {
     const html = buildInnerGame().replace(/"/g, '&quot;');
-    document.getElementById('result-code').value = '<iframe width="100%" height="100%" srcdoc="' + html + '" frameborder="0" scrolling="no" style="border:none; overflow:hidden;"></iframe>';
+    document.getElementById('result-code').value = `<iframe width="100%" height="100%" srcdoc="${html}" frameborder="0" scrolling="no" style="border:none;overflow:hidden;"></iframe>`;
     document.getElementById('code-modal').style.display = 'flex';
 }
 
-window.onload = function() { 
-    addQ('Сколько золотых в сундуке?', '100', ['50', '200']); 
+window.onload = () => { 
+    addQ('Кто написал Остров Сокровищ?', 'Стивенсон', 'Дефо, Лондон');
     updatePreview(); 
 };
 </script>
