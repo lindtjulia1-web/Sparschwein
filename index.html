@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>KGB Pile Editor Pro + Pirate Stakes</title>
+    <title>KGB Pile Editor Pro - Glass Piggy Edition</title>
     <style>
         :root { --accent: #f9e076; --bg: #1e1e24; --panel: #2a2a32; --border: #3d3d45; --green: #4caf50; --red: #f44336; }
         body { font-family: 'Segoe UI', sans-serif; background: #000; color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
@@ -33,12 +33,6 @@
         <label>Текст кнопки</label>
         <input type="text" id="start-btn-text" value="НАЧАТЬ">
         
-        <h2>Настройки копилки</h2>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <div><label>Контур</label><input type="color" id="pigColor" value="#ffffff"></div>
-            <div><label>Толщина</label><input type="number" id="pigStroke" value="2"></div>
-        </div>
-
         <h2>Оформление</h2>
         <label>Рамка виджета</label>
         <input type="color" id="borderColor" value="#f9e076">
@@ -89,8 +83,6 @@ function buildInnerGame() {
     const cfg = {
         title: document.getElementById('start-title').value,
         btn: document.getElementById('start-btn-text').value,
-        pigColor: document.getElementById('pigColor').value,
-        pigStroke: document.getElementById('pigStroke').value,
         borderColor: document.getElementById('borderColor').value,
         lang: document.getElementById('lang').value,
         font: document.getElementById('fontFamily').value,
@@ -103,49 +95,43 @@ function buildInnerGame() {
     return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
         body { margin:0; height:100vh; background:#000; font-family:${cfg.font}; color:#fff; display:flex; flex-direction:column; overflow:hidden; border:4px solid ${cfg.borderColor}; box-sizing:border-box; }
         #pile-container { flex:1; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-        .piggy-bank { width:280px; z-index:5; position:relative; }
-        .coins-inside { position:absolute; bottom:32%; width:130px; height:80px; display:flex; flex-wrap:wrap-reverse; justify-content:center; align-items:flex-start; z-index:4; }
-        .stored-coin { width:22px; height:22px; background:radial-gradient(circle at 30% 30%, #ffd700, #b8860b); border:1px solid #5a4408; border-radius:50%; margin:-3px; box-shadow:0 2px 4px rgba(0,0,0,0.5); position:relative; }
-        .stored-coin::after { content:"☠"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; color:rgba(0,0,0,0.5); }
-        .falling-coin { position:absolute; width:40px; height:40px; z-index:10; animation: fall 1s cubic-bezier(0.6, 0, 0.4, 1) forwards; }
-        @keyframes fall { 0% { top:-50px; opacity:0; transform:rotate(0deg); } 20% { opacity:1; } 100% { top:45%; opacity:1; transform:rotate(720deg); } }
-        .ui { padding:20px; display:grid; gap:10px; }
-        .btn-ans { background:rgba(255,215,0,0.1); border:1px solid gold; color:gold; padding:15px; border-radius:15px; cursor:pointer; font-weight:bold; }
-        .screen { position:absolute; inset:0; background:rgba(0,0,0,0.9); display:flex; align-items:center; justify-content:center; z-index:100; flex-direction:column; }
+        .piggy-bank { width:320px; height:240px; z-index:5; position:relative; background: url('https://i.ibb.co/LhyM4pC/Copilot-20260202-085849.jpg') no-repeat center/contain; pointer-events:none; }
+        .coins-inside { position:absolute; bottom:28%; left:50%; transform:translateX(-55%); width:160px; height:100px; display:flex; flex-wrap:wrap-reverse; justify-content:center; align-items:flex-start; z-index:4; overflow:hidden; }
+        .stored-coin { width:24px; height:24px; background:radial-gradient(circle at 30% 30%, #f9e076, #c29524); border-radius:50%; margin:-4px; box-shadow:0 2px 5px rgba(0,0,0,0.6); position:relative; border:1px solid #5a4408; }
+        .stored-coin::after { content:"☠"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:14px; color:rgba(0,0,0,0.4); font-weight:bold; }
+        .falling-coin { position:absolute; width:45px; height:45px; z-index:10; animation: fall 0.8s cubic-bezier(0.47, 0, 0.745, 0.715) forwards; pointer-events:none; }
+        @keyframes fall { 0% { top:-60px; transform:translateX(-50%) rotate(0deg); opacity:0; } 10% { opacity:1; } 100% { top:42%; transform:translateX(-50%) rotate(360deg); opacity:1; } }
+        .ui { padding:20px; display:grid; gap:10px; z-index:20; }
+        .btn-ans { background:rgba(255,215,0,0.1); border:1px solid gold; color:gold; padding:15px; border-radius:15px; cursor:pointer; font-weight:bold; font-size:16px; transition:0.2s; }
+        .btn-ans:hover { background:gold; color:#000; }
+        .screen { position:absolute; inset:0; background:rgba(0,0,0,0.95); display:flex; align-items:center; justify-content:center; z-index:100; flex-direction:column; padding:20px; text-align:center; }
     </style></head><body>
         <div id="start" class="screen"><h1>${cfg.title}</h1><button class="btn-ans" onclick="this.parentElement.remove()"> ${cfg.btn} </button></div>
         <div id="pile-container">
             <div class="coins-inside" id="coins"></div>
-            <svg class="piggy-bank" viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg">
-                <path d="M40,110 C40,60 80,45 120,45 C170,45 210,65 210,110 C210,150 170,165 120,165 C80,165 40,150 40,110 Z" fill="none" stroke="${cfg.pigColor}" stroke-width="${cfg.pigStroke}"/>
-                <path d="M210,100 C225,100 230,105 230,115 C230,125 225,130 210,130" fill="none" stroke="${cfg.pigColor}" stroke-width="${cfg.pigStroke}"/>
-                <circle cx="185" cy="85" r="3" fill="${cfg.pigColor}"/>
-                <path d="M150,55 L165,30 M110,50 L120,25" stroke="${cfg.pigColor}" stroke-width="${cfg.pigStroke}"/>
-                <rect x="110" y="45" width="25" height="5" fill="none" stroke="${cfg.pigColor}" stroke-width="${cfg.pigStroke}"/>
-                <path d="M40,110 C20,110 15,90 30,85" fill="none" stroke="${cfg.pigColor}" stroke-width="${cfg.pigStroke}"/>
-            </svg>
+            <div class="piggy-bank"></div>
         </div>
         <div class="ui" id="ctrl"></div>
     <script>
         let qi=0; const data=${JSON.stringify(cfg.data)};
         function next() {
-            if(qi>=data.length) return;
+            if(qi>=data.length) { document.getElementById('ctrl').innerHTML = '<h2>ИГРА ЗАВЕРШЕНА!</h2>'; return; }
             document.getElementById('ctrl').innerHTML = '';
-            data[qi].a.forEach(t => {
+            data[qi].a.sort(() => Math.random() - 0.5).forEach(t => {
                 const b = document.createElement('button'); b.className='btn-ans'; b.innerText=t;
-                b.onclick = () => { if(t===data[qi].a[0]) drop(); qi++; next(); };
+                b.onclick = () => { if(t===data[qi].a.find(x=>x===data[qi].a[0])) { drop(); } qi++; next(); };
                 document.getElementById('ctrl').appendChild(b);
             });
         }
         function drop() {
             const c = document.createElement('div'); c.className='falling-coin'; 
             c.innerHTML = '<div class="stored-coin" style="width:40px;height:40px"></div>';
-            c.style.left = '50%'; c.style.transform = 'translateX(-50%)';
+            c.style.left = '50%';
             document.getElementById('pile-container').appendChild(c);
             setTimeout(() => { c.remove(); 
                 const s = document.createElement('div'); s.className='stored-coin';
                 document.getElementById('coins').appendChild(s);
-            }, 1000);
+            }, 800);
         }
         next();
     <\/script></body></html>`;
@@ -158,7 +144,16 @@ function updatePreview() {
     document.getElementById('ifr').srcdoc = buildInnerGame();
 }
 
-window.onload = () => { addQ('Сколько золотых?', '100', '50,20'); updatePreview(); };
+function getGeniallyCode() {
+    const code = `<div style="width:100%;height:600px;">${buildInnerGame()}</div>`;
+    document.getElementById('result-code').value = code;
+    document.getElementById('code-modal').style.display = 'flex';
+}
+
+window.onload = () => { 
+    addQ('Какая валюта у пиратов?', 'Дублоны', 'Доллары,Евро'); 
+    updatePreview(); 
+};
 </script>
 </body>
 </html>
