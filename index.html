@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Multi-FX Letter Studio</title>
+  <title>Multi-FX Letter Studio Pro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Manrope:wght@700&family=Montserrat:wght@700&family=Rubik:wght@700&display=swap" rel="stylesheet">
@@ -12,7 +12,8 @@
       --font-family: 'Comfortaa', cursive;
       --font-size: 60px;
       --text-color: #ffffff;
-      --particle-color: #00FFFF;
+      --glow-color-1: #00ffff;
+      --glow-color-2: #ff00ff;
     }
 
     * { box-sizing: border-box; }
@@ -29,13 +30,13 @@
 
     /* Боковая панель */
     .sidebar {
-      width: 340px;
+      width: 350px;
       background: #151824;
       border-right: 1px solid #222638;
       padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       overflow-y: auto;
     }
 
@@ -46,8 +47,8 @@
       letter-spacing: 0.8px;
       color: #8fa0b5;
       margin-top: 8px;
-      margin-bottom: 4px;
-      padding-bottom: 6px;
+      margin-bottom: 2px;
+      padding-bottom: 4px;
       border-bottom: 1px solid #222638;
     }
 
@@ -59,7 +60,7 @@
     }
 
     .control-row label {
-      font-size: 13px;
+      font-size: 12px;
       color: #c5d1e0;
       white-space: nowrap;
     }
@@ -69,11 +70,11 @@
       background: #1c2030;
       border: 1px solid #2d3348;
       color: #fff;
-      padding: 6px 10px;
+      padding: 5px 8px;
       border-radius: 6px;
-      font-size: 13px;
+      font-size: 12px;
       outline: none;
-      width: 160px;
+      width: 150px;
     }
 
     .control-row input[type="color"] {
@@ -91,36 +92,23 @@
     .control-row input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
 
     .control-row input[type="range"] {
-      width: 140px;
+      width: 130px;
       accent-color: #4d7cff;
       height: 4px;
     }
 
-    /* Список чекбоксов эффектов */
-    .fx-checkbox-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      background: #10121c;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #222638;
-    }
-
-    .fx-checkbox-item {
+    /* Чекбоксы */
+    .checkbox-item {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
       color: #d1dbe8;
       user-select: none;
-      transition: color 0.2s;
     }
 
-    .fx-checkbox-item:hover { color: #fff; }
-
-    .fx-checkbox-item input[type="checkbox"] {
+    .checkbox-item input[type="checkbox"] {
       appearance: none;
       width: 16px;
       height: 16px;
@@ -131,19 +119,29 @@
       position: relative;
     }
 
-    .fx-checkbox-item input[type="checkbox"]:checked {
+    .checkbox-item input[type="checkbox"]:checked {
       background: #4d7cff;
       border-color: #4d7cff;
     }
 
-    .fx-checkbox-item input[type="checkbox"]:checked::after {
+    .checkbox-item input[type="checkbox"]:checked::after {
       content: '✓';
       position: absolute;
       color: #fff;
       font-size: 11px;
-      top: -1px;
+      top: -2px;
       left: 3px;
       font-weight: bold;
+    }
+
+    .fx-checkbox-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #10121c;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #222638;
     }
 
     .lang-group {
@@ -157,7 +155,7 @@
       background: #1c2030;
       color: #8fa0b5;
       border: 1px solid #2d3348;
-      padding: 6px 0;
+      padding: 5px 0;
       cursor: pointer;
       border-radius: 4px;
       font-size: 11px;
@@ -187,10 +185,28 @@
       overflow: hidden;
     }
 
+    /* Хост для надписи и холста частиц */
+    .fx-wrapper {
+      position: relative;
+      display: inline-block;
+      padding: 40px;
+    }
+
+    #fxCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
     .text-container {
+      position: relative;
+      z-index: 2;
       display: inline-block;
       text-align: center;
-      padding: 20px;
       font-family: var(--font-family);
       font-size: var(--font-size);
       color: var(--text-color);
@@ -199,15 +215,23 @@
       white-space: pre-wrap;
     }
 
-    /* Классы эффектов букв */
+    /* Классы букв и эффекты */
     .char {
       display: inline-block;
       position: relative;
-      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s, filter 0.3s, opacity 0.5s;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s, filter 0.3s, opacity 0.5s;
       cursor: pointer;
     }
 
-    /* Дрожание */
+    .has-shadow {
+      text-shadow: 3px 5px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    .has-glow {
+      filter: drop-shadow(0 0 12px var(--glow-color-1)) drop-shadow(0 0 25px var(--glow-color-2));
+    }
+
+    /* Спец-эффекты наведение */
     .char.fx-shake:hover {
       animation: charShake 0.08s infinite alternate;
     }
@@ -216,26 +240,12 @@
       100% { transform: translate(3px, 2px) rotate(4deg); }
     }
 
-    /* Огонь */
-    .char.fx-fire:hover {
-      color: #ffe600 !important;
-      text-shadow: 0 0 10px #ff3300, 0 -5px 20px #ff6600, 0 -10px 30px #ff0000;
-      animation: charBurn 0.15s infinite alternate;
-    }
-    @keyframes charBurn {
-      0% { filter: drop-shadow(0 0 4px #ff3300); }
-      100% { filter: drop-shadow(0 -8px 12px #ffcc00); }
-    }
-
-    /* Лед */
     .char.fx-ice:hover {
       color: #d4f7ff !important;
-      text-shadow: 0 0 8px #00d2ff, 0 0 18px #ffffff, 0 0 30px #00a2ff;
-      filter: brightness(1.4) drop-shadow(0 0 5px #00d2ff);
-      transform: scale(1.08);
+      text-shadow: 0 0 8px #00d2ff, 0 0 18px #ffffff;
+      transform: scale(1.1);
     }
 
-    /* Таяние */
     .char.fx-melted {
       transform: translateY(50px) scaleY(0.05) scaleX(2) !important;
       opacity: 0 !important;
@@ -250,25 +260,25 @@
     }
 
     .code-panel {
-      height: 190px;
+      height: 170px;
       background: #151824;
       border-top: 1px solid #222638;
-      padding: 12px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
 
-    .code-buttons { display: flex; gap: 10px; }
+    .code-buttons { display: flex; gap: 8px; }
 
     .btn-action {
       background: #202536;
       color: #fff;
       border: 1px solid #313850;
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
     }
 
@@ -284,7 +294,7 @@
       color: #61afef;
       font-family: monospace;
       font-size: 11px;
-      padding: 8px;
+      padding: 6px;
       resize: none;
       border-radius: 4px;
       outline: none;
@@ -293,7 +303,6 @@
 </head>
 <body>
 
-  <!-- Левая панель -->
   <div class="sidebar">
     <div class="section-title">Язык интерфейса</div>
     <div class="lang-group">
@@ -306,7 +315,7 @@
     <div class="section-title">Текст и Шрифт</div>
     <div class="control-row">
       <label>Текст надписи</label>
-      <input type="text" id="textInput" value="очередная попытка …">
+      <input type="text" id="textInput" value="живой текст …">
     </div>
     <div class="control-row">
       <label>Шрифт</label>
@@ -323,47 +332,57 @@
       <input type="range" id="fontSize" min="20" max="120" value="60">
     </div>
 
-    <!-- Множественный выбор эффектов -->
-    <div class="section-title">Комбинация Эффектов</div>
+    <div class="section-title">Свечение и Тень</div>
+    <label class="checkbox-item"><input type="checkbox" id="enableGlow" checked> Включить свечение</label>
+    <div class="control-row">
+      <label>Основное свечение</label>
+      <input type="color" id="glowColor1" value="#00ffff">
+    </div>
+    <div class="control-row">
+      <label>Вторичное свечение</label>
+      <input type="color" id="glowColor2" value="#ff00ff">
+    </div>
+    <label class="checkbox-item"><input type="checkbox" id="enableShadow" checked> Тень под буквами</label>
+
+    <div class="section-title">Интерактив и Атмосфера</div>
     <div class="fx-checkbox-list">
-      <label class="fx-checkbox-item"><input type="checkbox" value="scared"> Трусливые буквы</label>
-      <label class="fx-checkbox-item"><input type="checkbox" value="shake"> Дрожание букв</label>
-      <label class="fx-checkbox-item"><input type="checkbox" value="fire"> Возгорание букв</label>
-      <label class="fx-checkbox-item"><input type="checkbox" value="ice"> Покрываются льдом</label>
-      <label class="fx-checkbox-item"><input type="checkbox" value="leaves"> Падают листья</label>
-      <label class="fx-checkbox-item"><input type="checkbox" value="melt"> Буквы тают (исчезают)</label>
-      <label class="fx-checkbox-item"><input type="checkbox" value="sparks" checked> Всплеск искр</label>
-      <label class="fx-checkbox-item"><input type="checkbox" value="snow"> Снегопад</label>
-      <label class="fx-checkbox-item"><input type="checkbox" value="rain"> Ливень</label>
-      <label class="fx-checkbox-item"><input type="checkbox" value="stars"> Звездопад</label>
-      <label class="fx-checkbox-item"><input type="checkbox" value="ashes"> Тлеющий пепел</label>
+      <label class="checkbox-item"><input type="checkbox" value="scared"> Трусливые буквы (при курсоре)</label>
+      <label class="checkbox-item"><input type="checkbox" value="shake"> Дрожание букв</label>
+      <label class="checkbox-item"><input type="checkbox" value="melt"> Буквы тают (исчезают)</label>
+      <label class="checkbox-item"><input type="checkbox" value="sparks" checked> Всплеск искр (при курсоре)</label>
+      <label class="checkbox-item"><input type="checkbox" value="fire" checked> Постоянный Огонь вокруг</label>
+      <label class="checkbox-item"><input type="checkbox" value="snow"> Постоянный Снегопад</label>
+      <label class="checkbox-item"><input type="checkbox" value="rain"> Постоянный Ливень</label>
+      <label class="checkbox-item"><input type="checkbox" value="leaves"> Постоянный Листопад</label>
+      <label class="checkbox-item"><input type="checkbox" value="ashes"> Тлеющий Пепел</label>
+      <label class="checkbox-item"><input type="checkbox" value="stars"> Звездопад</label>
     </div>
 
-    <div class="section-title">Цветовая палитра</div>
+    <div class="section-title">Цвета и Динамика</div>
     <div class="control-row">
       <label>Цвет текста</label>
       <input type="color" id="textColor" value="#ffffff">
     </div>
     <div class="control-row">
-      <label>Цвет частиц</label>
-      <input type="color" id="sparkColor" value="#00FFFF">
-    </div>
-
-    <div class="section-title">Параметры Частиц</div>
-    <div class="control-row">
-      <label>Интенсивность</label>
-      <input type="range" id="sparkCount" min="5" max="100" value="40">
+      <label>Цвет искр / дождя</label>
+      <input type="color" id="sparkColor" value="#00ffff">
     </div>
     <div class="control-row">
-      <label>Скорость / Сила</label>
-      <input type="range" id="sparkVelocity" min="2" max="25" value="10">
+      <label>Интенсивность фона</label>
+      <input type="range" id="sparkCount" min="5" max="100" value="45">
+    </div>
+    <div class="control-row">
+      <label>Скорость частичек</label>
+      <input type="range" id="sparkVelocity" min="1" max="15" value="5">
     </div>
   </div>
 
-  <!-- Предпросмотр -->
   <div class="main-content">
     <div class="preview-container">
-      <div class="text-container" id="textContainer"></div>
+      <div class="fx-wrapper" id="fxWrapper">
+        <canvas id="fxCanvas"></canvas>
+        <div class="text-container" id="textContainer"></div>
+      </div>
     </div>
 
     <div class="code-panel">
@@ -377,10 +396,10 @@
 
   <script>
     const LOCALES = {
-      ru: "очередная попытка …",
-      en: "another attempt …",
-      de: "Ein weiterer Versuch …",
-      fr: "Une autre tentative …"
+      ru: "живой текст …",
+      en: "living text …",
+      de: "lebender Text …",
+      fr: "texte vivant …"
     };
 
     const inputs = {
@@ -388,17 +407,32 @@
       fontFamily: document.getElementById('fontFamily'),
       fontSize: document.getElementById('fontSize'),
       textColor: document.getElementById('textColor'),
+      glowColor1: document.getElementById('glowColor1'),
+      glowColor2: document.getElementById('glowColor2'),
+      sparkColor: document.getElementById('sparkColor'),
       sparkCount: document.getElementById('sparkCount'),
       sparkVelocity: document.getElementById('sparkVelocity'),
-      sparkColor: document.getElementById('sparkColor')
+      enableGlow: document.getElementById('enableGlow'),
+      enableShadow: document.getElementById('enableShadow')
     };
 
     const textContainer = document.getElementById('textContainer');
+    const fxWrapper = document.getElementById('fxWrapper');
+    const canvas = document.getElementById('fxCanvas');
+    const ctx = canvas.getContext('2d');
     const root = document.documentElement;
     const codeOutput = document.getElementById('codeOutput');
 
+    let particles = [];
+    let animationFrameId = null;
+
     function getSelectedFX() {
       return Array.from(document.querySelectorAll('.fx-checkbox-list input:checked')).map(cb => cb.value);
+    }
+
+    function resizeCanvas() {
+      canvas.width = fxWrapper.offsetWidth;
+      canvas.height = fxWrapper.offsetHeight;
     }
 
     function renderText() {
@@ -411,41 +445,33 @@
         span.className = 'char';
         span.textContent = char === ' ' ? '\u00A0' : char;
 
+        if (inputs.enableShadow.checked) span.classList.add('has-shadow');
+        if (inputs.enableGlow.checked) span.classList.add('has-glow');
         if (activeFX.includes('shake')) span.classList.add('fx-shake');
-        if (activeFX.includes('fire')) span.classList.add('fx-fire');
-        if (activeFX.includes('ice')) span.classList.add('fx-ice');
 
         attachCharEvents(span);
         textContainer.appendChild(span);
       }
+      setTimeout(resizeCanvas, 50);
     }
 
     function attachCharEvents(span) {
       span.addEventListener('mousemove', (e) => {
         const activeFX = getSelectedFX();
         const speed = parseFloat(inputs.sparkVelocity.value);
-        const color = inputs.sparkColor.value;
-        const count = parseInt(inputs.sparkCount.value);
 
-        // Трусливые буквы
         if (activeFX.includes('scared')) {
           const rect = span.getBoundingClientRect();
           const angle = Math.atan2(e.clientY - (rect.top + rect.height / 2), e.clientX - (rect.left + rect.width / 2));
-          span.style.transform = `translate(${ -Math.cos(angle) * speed * 10 }px, ${ -Math.sin(angle) * speed * 10 }px)`;
+          span.style.transform = `translate(${ -Math.cos(angle) * speed * 8 }px, ${ -Math.sin(angle) * speed * 8 }px)`;
         }
 
-        // Таяние
-        if (activeFX.includes('melt')) {
-          span.classList.add('fx-melted');
-        }
+        if (activeFX.includes('melt')) span.classList.add('fx-melted');
 
-        // Генерируем выбранные визуальные эффекты
-        if (Math.random() < (count / 100)) {
-          activeFX.forEach(fx => {
-            if (['leaves', 'fire', 'sparks', 'snow', 'rain', 'stars', 'ashes'].includes(fx)) {
-              spawnParticle(e.clientX, e.clientY, fx, speed, color);
-            }
-          });
+        if (activeFX.includes('sparks')) {
+          const rect = span.getBoundingClientRect();
+          const wrapperRect = fxWrapper.getBoundingClientRect();
+          spawnSpark(e.clientX - wrapperRect.left, e.clientY - wrapperRect.top);
         }
       });
 
@@ -456,93 +482,177 @@
       });
     }
 
-    // Зрелищные эффекты частиц
-    function spawnParticle(x, y, type, speed, color) {
-      const p = document.createElement('div');
-      p.className = 'fx-particle';
-      document.body.appendChild(p);
+    function spawnSpark(x, y) {
+      const color = inputs.sparkColor.value;
+      const speed = parseFloat(inputs.sparkVelocity.value);
+      const angle = Math.random() * Math.PI * 2;
+      const v = Math.random() * speed + 2;
+      particles.push({
+        type: 'spark',
+        x, y,
+        vx: Math.cos(angle) * v,
+        vy: Math.sin(angle) * v,
+        size: Math.random() * 4 + 2,
+        color,
+        life: 1,
+        decay: Math.random() * 0.03 + 0.02
+      });
+    }
 
-      let destX = 0, destY = 0, duration = 600, keyframes = [];
+    // Фоновая генерация частиц непрерывно вокруг текста
+    function generateAmbientParticles() {
+      const activeFX = getSelectedFX();
+      const intensity = parseInt(inputs.sparkCount.value) / 100;
+      const speed = parseFloat(inputs.sparkVelocity.value);
+      const w = canvas.width;
+      const h = canvas.height;
 
-      if (type === 'sparks') {
-        const size = Math.random() * 6 + 3;
-        p.style.width = size + 'px'; p.style.height = size + 'px'; p.style.borderRadius = '50%';
-        p.style.background = color;
-        p.style.boxShadow = `0 0 ${size * 2}px ${color}, 0 0 ${size * 4}px #ffffff`;
-        const angle = Math.random() * Math.PI * 2;
-        const v = Math.random() * speed + 3;
-        keyframes = [
-          { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-          { transform: `translate(${Math.cos(angle)*v*20}px, ${Math.sin(angle)*v*20}px) scale(0)`, opacity: 0 }
-        ];
-      } else if (type === 'fire') {
-        const size = Math.random() * 10 + 6;
-        p.style.width = size + 'px'; p.style.height = size + 'px'; p.style.borderRadius = '50%';
-        p.style.background = '#ff2200';
-        p.style.boxShadow = '0 0 10px #ff7700, 0 0 20px #ffea00';
-        destX = (Math.random() - 0.5) * 30;
-        destY = -(Math.random() * speed * 12 + 20);
-        duration = 500 + Math.random() * 300;
-        keyframes = [
-          { transform: 'translate(0, 0) scale(1)', opacity: 1, filter: 'brightness(1.5)' },
-          { transform: `translate(${destX}px, ${destY}px) scale(0.1)`, opacity: 0, filter: 'brightness(0.2)' }
-        ];
-      } else if (type === 'leaves') {
-        p.innerText = ['🍂', '🍁', '🍃'][Math.floor(Math.random() * 3)];
-        p.style.fontSize = (Math.random() * 12 + 12) + 'px';
-        destX = (Math.random() - 0.5) * speed * 10;
-        destY = Math.random() * speed * 15 + 30;
-        duration = 900 + Math.random() * 500;
-        keyframes = [
-          { transform: 'translate(0, 0) rotate(0deg) scale(0.8)', opacity: 1 },
-          { transform: `translate(${destX}px, ${destY}px) rotate(${Math.random() * 520}deg) scale(1.2)`, opacity: 0 }
-        ];
-      } else if (type === 'snow') {
-        p.innerText = ['❄', '❅', '✦'][Math.floor(Math.random() * 3)];
-        p.style.color = color; p.style.fontSize = (Math.random() * 10 + 10) + 'px';
-        p.style.textShadow = '0 0 8px #ffffff';
-        destX = (Math.random() - 0.5) * 40; destY = Math.random() * speed * 12 + 30;
-        duration = 1000 + Math.random() * 600;
-        keyframes = [
-          { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
-          { transform: `translate(${destX}px, ${destY}px) rotate(360deg)`, opacity: 0 }
-        ];
-      } else if (type === 'rain') {
-        p.style.width = '2px'; p.style.height = (Math.random() * 15 + 15) + 'px';
-        p.style.background = `linear-gradient(to bottom, transparent, ${color})`;
-        p.style.boxShadow = `0 0 6px ${color}`;
-        destY = Math.random() * speed * 20 + 40;
-        duration = 350 + Math.random() * 250;
-        keyframes = [
-          { transform: 'translate(0, 0)', opacity: 0.9 },
-          { transform: `translate(0, ${destY}px)`, opacity: 0 }
-        ];
-      } else if (type === 'stars') {
-        p.innerText = '★'; p.style.color = color;
-        p.style.fontSize = (Math.random() * 12 + 8) + 'px';
-        p.style.textShadow = `0 0 10px ${color}, 0 0 20px #ffffff`;
-        const angle = Math.random() * Math.PI * 2;
-        duration = 600 + Math.random() * 300;
-        keyframes = [
-          { transform: 'translate(0, 0) scale(1.8) rotate(0deg)', opacity: 1 },
-          { transform: `translate(${Math.cos(angle)*speed*12}px, ${Math.sin(angle)*speed*12}px) scale(0) rotate(180deg)`, opacity: 0 }
-        ];
-      } else if (type === 'ashes') {
-        p.style.width = '4px'; p.style.height = '4px'; p.style.background = '#888';
-        p.style.boxShadow = '0 0 4px #ff4400';
-        destX = (Math.random() - 0.5) * 35; destY = -(Math.random() * speed * 10 + 20);
-        duration = 800 + Math.random() * 400;
-        keyframes = [
-          { transform: 'translate(0, 0)', opacity: 0.8 },
-          { transform: `translate(${destX}px, ${destY}px) scale(0.2)`, opacity: 0 }
-        ];
+      if (Math.random() > intensity) return;
+
+      if (activeFX.includes('snow')) {
+        particles.push({
+          type: 'snow',
+          x: Math.random() * w,
+          y: -10,
+          vy: Math.random() * speed * 0.5 + 1,
+          vx: (Math.random() - 0.5) * 1,
+          size: Math.random() * 3 + 2,
+          color: inputs.sparkColor.value,
+          life: 1
+        });
       }
 
-      p.style.left = x + 'px';
-      p.style.top = y + 'px';
+      if (activeFX.includes('rain')) {
+        particles.push({
+          type: 'rain',
+          x: Math.random() * w,
+          y: -20,
+          vy: Math.random() * speed * 2 + 8,
+          len: Math.random() * 12 + 10,
+          color: inputs.sparkColor.value,
+          life: 1
+        });
+      }
 
-      const anim = p.animate(keyframes, { duration: duration, easing: 'cubic-bezier(0.1, 0.8, 0.3, 1)', fill: 'forwards' });
-      anim.onfinish = () => p.remove();
+      if (activeFX.includes('fire')) {
+        particles.push({
+          type: 'fire',
+          x: Math.random() * (w - 40) + 20,
+          y: h - 10,
+          vy: -(Math.random() * speed * 0.8 + 2),
+          vx: (Math.random() - 0.5) * 1.5,
+          size: Math.random() * 8 + 4,
+          life: 1,
+          decay: Math.random() * 0.02 + 0.015
+        });
+      }
+
+      if (activeFX.includes('leaves')) {
+        particles.push({
+          type: 'leaf',
+          x: Math.random() * w,
+          y: -15,
+          vy: Math.random() * speed * 0.4 + 1,
+          vx: Math.sin(Date.now() / 300) * 1.5,
+          size: Math.random() * 6 + 8,
+          char: ['🍂', '🍁', '🍃'][Math.floor(Math.random() * 3)],
+          life: 1
+        });
+      }
+
+      if (activeFX.includes('ashes')) {
+        particles.push({
+          type: 'ashes',
+          x: Math.random() * w,
+          y: h + 10,
+          vy: -(Math.random() * speed * 0.5 + 1),
+          vx: (Math.random() - 0.5) * 1,
+          size: Math.random() * 3 + 1,
+          life: 1,
+          decay: Math.random() * 0.015 + 0.01
+        });
+      }
+
+      if (activeFX.includes('stars')) {
+        particles.push({
+          type: 'star',
+          x: Math.random() * w,
+          y: Math.random() * h,
+          size: Math.random() * 4 + 2,
+          color: inputs.sparkColor.value,
+          life: 1,
+          decay: Math.random() * 0.04 + 0.01
+        });
+      }
+    }
+
+    function updateAndDrawParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      generateAmbientParticles();
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+
+        if (p.type === 'spark') {
+          p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+          ctx.fill();
+        } 
+        else if (p.type === 'snow') {
+          p.y += p.vy; p.x += p.vx;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+          if (p.y > canvas.height) p.life = 0;
+        } 
+        else if (p.type === 'rain') {
+          p.y += p.vy;
+          ctx.strokeStyle = p.color;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.x, p.y + p.len);
+          ctx.stroke();
+          if (p.y > canvas.height) p.life = 0;
+        } 
+        else if (p.type === 'fire') {
+          p.y += p.vy; p.x += p.vx; p.life -= p.decay;
+          let r = Math.floor(255);
+          let g = Math.floor(p.life * 200);
+          ctx.fillStyle = `rgba(${r}, ${g}, 0, ${p.life})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+          ctx.fill();
+        } 
+        else if (p.type === 'leaf') {
+          p.y += p.vy; p.x += p.vx;
+          ctx.font = `${p.size}px sans-serif`;
+          ctx.fillText(p.char, p.x, p.y);
+          if (p.y > canvas.height) p.life = 0;
+        } 
+        else if (p.type === 'ashes') {
+          p.y += p.vy; p.x += p.vx; p.life -= p.decay;
+          ctx.fillStyle = `rgba(180, 180, 180, ${p.life})`;
+          ctx.fillRect(p.x, p.y, p.size, p.size);
+        } 
+        else if (p.type === 'star') {
+          p.life -= p.decay;
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = Math.max(0, p.life);
+          ctx.font = `${p.size * 3}px sans-serif`;
+          ctx.fillText('★', p.x, p.y);
+          ctx.globalAlpha = 1.0;
+        }
+
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(updateAndDrawParticles);
     }
 
     function getBaseHTML() {
@@ -550,18 +660,27 @@
       return `<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Manrope:wght@700&family=Montserrat:wght@700&family=Rubik:wght@700&display=swap" rel="stylesheet">
-<div id="FX_ROOT">
+<div id="FX_STUDIO_ROOT">
   <style>
     :root {
       --font-family: ${inputs.fontFamily.value};
       --font-size: ${inputs.fontSize.value}px;
       --text-color: ${inputs.textColor.value};
+      --glow-color-1: ${inputs.glowColor1.value};
+      --glow-color-2: ${inputs.glowColor2.value};
+    }
+
+    .fx-wrapper {
+      position: relative;
+      display: inline-block;
+      padding: 40px;
     }
 
     .text-container {
+      position: relative;
+      z-index: 2;
       display: inline-block;
       text-align: center;
-      padding: 20px;
       font-family: var(--font-family);
       font-size: var(--font-size);
       color: var(--text-color);
@@ -570,34 +689,28 @@
       white-space: pre-wrap;
     }
 
+    #fxCanvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
     .char {
       display: inline-block;
       position: relative;
-      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s, filter 0.3s, opacity 0.5s;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s, filter 0.3s, opacity 0.5s;
       cursor: pointer;
     }
+
+    .has-shadow { text-shadow: 3px 5px 10px rgba(0, 0, 0, 0.8); }
+    .has-glow { filter: drop-shadow(0 0 12px var(--glow-color-1)) drop-shadow(0 0 25px var(--glow-color-2)); }
 
     .char.fx-shake:hover { animation: charShake 0.08s infinite alternate; }
     @keyframes charShake {
       0% { transform: translate(-3px, -2px) rotate(-4deg); }
       100% { transform: translate(3px, 2px) rotate(4deg); }
-    }
-
-    .char.fx-fire:hover {
-      color: #ffe600 !important;
-      text-shadow: 0 0 10px #ff3300, 0 -5px 20px #ff6600, 0 -10px 30px #ff0000;
-      animation: charBurn 0.15s infinite alternate;
-    }
-    @keyframes charBurn {
-      0% { filter: drop-shadow(0 0 4px #ff3300); }
-      100% { filter: drop-shadow(0 -8px 12px #ffcc00); }
-    }
-
-    .char.fx-ice:hover {
-      color: #d4f7ff !important;
-      text-shadow: 0 0 8px #00d2ff, 0 0 18px #ffffff, 0 0 30px #00a2ff;
-      filter: brightness(1.4) drop-shadow(0 0 5px #00d2ff);
-      transform: scale(1.08);
     }
 
     .char.fx-melted {
@@ -606,43 +719,58 @@
       filter: blur(8px) brightness(2) !important;
       pointer-events: none;
     }
-
-    .fx-particle { position: absolute; pointer-events: none; z-index: 9999; }
   </style>
 
-  <div class="text-container" id="fxTextContainer"></div>
+  <div class="fx-wrapper" id="fxRootWrapper">
+    <canvas id="fxRootCanvas"></canvas>
+    <div class="text-container" id="fxRootText"></div>
+  </div>
 
   <script>
     (function() {
-      const container = document.getElementById('fxTextContainer');
+      const container = document.getElementById('fxRootText');
+      const wrapper = document.getElementById('fxRootWrapper');
+      const canvas = document.getElementById('fxRootCanvas');
+      const ctx = canvas.getContext('2d');
+
       const text = "${inputs.text.value.replace(/"/g, '\\"').replace(/\n/g, '')}";
       const activeFX = ${activeFX};
       const speed = ${inputs.sparkVelocity.value};
       const count = ${inputs.sparkCount.value};
-      const color = "${inputs.sparkColor.value}";
+      const sparkColor = "${inputs.sparkColor.value}";
+      const hasShadow = ${inputs.enableShadow.checked};
+      const hasGlow = ${inputs.enableGlow.checked};
+
+      let particles = [];
+
+      function resize() {
+        canvas.width = wrapper.offsetWidth;
+        canvas.height = wrapper.offsetHeight;
+      }
 
       for (let char of text) {
         const span = document.createElement('span');
         span.className = 'char';
         span.textContent = char === ' ' ? '\u00A0' : char;
 
+        if (hasShadow) span.classList.add('has-shadow');
+        if (hasGlow) span.classList.add('has-glow');
         if (activeFX.includes('shake')) span.classList.add('fx-shake');
-        if (activeFX.includes('fire')) span.classList.add('fx-fire');
-        if (activeFX.includes('ice')) span.classList.add('fx-ice');
 
         span.addEventListener('mousemove', (e) => {
           if (activeFX.includes('scared')) {
             const rect = span.getBoundingClientRect();
             const angle = Math.atan2(e.clientY - (rect.top + rect.height/2), e.clientX - (rect.left + rect.width/2));
-            span.style.transform = \`translate(\${-Math.cos(angle) * speed * 10}px, \${-Math.sin(angle) * speed * 10}px)\`;
+            span.style.transform = \`translate(\${-Math.cos(angle) * speed * 8}px, \${-Math.sin(angle) * speed * 8}px)\`;
           }
           if (activeFX.includes('melt')) span.classList.add('fx-melted');
-
-          if (Math.random() < (count / 100)) {
-            activeFX.forEach(fx => {
-              if (['leaves', 'fire', 'sparks', 'snow', 'rain', 'stars', 'ashes'].includes(fx)) {
-                spawnP(e.clientX, e.clientY, fx);
-              }
+          if (activeFX.includes('sparks')) {
+            const rect = wrapper.getBoundingClientRect();
+            const a = Math.random() * Math.PI * 2, v = Math.random() * speed + 2;
+            particles.push({
+              type: 'spark', x: e.clientX - rect.left, y: e.clientY - rect.top,
+              vx: Math.cos(a)*v, vy: Math.sin(a)*v, size: Math.random()*4+2,
+              color: sparkColor, life: 1, decay: Math.random()*0.03+0.02
             });
           }
         });
@@ -656,50 +784,50 @@
         container.appendChild(span);
       }
 
-      function spawnP(x, y, type) {
-        const p = document.createElement('div');
-        p.className = 'fx-particle';
-        document.body.appendChild(p);
-        let destX = 0, destY = 0, duration = 600, keyframes = [];
+      setTimeout(resize, 50);
 
-        if (type === 'sparks') {
-          const sz = Math.random() * 6 + 3;
-          p.style.width = sz + 'px'; p.style.height = sz + 'px'; p.style.borderRadius = '50%';
-          p.style.background = color; p.style.boxShadow = \`0 0 \${sz*2}px \${color}\`;
-          const a = Math.random() * Math.PI * 2, v = Math.random() * speed + 3;
-          keyframes = [{ transform: 'translate(0, 0) scale(1)', opacity: 1 }, { transform: \`translate(\${Math.cos(a)*v*20}px, \${Math.sin(a)*v*20}px) scale(0)\`, opacity: 0 }];
-        } else if (type === 'fire') {
-          const sz = Math.random() * 10 + 6;
-          p.style.width = sz + 'px'; p.style.height = sz + 'px'; p.style.borderRadius = '50%';
-          p.style.background = '#ff2200'; p.style.boxShadow = '0 0 10px #ff7700';
-          destX = (Math.random() - 0.5) * 30; destY = -(Math.random() * speed * 12 + 20);
-          keyframes = [{ transform: 'translate(0, 0) scale(1)', opacity: 1 }, { transform: \`translate(\${destX}px, \${destY}px) scale(0.1)\`, opacity: 0 }];
-        } else if (type === 'leaves') {
-          p.innerText = ['🍂', '🍁', '🍃'][Math.floor(Math.random() * 3)]; p.style.fontSize = '16px';
-          destX = (Math.random() - 0.5) * speed * 10; destY = Math.random() * speed * 15 + 30;
-          keyframes = [{ transform: 'translate(0, 0) rotate(0deg)', opacity: 1 }, { transform: \`translate(\${destX}px, \${destY}px) rotate(360deg)\`, opacity: 0 }];
-        } else if (type === 'snow') {
-          p.innerText = '❄'; p.style.color = color; p.style.fontSize = '12px';
-          destX = (Math.random() - 0.5) * 40; destY = Math.random() * speed * 12 + 30;
-          keyframes = [{ transform: 'translate(0, 0)', opacity: 1 }, { transform: \`translate(\${destX}px, \${destY}px)\`, opacity: 0 }];
-        } else if (type === 'rain') {
-          p.style.width = '2px'; p.style.height = '18px'; p.style.background = color;
-          destY = Math.random() * speed * 20 + 40;
-          keyframes = [{ transform: 'translate(0, 0)', opacity: 0.9 }, { transform: \`translate(0, \${destY}px)\`, opacity: 0 }];
-        } else if (type === 'stars') {
-          p.innerText = '★'; p.style.color = color; p.style.fontSize = '12px';
-          const a = Math.random() * Math.PI * 2;
-          keyframes = [{ transform: 'translate(0, 0) scale(1.5)', opacity: 1 }, { transform: \`translate(\${Math.cos(a)*speed*12}px, \${Math.sin(a)*speed*12}px) scale(0)\`, opacity: 0 }];
-        } else if (type === 'ashes') {
-          p.style.width = '4px'; p.style.height = '4px'; p.style.background = '#888';
-          destX = (Math.random() - 0.5) * 35; destY = -(Math.random() * speed * 10 + 20);
-          keyframes = [{ transform: 'translate(0, 0)', opacity: 0.8 }, { transform: \`translate(\${destX}px, \${destY}px)\`, opacity: 0 }];
+      function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const intensity = count / 100;
+        const w = canvas.width, h = canvas.height;
+
+        if (Math.random() < intensity) {
+          if (activeFX.includes('snow')) particles.push({ type: 'snow', x: Math.random()*w, y: -10, vy: Math.random()*speed*0.5+1, vx: (Math.random()-0.5), size: Math.random()*3+2, color: sparkColor, life: 1 });
+          if (activeFX.includes('rain')) particles.push({ type: 'rain', x: Math.random()*w, y: -20, vy: Math.random()*speed*2+8, len: Math.random()*12+10, color: sparkColor, life: 1 });
+          if (activeFX.includes('fire')) particles.push({ type: 'fire', x: Math.random()*(w-40)+20, y: h-10, vy: -(Math.random()*speed*0.8+2), vx: (Math.random()-0.5)*1.5, size: Math.random()*8+4, life: 1, decay: Math.random()*0.02+0.015 });
+          if (activeFX.includes('leaves')) particles.push({ type: 'leaf', x: Math.random()*w, y: -15, vy: Math.random()*speed*0.4+1, vx: Math.sin(Date.now()/300)*1.5, size: Math.random()*6+8, char: ['🍂','🍁','🍃'][Math.floor(Math.random()*3)], life: 1 });
+          if (activeFX.includes('ashes')) particles.push({ type: 'ashes', x: Math.random()*w, y: h+10, vy: -(Math.random()*speed*0.5+1), vx: (Math.random()-0.5), size: Math.random()*3+1, life: 1, decay: Math.random()*0.015+0.01 });
+          if (activeFX.includes('stars')) particles.push({ type: 'star', x: Math.random()*w, y: Math.random()*h, size: Math.random()*4+2, color: sparkColor, life: 1, decay: Math.random()*0.04+0.01 });
         }
 
-        p.style.left = x + 'px'; p.style.top = y + 'px';
-        const anim = p.animate(keyframes, { duration: 600, easing: 'ease-out', fill: 'forwards' });
-        anim.onfinish = () => p.remove();
+        for (let i = particles.length - 1; i >= 0; i--) {
+          let p = particles[i];
+          if (p.type === 'spark') {
+            p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+            ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size*p.life, 0, Math.PI*2); ctx.fill();
+          } else if (p.type === 'snow') {
+            p.y += p.vy; p.x += p.vx; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+            if (p.y > h) p.life = 0;
+          } else if (p.type === 'rain') {
+            p.y += p.vy; ctx.strokeStyle = p.color; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x, p.y+p.len); ctx.stroke();
+            if (p.y > h) p.life = 0;
+          } else if (p.type === 'fire') {
+            p.y += p.vy; p.x += p.vx; p.life -= p.decay;
+            ctx.fillStyle = \`rgba(255, \${Math.floor(p.life*200)}, 0, \${p.life})\`;
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.size*p.life, 0, Math.PI*2); ctx.fill();
+          } else if (p.type === 'leaf') {
+            p.y += p.vy; p.x += p.vx; ctx.font = \`\${p.size}px sans-serif\`; ctx.fillText(p.char, p.x, p.y);
+            if (p.y > h) p.life = 0;
+          } else if (p.type === 'ashes') {
+            p.y += p.vy; p.x += p.vx; p.life -= p.decay; ctx.fillStyle = \`rgba(180, 180, 180, \${p.life})\`; ctx.fillRect(p.x, p.y, p.size, p.size);
+          } else if (p.type === 'star') {
+            p.life -= p.decay; ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, p.life); ctx.font = \`\${p.size*3}px sans-serif\`; ctx.fillText('★', p.x, p.y); ctx.globalAlpha = 1.0;
+          }
+          if (p.life <= 0) particles.splice(i, 1);
+        }
+        requestAnimationFrame(loop);
       }
+      loop();
     })();
   <\/script>
 </div>`;
@@ -709,6 +837,8 @@
       root.style.setProperty('--font-family', inputs.fontFamily.value);
       root.style.setProperty('--font-size', inputs.fontSize.value + 'px');
       root.style.setProperty('--text-color', inputs.textColor.value);
+      root.style.setProperty('--glow-color-1', inputs.glowColor1.value);
+      root.style.setProperty('--glow-color-2', inputs.glowColor2.value);
 
       renderText();
       codeOutput.value = getBaseHTML();
@@ -742,14 +872,16 @@
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
-      const geniallyIframe = `<iframe width="100%" height="300" frameborder="0" scrolling="no" srcdoc="${escapedHTML}"></iframe>`;
+      const geniallyIframe = `<iframe width="100%" height="320" frameborder="0" scrolling="no" srcdoc="${escapedHTML}"></iframe>`;
       codeOutput.value = geniallyIframe;
       codeOutput.select();
       document.execCommand('copy');
       alert('Код для Genially скопирован!');
     }
 
+    window.addEventListener('resize', resizeCanvas);
     updateFX();
+    updateAndDrawParticles();
   </script>
 </body>
 </html>
