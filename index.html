@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Multi-FX Letter Studio Pro</title>
+  <title>Multi-FX Letter Studio Fixed</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Manrope:wght@700&family=Montserrat:wght@700&family=Rubik:wght@700&display=swap" rel="stylesheet">
@@ -28,7 +28,6 @@
       overflow: hidden;
     }
 
-    /* Боковая панель */
     .sidebar {
       width: 350px;
       background: #151824;
@@ -97,7 +96,6 @@
       height: 4px;
     }
 
-    /* Чекбоксы */
     .checkbox-item {
       display: flex;
       align-items: center;
@@ -168,7 +166,6 @@
       border-color: #4d7cff;
     }
 
-    /* Правая область */
     .main-content {
       flex: 1;
       display: flex;
@@ -183,13 +180,6 @@
       background: #08090e;
       position: relative;
       overflow: hidden;
-    }
-
-    /* Хост для надписи и холста частиц */
-    .fx-wrapper {
-      position: relative;
-      display: inline-block;
-      padding: 40px;
     }
 
     #fxCanvas {
@@ -215,35 +205,20 @@
       white-space: pre-wrap;
     }
 
-    /* Классы букв и эффекты */
     .char {
       display: inline-block;
       position: relative;
-      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s, filter 0.3s, opacity 0.5s;
+      transition: transform 0.15s ease-out, color 0.3s, filter 0.3s, opacity 0.5s;
       cursor: pointer;
     }
 
-    .has-shadow {
-      text-shadow: 3px 5px 10px rgba(0, 0, 0, 0.8);
-    }
+    .has-shadow { text-shadow: 3px 5px 10px rgba(0, 0, 0, 0.8); }
+    .has-glow { filter: drop-shadow(0 0 12px var(--glow-color-1)) drop-shadow(0 0 25px var(--glow-color-2)); }
 
-    .has-glow {
-      filter: drop-shadow(0 0 12px var(--glow-color-1)) drop-shadow(0 0 25px var(--glow-color-2));
-    }
-
-    /* Спец-эффекты наведение */
-    .char.fx-shake:hover {
-      animation: charShake 0.08s infinite alternate;
-    }
+    .char.fx-shake:hover { animation: charShake 0.08s infinite alternate; }
     @keyframes charShake {
       0% { transform: translate(-3px, -2px) rotate(-4deg); }
       100% { transform: translate(3px, 2px) rotate(4deg); }
-    }
-
-    .char.fx-ice:hover {
-      color: #d4f7ff !important;
-      text-shadow: 0 0 8px #00d2ff, 0 0 18px #ffffff;
-      transform: scale(1.1);
     }
 
     .char.fx-melted {
@@ -251,12 +226,6 @@
       opacity: 0 !important;
       filter: blur(8px) brightness(2) !important;
       pointer-events: none;
-    }
-
-    .fx-particle {
-      position: absolute;
-      pointer-events: none;
-      z-index: 9999;
     }
 
     .code-panel {
@@ -342,20 +311,20 @@
       <label>Вторичное свечение</label>
       <input type="color" id="glowColor2" value="#ff00ff">
     </div>
-    <label class="checkbox-item"><input type="checkbox" id="enableShadow" checked> Тень под буквами</label>
+    <label class="checkbox-item"><input type="checkbox" id="enableShadow"> Тень под буквами</label>
 
     <div class="section-title">Интерактив и Атмосфера</div>
     <div class="fx-checkbox-list">
-      <label class="checkbox-item"><input type="checkbox" value="scared"> Трусливые буквы (при курсоре)</label>
-      <label class="checkbox-item"><input type="checkbox" value="shake"> Дрожание букв</label>
-      <label class="checkbox-item"><input type="checkbox" value="melt"> Буквы тают (исчезают)</label>
-      <label class="checkbox-item"><input type="checkbox" value="sparks" checked> Всплеск искр (при курсоре)</label>
-      <label class="checkbox-item"><input type="checkbox" value="fire" checked> Постоянный Огонь вокруг</label>
-      <label class="checkbox-item"><input type="checkbox" value="snow"> Постоянный Снегопад</label>
-      <label class="checkbox-item"><input type="checkbox" value="rain"> Постоянный Ливень</label>
-      <label class="checkbox-item"><input type="checkbox" value="leaves"> Постоянный Листопад</label>
-      <label class="checkbox-item"><input type="checkbox" value="ashes"> Тлеющий Пепел</label>
-      <label class="checkbox-item"><input type="checkbox" value="stars"> Звездопад</label>
+      <label class="checkbox-item"><input type="checkbox" value="scared" class="fx-option"> Трусливые буквы (при курсоре)</label>
+      <label class="checkbox-item"><input type="checkbox" value="shake" class="fx-option"> Дрожание букв</label>
+      <label class="checkbox-item"><input type="checkbox" value="melt" class="fx-option"> Буквы тают (исчезают)</label>
+      <label class="checkbox-item"><input type="checkbox" value="sparks" class="fx-option" checked> Всплеск искр (при курсоре)</label>
+      <label class="checkbox-item"><input type="checkbox" value="fire" class="fx-option"> Постоянный Огонь вокруг</label>
+      <label class="checkbox-item"><input type="checkbox" value="snow" class="fx-option"> Постоянный Снегопад</label>
+      <label class="checkbox-item"><input type="checkbox" value="rain" class="fx-option" checked> Постоянный Ливень</label>
+      <label class="checkbox-item"><input type="checkbox" value="leaves" class="fx-option" checked> Постоянный Листопад</label>
+      <label class="checkbox-item"><input type="checkbox" value="ashes" class="fx-option" checked> Тлеющий Пепел</label>
+      <label class="checkbox-item"><input type="checkbox" value="stars" class="fx-option"> Звездопад</label>
     </div>
 
     <div class="section-title">Цвета и Динамика</div>
@@ -369,20 +338,18 @@
     </div>
     <div class="control-row">
       <label>Интенсивность фона</label>
-      <input type="range" id="sparkCount" min="5" max="100" value="45">
+      <input type="range" id="sparkCount" min="5" max="100" value="50">
     </div>
     <div class="control-row">
       <label>Скорость частичек</label>
-      <input type="range" id="sparkVelocity" min="1" max="15" value="5">
+      <input type="range" id="sparkVelocity" min="1" max="15" value="6">
     </div>
   </div>
 
   <div class="main-content">
-    <div class="preview-container">
-      <div class="fx-wrapper" id="fxWrapper">
-        <canvas id="fxCanvas"></canvas>
-        <div class="text-container" id="textContainer"></div>
-      </div>
+    <div class="preview-container" id="previewContainer">
+      <canvas id="fxCanvas"></canvas>
+      <div class="text-container" id="textContainer"></div>
     </div>
 
     <div class="code-panel">
@@ -417,22 +384,21 @@
     };
 
     const textContainer = document.getElementById('textContainer');
-    const fxWrapper = document.getElementById('fxWrapper');
+    const previewContainer = document.getElementById('previewContainer');
     const canvas = document.getElementById('fxCanvas');
     const ctx = canvas.getContext('2d');
     const root = document.documentElement;
     const codeOutput = document.getElementById('codeOutput');
 
     let particles = [];
-    let animationFrameId = null;
 
     function getSelectedFX() {
-      return Array.from(document.querySelectorAll('.fx-checkbox-list input:checked')).map(cb => cb.value);
+      return Array.from(document.querySelectorAll('.fx-option:checked')).map(cb => cb.value);
     }
 
     function resizeCanvas() {
-      canvas.width = fxWrapper.offsetWidth;
-      canvas.height = fxWrapper.offsetHeight;
+      canvas.width = previewContainer.offsetWidth;
+      canvas.height = previewContainer.offsetHeight;
     }
 
     function renderText() {
@@ -452,7 +418,6 @@
         attachCharEvents(span);
         textContainer.appendChild(span);
       }
-      setTimeout(resizeCanvas, 50);
     }
 
     function attachCharEvents(span) {
@@ -463,21 +428,20 @@
         if (activeFX.includes('scared')) {
           const rect = span.getBoundingClientRect();
           const angle = Math.atan2(e.clientY - (rect.top + rect.height / 2), e.clientX - (rect.left + rect.width / 2));
-          span.style.transform = `translate(${ -Math.cos(angle) * speed * 8 }px, ${ -Math.sin(angle) * speed * 8 }px)`;
+          span.style.transform = `translate(${ -Math.cos(angle) * speed * 10 }px, ${ -Math.sin(angle) * speed * 10 }px)`;
         }
 
         if (activeFX.includes('melt')) span.classList.add('fx-melted');
 
         if (activeFX.includes('sparks')) {
-          const rect = span.getBoundingClientRect();
-          const wrapperRect = fxWrapper.getBoundingClientRect();
-          spawnSpark(e.clientX - wrapperRect.left, e.clientY - wrapperRect.top);
+          const rect = previewContainer.getBoundingClientRect();
+          spawnSpark(e.clientX - rect.left, e.clientY - rect.top);
         }
       });
 
       span.addEventListener('mouseleave', () => {
         if (getSelectedFX().includes('scared')) {
-          setTimeout(() => { span.style.transform = 'translate(0, 0)'; }, 350);
+          setTimeout(() => { span.style.transform = 'translate(0, 0)'; }, 300);
         }
       });
     }
@@ -485,27 +449,37 @@
     function spawnSpark(x, y) {
       const color = inputs.sparkColor.value;
       const speed = parseFloat(inputs.sparkVelocity.value);
-      const angle = Math.random() * Math.PI * 2;
-      const v = Math.random() * speed + 2;
-      particles.push({
-        type: 'spark',
-        x, y,
-        vx: Math.cos(angle) * v,
-        vy: Math.sin(angle) * v,
-        size: Math.random() * 4 + 2,
-        color,
-        life: 1,
-        decay: Math.random() * 0.03 + 0.02
-      });
+      for (let i = 0; i < 3; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const v = Math.random() * speed + 2;
+        particles.push({
+          type: 'spark',
+          x, y,
+          vx: Math.cos(angle) * v,
+          vy: Math.sin(angle) * v,
+          size: Math.random() * 4 + 2,
+          color,
+          life: 1,
+          decay: Math.random() * 0.04 + 0.02
+        });
+      }
     }
 
-    // Фоновая генерация частиц непрерывно вокруг текста
     function generateAmbientParticles() {
       const activeFX = getSelectedFX();
       const intensity = parseInt(inputs.sparkCount.value) / 100;
       const speed = parseFloat(inputs.sparkVelocity.value);
       const w = canvas.width;
       const h = canvas.height;
+
+      const rect = textContainer.getBoundingClientRect();
+      const pRect = previewContainer.getBoundingClientRect();
+      const textArea = {
+        left: rect.left - pRect.left - 20,
+        right: rect.right - pRect.left + 20,
+        top: rect.top - pRect.top - 20,
+        bottom: rect.bottom - pRect.top + 20
+      };
 
       if (Math.random() > intensity) return;
 
@@ -537,8 +511,8 @@
       if (activeFX.includes('fire')) {
         particles.push({
           type: 'fire',
-          x: Math.random() * (w - 40) + 20,
-          y: h - 10,
+          x: textArea.left + Math.random() * (textArea.right - textArea.left),
+          y: textArea.bottom,
           vy: -(Math.random() * speed * 0.8 + 2),
           vx: (Math.random() - 0.5) * 1.5,
           size: Math.random() * 8 + 4,
@@ -554,7 +528,7 @@
           y: -15,
           vy: Math.random() * speed * 0.4 + 1,
           vx: Math.sin(Date.now() / 300) * 1.5,
-          size: Math.random() * 6 + 8,
+          size: Math.random() * 6 + 10,
           char: ['🍂', '🍁', '🍃'][Math.floor(Math.random() * 3)],
           life: 1
         });
@@ -569,7 +543,7 @@
           vx: (Math.random() - 0.5) * 1,
           size: Math.random() * 3 + 1,
           life: 1,
-          decay: Math.random() * 0.015 + 0.01
+          decay: Math.random() * 0.015 + 0.008
         });
       }
 
@@ -586,7 +560,7 @@
       }
     }
 
-    function updateAndDrawParticles() {
+    function renderLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       generateAmbientParticles();
 
@@ -597,7 +571,7 @@
           p.x += p.vx; p.y += p.vy; p.life -= p.decay;
           ctx.fillStyle = p.color;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, Math.max(0, p.size * p.life), 0, Math.PI * 2);
           ctx.fill();
         } 
         else if (p.type === 'snow') {
@@ -620,11 +594,9 @@
         } 
         else if (p.type === 'fire') {
           p.y += p.vy; p.x += p.vx; p.life -= p.decay;
-          let r = Math.floor(255);
-          let g = Math.floor(p.life * 200);
-          ctx.fillStyle = `rgba(${r}, ${g}, 0, ${p.life})`;
+          ctx.fillStyle = `rgba(255, ${Math.floor(p.life * 200)}, 0, ${Math.max(0, p.life)})`;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, Math.max(0, p.size * p.life), 0, Math.PI * 2);
           ctx.fill();
         } 
         else if (p.type === 'leaf') {
@@ -635,7 +607,7 @@
         } 
         else if (p.type === 'ashes') {
           p.y += p.vy; p.x += p.vx; p.life -= p.decay;
-          ctx.fillStyle = `rgba(180, 180, 180, ${p.life})`;
+          ctx.fillStyle = `rgba(180, 180, 180, ${Math.max(0, p.life)})`;
           ctx.fillRect(p.x, p.y, p.size, p.size);
         } 
         else if (p.type === 'star') {
@@ -652,7 +624,7 @@
         }
       }
 
-      animationFrameId = requestAnimationFrame(updateAndDrawParticles);
+      requestAnimationFrame(renderLoop);
     }
 
     function getBaseHTML() {
@@ -660,20 +632,14 @@
       return `<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Manrope:wght@700&family=Montserrat:wght@700&family=Rubik:wght@700&display=swap" rel="stylesheet">
-<div id="FX_STUDIO_ROOT">
+<div id="FX_STUDIO_ROOT" style="position:relative; width:100%; height:100%; min-height:250px; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#08090e;">
   <style>
-    :root {
+    #FX_STUDIO_ROOT {
       --font-family: ${inputs.fontFamily.value};
       --font-size: ${inputs.fontSize.value}px;
       --text-color: ${inputs.textColor.value};
       --glow-color-1: ${inputs.glowColor1.value};
       --glow-color-2: ${inputs.glowColor2.value};
-    }
-
-    .fx-wrapper {
-      position: relative;
-      display: inline-block;
-      padding: 40px;
     }
 
     .text-container {
@@ -689,7 +655,7 @@
       white-space: pre-wrap;
     }
 
-    #fxCanvas {
+    #fxRootCanvas {
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
@@ -700,7 +666,7 @@
     .char {
       display: inline-block;
       position: relative;
-      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s, filter 0.3s, opacity 0.5s;
+      transition: transform 0.15s ease-out, color 0.3s, filter 0.3s, opacity 0.5s;
       cursor: pointer;
     }
 
@@ -721,15 +687,13 @@
     }
   </style>
 
-  <div class="fx-wrapper" id="fxRootWrapper">
-    <canvas id="fxRootCanvas"></canvas>
-    <div class="text-container" id="fxRootText"></div>
-  </div>
+  <canvas id="fxRootCanvas"></canvas>
+  <div class="text-container" id="fxRootText"></div>
 
   <script>
     (function() {
+      const root = document.getElementById('FX_STUDIO_ROOT');
       const container = document.getElementById('fxRootText');
-      const wrapper = document.getElementById('fxRootWrapper');
       const canvas = document.getElementById('fxRootCanvas');
       const ctx = canvas.getContext('2d');
 
@@ -744,8 +708,8 @@
       let particles = [];
 
       function resize() {
-        canvas.width = wrapper.offsetWidth;
-        canvas.height = wrapper.offsetHeight;
+        canvas.width = root.offsetWidth;
+        canvas.height = root.offsetHeight;
       }
 
       for (let char of text) {
@@ -761,42 +725,54 @@
           if (activeFX.includes('scared')) {
             const rect = span.getBoundingClientRect();
             const angle = Math.atan2(e.clientY - (rect.top + rect.height/2), e.clientX - (rect.left + rect.width/2));
-            span.style.transform = \`translate(\${-Math.cos(angle) * speed * 8}px, \${-Math.sin(angle) * speed * 8}px)\`;
+            span.style.transform = \`translate(\${-Math.cos(angle) * speed * 10}px, \${-Math.sin(angle) * speed * 10}px)\`;
           }
           if (activeFX.includes('melt')) span.classList.add('fx-melted');
           if (activeFX.includes('sparks')) {
-            const rect = wrapper.getBoundingClientRect();
-            const a = Math.random() * Math.PI * 2, v = Math.random() * speed + 2;
-            particles.push({
-              type: 'spark', x: e.clientX - rect.left, y: e.clientY - rect.top,
-              vx: Math.cos(a)*v, vy: Math.sin(a)*v, size: Math.random()*4+2,
-              color: sparkColor, life: 1, decay: Math.random()*0.03+0.02
-            });
+            const rect = root.getBoundingClientRect();
+            for(let i=0; i<3; i++) {
+              const a = Math.random() * Math.PI * 2, v = Math.random() * speed + 2;
+              particles.push({
+                type: 'spark', x: e.clientX - rect.left, y: e.clientY - rect.top,
+                vx: Math.cos(a)*v, vy: Math.sin(a)*v, size: Math.random()*4+2,
+                color: sparkColor, life: 1, decay: Math.random()*0.04+0.02
+              });
+            }
           }
         });
 
         if (activeFX.includes('scared')) {
           span.addEventListener('mouseleave', () => {
-            setTimeout(() => { span.style.transform = 'translate(0, 0)'; }, 350);
+            setTimeout(() => { span.style.transform = 'translate(0, 0)'; }, 300);
           });
         }
 
         container.appendChild(span);
       }
 
-      setTimeout(resize, 50);
+      resize();
+      window.addEventListener('resize', resize);
 
       function loop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const intensity = count / 100;
         const w = canvas.width, h = canvas.height;
 
+        const rect = container.getBoundingClientRect();
+        const rRect = root.getBoundingClientRect();
+        const textArea = {
+          left: rect.left - rRect.left - 20,
+          right: rect.right - rRect.left + 20,
+          top: rect.top - rRect.top - 20,
+          bottom: rect.bottom - rRect.top + 20
+        };
+
         if (Math.random() < intensity) {
           if (activeFX.includes('snow')) particles.push({ type: 'snow', x: Math.random()*w, y: -10, vy: Math.random()*speed*0.5+1, vx: (Math.random()-0.5), size: Math.random()*3+2, color: sparkColor, life: 1 });
           if (activeFX.includes('rain')) particles.push({ type: 'rain', x: Math.random()*w, y: -20, vy: Math.random()*speed*2+8, len: Math.random()*12+10, color: sparkColor, life: 1 });
-          if (activeFX.includes('fire')) particles.push({ type: 'fire', x: Math.random()*(w-40)+20, y: h-10, vy: -(Math.random()*speed*0.8+2), vx: (Math.random()-0.5)*1.5, size: Math.random()*8+4, life: 1, decay: Math.random()*0.02+0.015 });
-          if (activeFX.includes('leaves')) particles.push({ type: 'leaf', x: Math.random()*w, y: -15, vy: Math.random()*speed*0.4+1, vx: Math.sin(Date.now()/300)*1.5, size: Math.random()*6+8, char: ['🍂','🍁','🍃'][Math.floor(Math.random()*3)], life: 1 });
-          if (activeFX.includes('ashes')) particles.push({ type: 'ashes', x: Math.random()*w, y: h+10, vy: -(Math.random()*speed*0.5+1), vx: (Math.random()-0.5), size: Math.random()*3+1, life: 1, decay: Math.random()*0.015+0.01 });
+          if (activeFX.includes('fire')) particles.push({ type: 'fire', x: textArea.left + Math.random()*(textArea.right - textArea.left), y: textArea.bottom, vy: -(Math.random()*speed*0.8+2), vx: (Math.random()-0.5)*1.5, size: Math.random()*8+4, life: 1, decay: Math.random()*0.02+0.015 });
+          if (activeFX.includes('leaves')) particles.push({ type: 'leaf', x: Math.random()*w, y: -15, vy: Math.random()*speed*0.4+1, vx: Math.sin(Date.now()/300)*1.5, size: Math.random()*6+10, char: ['🍂','🍁','🍃'][Math.floor(Math.random()*3)], life: 1 });
+          if (activeFX.includes('ashes')) particles.push({ type: 'ashes', x: Math.random()*w, y: h+10, vy: -(Math.random()*speed*0.5+1), vx: (Math.random()-0.5), size: Math.random()*3+1, life: 1, decay: Math.random()*0.015+0.008 });
           if (activeFX.includes('stars')) particles.push({ type: 'star', x: Math.random()*w, y: Math.random()*h, size: Math.random()*4+2, color: sparkColor, life: 1, decay: Math.random()*0.04+0.01 });
         }
 
@@ -804,7 +780,7 @@
           let p = particles[i];
           if (p.type === 'spark') {
             p.x += p.vx; p.y += p.vy; p.life -= p.decay;
-            ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size*p.life, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0, p.size*p.life), 0, Math.PI*2); ctx.fill();
           } else if (p.type === 'snow') {
             p.y += p.vy; p.x += p.vx; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
             if (p.y > h) p.life = 0;
@@ -813,13 +789,13 @@
             if (p.y > h) p.life = 0;
           } else if (p.type === 'fire') {
             p.y += p.vy; p.x += p.vx; p.life -= p.decay;
-            ctx.fillStyle = \`rgba(255, \${Math.floor(p.life*200)}, 0, \${p.life})\`;
-            ctx.beginPath(); ctx.arc(p.x, p.y, p.size*p.life, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = \`rgba(255, \${Math.floor(p.life*200)}, 0, \${Math.max(0, p.life)})\`;
+            ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0, p.size*p.life), 0, Math.PI*2); ctx.fill();
           } else if (p.type === 'leaf') {
             p.y += p.vy; p.x += p.vx; ctx.font = \`\${p.size}px sans-serif\`; ctx.fillText(p.char, p.x, p.y);
             if (p.y > h) p.life = 0;
           } else if (p.type === 'ashes') {
-            p.y += p.vy; p.x += p.vx; p.life -= p.decay; ctx.fillStyle = \`rgba(180, 180, 180, \${p.life})\`; ctx.fillRect(p.x, p.y, p.size, p.size);
+            p.y += p.vy; p.x += p.vx; p.life -= p.decay; ctx.fillStyle = \`rgba(180, 180, 180, \${Math.max(0, p.life)})\`; ctx.fillRect(p.x, p.y, p.size, p.size);
           } else if (p.type === 'star') {
             p.life -= p.decay; ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, p.life); ctx.font = \`\${p.size*3}px sans-serif\`; ctx.fillText('★', p.x, p.y); ctx.globalAlpha = 1.0;
           }
@@ -845,7 +821,7 @@
     }
 
     Object.values(inputs).forEach(input => input.addEventListener('input', updateFX));
-    document.querySelectorAll('.fx-checkbox-list input').forEach(cb => cb.addEventListener('change', updateFX));
+    document.querySelectorAll('.fx-option').forEach(cb => cb.addEventListener('change', updateFX));
 
     function setLang(lang, btn) {
       document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
@@ -872,7 +848,7 @@
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
-      const geniallyIframe = `<iframe width="100%" height="320" frameborder="0" scrolling="no" srcdoc="${escapedHTML}"></iframe>`;
+      const geniallyIframe = `<iframe width="100%" height="350" frameborder="0" scrolling="no" srcdoc="${escapedHTML}"></iframe>`;
       codeOutput.value = geniallyIframe;
       codeOutput.select();
       document.execCommand('copy');
@@ -880,8 +856,10 @@
     }
 
     window.addEventListener('resize', resizeCanvas);
+    
+    resizeCanvas();
     updateFX();
-    updateAndDrawParticles();
+    renderLoop();
   </script>
 </body>
 </html>
