@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Multi-FX Letter Studio Fixed</title>
+  <title>Multi-FX Letter Studio Pro Extended</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Manrope:wght@700&family=Montserrat:wght@700&family=Rubik:wght@700&display=swap" rel="stylesheet">
@@ -215,10 +215,31 @@
     .has-shadow { text-shadow: 3px 5px 10px rgba(0, 0, 0, 0.8); }
     .has-glow { filter: drop-shadow(0 0 12px var(--glow-color-1)) drop-shadow(0 0 25px var(--glow-color-2)); }
 
+    /* Анимации букв */
     .char.fx-shake:hover { animation: charShake 0.08s infinite alternate; }
     @keyframes charShake {
       0% { transform: translate(-3px, -2px) rotate(-4deg); }
       100% { transform: translate(3px, 2px) rotate(4deg); }
+    }
+
+    .char.fx-flicker {
+      animation: charFlicker 1.8s infinite ease-in-out;
+      animation-delay: calc(var(--char-index) * 0.12s);
+    }
+    @keyframes charFlicker {
+      0%, 100% { opacity: 1; filter: brightness(1); }
+      30% { opacity: 0.3; filter: brightness(0.5); }
+      35% { opacity: 0.9; filter: brightness(1.2); }
+      70% { opacity: 0.4; filter: brightness(0.6); }
+    }
+
+    .char.fx-wave {
+      animation: charWave 1.6s infinite ease-in-out;
+      animation-delay: calc(var(--char-index) * 0.15s);
+    }
+    @keyframes charWave {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.35) translateY(-5px); }
     }
 
     .char.fx-melted {
@@ -313,17 +334,19 @@
     </div>
     <label class="checkbox-item"><input type="checkbox" id="enableShadow"> Тень под буквами</label>
 
-    <div class="section-title">Интерактив и Атмосфера</div>
+    <div class="section-title">Интерактив и Эффекты</div>
     <div class="fx-checkbox-list">
+      <label class="checkbox-item"><input type="checkbox" value="flicker" class="fx-option" checked> Мерцание букв</label>
+      <label class="checkbox-item"><input type="checkbox" value="wave" class="fx-option"> Волнообразная пульсация</label>
       <label class="checkbox-item"><input type="checkbox" value="scared" class="fx-option"> Трусливые буквы (при курсоре)</label>
       <label class="checkbox-item"><input type="checkbox" value="shake" class="fx-option"> Дрожание букв</label>
       <label class="checkbox-item"><input type="checkbox" value="melt" class="fx-option"> Буквы тают (исчезают)</label>
       <label class="checkbox-item"><input type="checkbox" value="sparks" class="fx-option" checked> Всплеск искр (при курсоре)</label>
-      <label class="checkbox-item"><input type="checkbox" value="fire" class="fx-option"> Постоянный Огонь вокруг</label>
-      <label class="checkbox-item"><input type="checkbox" value="snow" class="fx-option"> Постоянный Снегопад</label>
-      <label class="checkbox-item"><input type="checkbox" value="rain" class="fx-option" checked> Постоянный Ливень</label>
-      <label class="checkbox-item"><input type="checkbox" value="leaves" class="fx-option" checked> Постоянный Листопад</label>
-      <label class="checkbox-item"><input type="checkbox" value="ashes" class="fx-option" checked> Тлеющий Пепел</label>
+      <label class="checkbox-item"><input type="checkbox" value="fire" class="fx-option" checked> Реалистичный Огонь вокруг</label>
+      <label class="checkbox-item"><input type="checkbox" value="snow" class="fx-option"> Снегопад (снежинки)</label>
+      <label class="checkbox-item"><input type="checkbox" value="rain" class="fx-option"> Постоянный Ливень</label>
+      <label class="checkbox-item"><input type="checkbox" value="leaves" class="fx-option"> Осенний Листопад</label>
+      <label class="checkbox-item"><input type="checkbox" value="ashes" class="fx-option"> Тлеющий Пепел</label>
       <label class="checkbox-item"><input type="checkbox" value="stars" class="fx-option"> Звездопад</label>
     </div>
 
@@ -406,17 +429,22 @@
       const str = inputs.text.value;
       const activeFX = getSelectedFX();
 
+      let idx = 0;
       for (let char of str) {
         const span = document.createElement('span');
         span.className = 'char';
         span.textContent = char === ' ' ? '\u00A0' : char;
+        span.style.setProperty('--char-index', idx);
 
         if (inputs.enableShadow.checked) span.classList.add('has-shadow');
         if (inputs.enableGlow.checked) span.classList.add('has-glow');
         if (activeFX.includes('shake')) span.classList.add('fx-shake');
+        if (activeFX.includes('flicker')) span.classList.add('fx-flicker');
+        if (activeFX.includes('wave')) span.classList.add('fx-wave');
 
         attachCharEvents(span);
         textContainer.appendChild(span);
+        idx++;
       }
     }
 
@@ -485,12 +513,12 @@
 
       if (activeFX.includes('snow')) {
         particles.push({
-          type: 'snow',
+          type: 'snowflake',
           x: Math.random() * w,
           y: -10,
-          vy: Math.random() * speed * 0.5 + 1,
+          vy: Math.random() * speed * 0.4 + 1,
           vx: (Math.random() - 0.5) * 1,
-          size: Math.random() * 3 + 2,
+          size: Math.random() * 4 + 3,
           color: inputs.sparkColor.value,
           life: 1
         });
@@ -510,26 +538,27 @@
 
       if (activeFX.includes('fire')) {
         particles.push({
-          type: 'fire',
+          type: 'flame',
           x: textArea.left + Math.random() * (textArea.right - textArea.left),
-          y: textArea.bottom,
-          vy: -(Math.random() * speed * 0.8 + 2),
-          vx: (Math.random() - 0.5) * 1.5,
-          size: Math.random() * 8 + 4,
+          y: textArea.bottom + 5,
+          vy: -(Math.random() * speed * 0.7 + 2),
+          vx: (Math.random() - 0.5) * 1.2,
+          size: Math.random() * 12 + 8,
           life: 1,
-          decay: Math.random() * 0.02 + 0.015
+          decay: Math.random() * 0.025 + 0.015
         });
       }
 
       if (activeFX.includes('leaves')) {
+        const autumnColors = ['#d9381e', '#e67300', '#ffb300', '#8b4513', '#cc5500'];
         particles.push({
           type: 'leaf',
           x: Math.random() * w,
           y: -15,
           vy: Math.random() * speed * 0.4 + 1,
           vx: Math.sin(Date.now() / 300) * 1.5,
-          size: Math.random() * 6 + 10,
-          char: ['🍂', '🍁', '🍃'][Math.floor(Math.random() * 3)],
+          size: Math.random() * 8 + 8,
+          color: autumnColors[Math.floor(Math.random() * autumnColors.length)],
           life: 1
         });
       }
@@ -560,6 +589,58 @@
       }
     }
 
+    function drawSnowflake(ctx, x, y, size, color) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.2;
+      for (let i = 0; i < 6; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, size);
+        ctx.moveTo(0, size * 0.5);
+        ctx.lineTo(size * 0.3, size * 0.7);
+        ctx.moveTo(0, size * 0.5);
+        ctx.lineTo(-size * 0.3, size * 0.7);
+        ctx.stroke();
+        ctx.rotate(Math.PI / 3);
+      }
+      ctx.restore();
+    }
+
+    function drawLeaf(ctx, x, y, size, color) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(0, -size);
+      ctx.quadraticCurveTo(size, 0, 0, size);
+      ctx.quadraticCurveTo(-size, 0, 0, -size);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawFlame(ctx, x, y, size, life) {
+      ctx.save();
+      ctx.translate(x, y);
+      const currentSize = Math.max(0, size * life);
+      
+      const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, currentSize);
+      grad.addColorStop(0, 'rgba(255, 255, 200, ' + life + ')');
+      grad.addColorStop(0.3, 'rgba(255, 140, 0, ' + life * 0.8 + ')');
+      grad.addColorStop(0.7, 'rgba(200, 30, 0, ' + life * 0.4 + ')');
+      grad.addColorStop(1, 'rgba(100, 0, 0, 0)');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(0, -currentSize * 1.5);
+      ctx.quadraticCurveTo(currentSize, -currentSize * 0.5, currentSize * 0.8, currentSize * 0.5);
+      ctx.quadraticCurveTo(0, currentSize, -currentSize * 0.8, currentSize * 0.5);
+      ctx.quadraticCurveTo(-currentSize, -currentSize * 0.5, 0, -currentSize * 1.5);
+      ctx.fill();
+      ctx.restore();
+    }
+
     function renderLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       generateAmbientParticles();
@@ -574,12 +655,9 @@
           ctx.arc(p.x, p.y, Math.max(0, p.size * p.life), 0, Math.PI * 2);
           ctx.fill();
         } 
-        else if (p.type === 'snow') {
+        else if (p.type === 'snowflake') {
           p.y += p.vy; p.x += p.vx;
-          ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          ctx.fill();
+          drawSnowflake(ctx, p.x, p.y, p.size, p.color);
           if (p.y > canvas.height) p.life = 0;
         } 
         else if (p.type === 'rain') {
@@ -592,17 +670,13 @@
           ctx.stroke();
           if (p.y > canvas.height) p.life = 0;
         } 
-        else if (p.type === 'fire') {
-          p.y += p.vy; p.x += p.vx; p.life -= p.decay;
-          ctx.fillStyle = `rgba(255, ${Math.floor(p.life * 200)}, 0, ${Math.max(0, p.life)})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, Math.max(0, p.size * p.life), 0, Math.PI * 2);
-          ctx.fill();
+        else if (p.type === 'flame') {
+          p.y += p.vy; p.x += p.vx + (Math.random() - 0.5) * 0.8; p.life -= p.decay;
+          drawFlame(ctx, p.x, p.y, p.size, p.life);
         } 
         else if (p.type === 'leaf') {
           p.y += p.vy; p.x += p.vx;
-          ctx.font = `${p.size}px sans-serif`;
-          ctx.fillText(p.char, p.x, p.y);
+          drawLeaf(ctx, p.x, p.y, p.size, p.color);
           if (p.y > canvas.height) p.life = 0;
         } 
         else if (p.type === 'ashes') {
@@ -679,6 +753,26 @@
       100% { transform: translate(3px, 2px) rotate(4deg); }
     }
 
+    .char.fx-flicker {
+      animation: charFlicker 1.8s infinite ease-in-out;
+      animation-delay: calc(var(--char-index) * 0.12s);
+    }
+    @keyframes charFlicker {
+      0%, 100% { opacity: 1; filter: brightness(1); }
+      30% { opacity: 0.3; filter: brightness(0.5); }
+      35% { opacity: 0.9; filter: brightness(1.2); }
+      70% { opacity: 0.4; filter: brightness(0.6); }
+    }
+
+    .char.fx-wave {
+      animation: charWave 1.6s infinite ease-in-out;
+      animation-delay: calc(var(--char-index) * 0.15s);
+    }
+    @keyframes charWave {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.35) translateY(-5px); }
+    }
+
     .char.fx-melted {
       transform: translateY(50px) scaleY(0.05) scaleX(2) !important;
       opacity: 0 !important;
@@ -712,14 +806,18 @@
         canvas.height = root.offsetHeight;
       }
 
+      let idx = 0;
       for (let char of text) {
         const span = document.createElement('span');
         span.className = 'char';
         span.textContent = char === ' ' ? '\u00A0' : char;
+        span.style.setProperty('--char-index', idx);
 
         if (hasShadow) span.classList.add('has-shadow');
         if (hasGlow) span.classList.add('has-glow');
         if (activeFX.includes('shake')) span.classList.add('fx-shake');
+        if (activeFX.includes('flicker')) span.classList.add('fx-flicker');
+        if (activeFX.includes('wave')) span.classList.add('fx-wave');
 
         span.addEventListener('mousemove', (e) => {
           if (activeFX.includes('scared')) {
@@ -748,10 +846,41 @@
         }
 
         container.appendChild(span);
+        idx++;
       }
 
       resize();
       window.addEventListener('resize', resize);
+
+      function drawSnowflake(ctx, x, y, size, color) {
+        ctx.save(); ctx.translate(x, y); ctx.strokeStyle = color; ctx.lineWidth = 1.2;
+        for (let i = 0; i < 6; i++) {
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, size);
+          ctx.moveTo(0, size * 0.5); ctx.lineTo(size * 0.3, size * 0.7);
+          ctx.moveTo(0, size * 0.5); ctx.lineTo(-size * 0.3, size * 0.7);
+          ctx.stroke(); ctx.rotate(Math.PI / 3);
+        }
+        ctx.restore();
+      }
+
+      function drawLeaf(ctx, x, y, size, color) {
+        ctx.save(); ctx.translate(x, y); ctx.fillStyle = color; ctx.beginPath();
+        ctx.moveTo(0, -size); ctx.quadraticCurveTo(size, 0, 0, size);
+        ctx.quadraticCurveTo(-size, 0, 0, -size); ctx.fill(); ctx.restore();
+      }
+
+      function drawFlame(ctx, x, y, size, life) {
+        ctx.save(); ctx.translate(x, y); const cs = Math.max(0, size * life);
+        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, cs);
+        grad.addColorStop(0, 'rgba(255, 255, 200, ' + life + ')');
+        grad.addColorStop(0.3, 'rgba(255, 140, 0, ' + life * 0.8 + ')');
+        grad.addColorStop(0.7, 'rgba(200, 30, 0, ' + life * 0.4 + ')');
+        grad.addColorStop(1, 'rgba(100, 0, 0, 0)');
+        ctx.fillStyle = grad; ctx.beginPath();
+        ctx.moveTo(0, -cs * 1.5); ctx.quadraticCurveTo(cs, -cs * 0.5, cs * 0.8, cs * 0.5);
+        ctx.quadraticCurveTo(0, cs, -cs * 0.8, cs * 0.5); ctx.quadraticCurveTo(-cs, -cs * 0.5, 0, -cs * 1.5);
+        ctx.fill(); ctx.restore();
+      }
 
       function loop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -768,10 +897,13 @@
         };
 
         if (Math.random() < intensity) {
-          if (activeFX.includes('snow')) particles.push({ type: 'snow', x: Math.random()*w, y: -10, vy: Math.random()*speed*0.5+1, vx: (Math.random()-0.5), size: Math.random()*3+2, color: sparkColor, life: 1 });
+          if (activeFX.includes('snow')) particles.push({ type: 'snowflake', x: Math.random()*w, y: -10, vy: Math.random()*speed*0.4+1, vx: (Math.random()-0.5), size: Math.random()*4+3, color: sparkColor, life: 1 });
           if (activeFX.includes('rain')) particles.push({ type: 'rain', x: Math.random()*w, y: -20, vy: Math.random()*speed*2+8, len: Math.random()*12+10, color: sparkColor, life: 1 });
-          if (activeFX.includes('fire')) particles.push({ type: 'fire', x: textArea.left + Math.random()*(textArea.right - textArea.left), y: textArea.bottom, vy: -(Math.random()*speed*0.8+2), vx: (Math.random()-0.5)*1.5, size: Math.random()*8+4, life: 1, decay: Math.random()*0.02+0.015 });
-          if (activeFX.includes('leaves')) particles.push({ type: 'leaf', x: Math.random()*w, y: -15, vy: Math.random()*speed*0.4+1, vx: Math.sin(Date.now()/300)*1.5, size: Math.random()*6+10, char: ['🍂','🍁','🍃'][Math.floor(Math.random()*3)], life: 1 });
+          if (activeFX.includes('fire')) particles.push({ type: 'flame', x: textArea.left + Math.random()*(textArea.right - textArea.left), y: textArea.bottom+5, vy: -(Math.random()*speed*0.7+2), vx: (Math.random()-0.5)*1.2, size: Math.random()*12+8, life: 1, decay: Math.random()*0.025+0.015 });
+          if (activeFX.includes('leaves')) {
+            const autumnColors = ['#d9381e', '#e67300', '#ffb300', '#8b4513', '#cc5500'];
+            particles.push({ type: 'leaf', x: Math.random()*w, y: -15, vy: Math.random()*speed*0.4+1, vx: Math.sin(Date.now()/300)*1.5, size: Math.random()*8+8, color: autumnColors[Math.floor(Math.random()*autumnColors.length)], life: 1 });
+          }
           if (activeFX.includes('ashes')) particles.push({ type: 'ashes', x: Math.random()*w, y: h+10, vy: -(Math.random()*speed*0.5+1), vx: (Math.random()-0.5), size: Math.random()*3+1, life: 1, decay: Math.random()*0.015+0.008 });
           if (activeFX.includes('stars')) particles.push({ type: 'star', x: Math.random()*w, y: Math.random()*h, size: Math.random()*4+2, color: sparkColor, life: 1, decay: Math.random()*0.04+0.01 });
         }
@@ -781,18 +913,17 @@
           if (p.type === 'spark') {
             p.x += p.vx; p.y += p.vy; p.life -= p.decay;
             ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0, p.size*p.life), 0, Math.PI*2); ctx.fill();
-          } else if (p.type === 'snow') {
-            p.y += p.vy; p.x += p.vx; ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+          } else if (p.type === 'snowflake') {
+            p.y += p.vy; p.x += p.vx; drawSnowflake(ctx, p.x, p.y, p.size, p.color);
             if (p.y > h) p.life = 0;
           } else if (p.type === 'rain') {
             p.y += p.vy; ctx.strokeStyle = p.color; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x, p.y+p.len); ctx.stroke();
             if (p.y > h) p.life = 0;
-          } else if (p.type === 'fire') {
-            p.y += p.vy; p.x += p.vx; p.life -= p.decay;
-            ctx.fillStyle = \`rgba(255, \${Math.floor(p.life*200)}, 0, \${Math.max(0, p.life)})\`;
-            ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0, p.size*p.life), 0, Math.PI*2); ctx.fill();
+          } else if (p.type === 'flame') {
+            p.y += p.vy; p.x += p.vx + (Math.random() - 0.5) * 0.8; p.life -= p.decay;
+            drawFlame(ctx, p.x, p.y, p.size, p.life);
           } else if (p.type === 'leaf') {
-            p.y += p.vy; p.x += p.vx; ctx.font = \`\${p.size}px sans-serif\`; ctx.fillText(p.char, p.x, p.y);
+            p.y += p.vy; p.x += p.vx; drawLeaf(ctx, p.x, p.y, p.size, p.color);
             if (p.y > h) p.life = 0;
           } else if (p.type === 'ashes') {
             p.y += p.vy; p.x += p.vx; p.life -= p.decay; ctx.fillStyle = \`rgba(180, 180, 180, \${Math.max(0, p.life)})\`; ctx.fillRect(p.x, p.y, p.size, p.size);
