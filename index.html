@@ -1,32 +1,75 @@
-<div id="FX_ROOT">
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Neon FX Widget</title>
   <style>
     :root {
-      /* --- ГЛОБАЛЬНЫЕ НАСТРОЙКИ --- */
-      --font-size: 60px;          /* РАЗМЕР БУКВ */
-      --text-align: left;       /* ВЫРАВНИВАНИЕ: center, left или right */
-      --text-color: #FF00FF;      /* ЦВЕТ ТЕКСТА */
-      --glow-gold: #ffd700;       /* ЗОЛОТОЙ ЦВЕТ */
-      --glow-orange: #ff8c00;     /* ОРАНЖЕВЫЙ ЦВЕТ */
-      --display-type: block;      /* block для всей ширины, inline-block для размера по тексту */
-      /* ---------------------------- */
+      /* --- НАСТРОЙКИ ТЕКСТА И СВЕЧЕНИЯ --- */
+      --font-size: 60px;          /* Размер букв */
+      --text-align: center;       /* Выравнивание: left, center, right */
+      --text-color: #FF00FF;      /* Цвет текста */
+      --glow-gold: #ffd700;       /* Золотой цвет свечения */
+      --glow-orange: #ff8c00;     /* Оранжевый цвет свечения */
+      --display-type: block;      /* block или inline-block */
+
+      /* --- НАСТРОЙКИ ИСКР (СПАРКОВ) --- */
+      --spark-count: 35;          /* Количество искр за клик */
+      --spark-velocity: 8;        /* Скорость / дальность разлета (от 2 до 15) */
+      --spark-color: #00FFFF;     /* Цвет центра искры */
     }
 
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    /* Панель переключателя языков */
+    .lang-controls {
+      margin-bottom: 40px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .lang-btn {
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: 0.2s;
+    }
+
+    .lang-btn:hover {
+      background: var(--glow-orange);
+      color: #000;
+      border-color: var(--glow-gold);
+    }
+
+    /* Стили неонового текста */
     .neon-wrapper {
       display: var(--display-type);
       text-align: var(--text-align);
-      padding: 15px;
+      padding: 20px;
       cursor: pointer;
       position: relative;
+      user-select: none;
       
       font-size: var(--font-size);
       color: var(--text-color);
-      font-family: 'Segoe UI', Roboto, sans-serif;
       font-weight: bold;
       
       animation: neonFlash 1.5s ease-out forwards;
     }
 
-    /* Остальные стили (анимации и искры) остаются прежними */
     .neon-wrapper:hover {
       filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 15px var(--glow-gold)) drop-shadow(0 0 25px var(--glow-orange));
       transform: scale(1.05);
@@ -45,36 +88,74 @@
       to { transform: translate(1px, -1px); }
     }
 
+    /* Стили искры */
     .spark {
       position: absolute;
-      width: 3px;
-      height: 3px;
-      background: #fff;
-      box-shadow: 0 0 5px var(--glow-gold), 0 0 10px var(--glow-orange);
+      width: 4px;
+      height: 4px;
+      background: var(--spark-color);
+      box-shadow: 0 0 6px var(--glow-gold), 0 0 12px var(--glow-orange);
       border-radius: 50%;
       pointer-events: none;
       z-index: 9999;
     }
   </style>
+</head>
+<body>
 
-  <div class="neon-wrapper" id="neonElement">
-    очередная попытка … 
+  <!-- Кнопки выбора языка -->
+  <div class="lang-controls">
+    <button class="lang-btn" onclick="setLanguage('ru')">Русский</button>
+    <button class="lang-btn" onclick="setLanguage('de')">Deutsch</button>
+    <button class="lang-btn" onclick="setLanguage('fr')">Français</button>
+  </div>
+
+  <!-- Виджет с неоновым текстом -->
+  <div id="FX_ROOT">
+    <div class="neon-wrapper" id="neonElement">
+      <span id="neonText">очередная попытка …</span>
+    </div>
   </div>
 
   <script>
-    /* Скрипт для искр остается без изменений */
+    // Словарь языков
+    const LOCALES = {
+      ru: "очередная попытка …",
+      de: "Ein weiterer Versuch …",
+      fr: "Une autre tentative …"
+    };
+
+    // Функция смены языка
+    function setLanguage(langCode) {
+      const textContainer = document.getElementById('neonText');
+      if (textContainer && LOCALES[langCode]) {
+        textContainer.textContent = LOCALES[langCode];
+      }
+    }
+
+    // Генератор искр при клике
     const container = document.getElementById('neonElement');
+
     container.addEventListener('click', (e) => {
-      for (let i = 0; i < 15; i++) {
+      const rootStyles = getComputedStyle(document.documentElement);
+      
+      // Считывание параметров искр из CSS-переменных
+      const count = parseInt(rootStyles.getPropertyValue('--spark-count')) || 25;
+      const velocityMultiplier = parseFloat(rootStyles.getPropertyValue('--spark-velocity')) || 6;
+
+      for (let i = 0; i < count; i++) {
         const spark = document.createElement('div');
         spark.classList.add('spark');
         document.body.appendChild(spark);
+
         const angle = Math.random() * Math.PI * 2;
-        const velocity = Math.random() * 6 + 2;
-        const destinationX = (Math.cos(angle) * velocity * 25);
-        const destinationY = (Math.sin(angle) * velocity * 25);
+        const velocity = Math.random() * velocityMultiplier + 2;
+        const destinationX = Math.cos(angle) * velocity * 25;
+        const destinationY = Math.sin(angle) * velocity * 25;
+
         spark.style.left = `${e.clientX}px`;
         spark.style.top = `${e.clientY}px`;
+
         const animation = spark.animate([
           { transform: 'translate(0, 0) scale(1)', opacity: 1 },
           { transform: `translate(${destinationX}px, ${destinationY}px) scale(0)`, opacity: 0 }
@@ -83,8 +164,11 @@
           easing: 'cubic-bezier(0, .9, .57, 1)',
           fill: 'forwards'
         });
+
         animation.onfinish = () => spark.remove();
       }
     });
   </script>
-</div>
+
+</body>
+</html>
