@@ -309,7 +309,6 @@
         <option value="'Montserrat', sans-serif">Montserrat</option>
         <option value="'Inter', sans-serif">Business / Calm</option>
         <option value="'Great Vibes', cursive">Fancy / Valentines</option>
-        <option value="'Montserrat', sans-serif">Playful / Active</option>
         <option value="'Yellowtail', cursive">Cute / Childlike</option>
         <option value="'UnifrakturMaguntia', cursive">Artistic / Vintage</option>
         <option value="'Emblema One', cursive">Loud</option>
@@ -364,12 +363,12 @@
       <label class="checkbox-item"><input type="checkbox" value="shake" class="fx-option"> Дрожание букв</label>
       <label class="checkbox-item"><input type="checkbox" value="melt" class="fx-option"> Буквы тают (исчезают)</label>
       <label class="checkbox-item"><input type="checkbox" value="sparks" class="fx-option"> Всплеск искр (при курсоре)</label>
-      <label class="checkbox-item"><input type="checkbox" value="fire" class="fx-option" checked> Реалистичный Огонь вокруг</label>
+      <label class="checkbox-item"><input type="checkbox" value="fire" class="fx-option"> Реалистичный Огонь вокруг</label>
       <label class="checkbox-item"><input type="checkbox" value="snow" class="fx-option"> Снегопад (снежинки)</label>
       <label class="checkbox-item"><input type="checkbox" value="rain" class="fx-option"> Постоянный Ливень</label>
       <label class="checkbox-item"><input type="checkbox" value="leaves" class="fx-option"> Осенний Листопад</label>
       <label class="checkbox-item"><input type="checkbox" value="embers" class="fx-option"> Тлеющий Пепел</label>
-      <label class="checkbox-item"><input type="checkbox" value="stars" class="fx-option"> Звездопад</label>
+      <label class="checkbox-item"><input type="checkbox" value="stars" class="fx-option" checked> Звездное небо</label>
     </div>
 
     <div class="section-title">Динамика</div>
@@ -378,7 +377,7 @@
       <input type="color" id="textColor" value="#ffffff">
     </div>
     <div class="control-row">
-      <label>Цвет искр / снега</label>
+      <label>Цвет искр / звезд</label>
       <input type="color" id="sparkColor" value="#ffffff">
     </div>
     <div class="control-row">
@@ -621,12 +620,12 @@
           type: 'star',
           x: Math.random() * w,
           y: Math.random() * h,
-          vy: speed * 0.8 + 2,
-          vx: -(speed * 0.8 + 2),
-          length: Math.random() * 30 + 15,
-          color: '#ffffff',
-          life: 1,
-          decay: 0.03
+          size: Math.random() * 8 + 4,
+          color: inputs.sparkColor.value,
+          life: 0,
+          maxLife: Math.random() * 100 + 60,
+          fadeIn: true,
+          points: Math.random() > 0.5 ? 4 : 8
         });
       }
     }
@@ -683,6 +682,36 @@
       ctx.restore();
     }
 
+    function drawStarShape(ctx, x, y, size, color, alpha, points) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+      ctx.fillStyle = color;
+
+      ctx.beginPath();
+      for (let i = 0; i < points * 2; i++) {
+        const radius = i % 2 === 0 ? size : size * 0.25;
+        const angle = (i * Math.PI) / points;
+        const px = Math.cos(angle) * radius;
+        const py = Math.sin(angle) * radius;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // Центровое свечение
+      const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 0.6);
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(1, color);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(0, 0, size * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
     function renderLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       generateAmbientParticles();
@@ -729,16 +758,16 @@
           if (p.y > canvas.height) p.life = 0;
         }
         else if (p.type === 'star') {
-          p.x += p.vx; p.y += p.vy; p.life -= p.decay;
-          ctx.strokeStyle = p.color;
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p.x - p.vx * 2, p.y - p.vy * 2);
-          ctx.stroke();
+          if (p.fadeIn) {
+            p.life += 0.04;
+            if (p.life >= 1) { p.life = 1; p.fadeIn = false; }
+          } else {
+            p.life -= 0.02;
+          }
+          drawStarShape(ctx, p.x, p.y, p.size, p.color, p.life, p.points);
         }
 
-        if (p.life <= 0) {
+        if (p.life <= 0 && !p.fadeIn) {
           particles.splice(i, 1);
         }
       }
@@ -931,6 +960,22 @@
         ctx.fill(); ctx.restore();
       }
 
+      function drawStarShape(ctx, x, y, size, color, alpha, points) {
+        ctx.save(); ctx.translate(x, y); ctx.globalAlpha = Math.max(0, Math.min(1, alpha)); ctx.fillStyle = color;
+        ctx.beginPath();
+        for (let i = 0; i < points * 2; i++) {
+          const radius = i % 2 === 0 ? size : size * 0.25;
+          const angle = (i * Math.PI) / points;
+          const px = Math.cos(angle) * radius, py = Math.sin(angle) * radius;
+          if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.closePath(); ctx.fill();
+        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 0.6);
+        grad.addColorStop(0, '#ffffff'); grad.addColorStop(1, color);
+        ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(0, 0, size * 0.3, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
       function loop() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const intensity = count / 100;
@@ -954,7 +999,9 @@
             const autumnColors = ['#d9381e', '#e67300', '#ffb300', '#8b4513', '#cc5500'];
             particles.push({ type: 'leaf', x: Math.random()*w, y: -15, vy: Math.random()*speed*0.4+1, vx: Math.sin(Date.now()/300)*1.5, size: Math.random()*8+8, color: autumnColors[Math.floor(Math.random()*autumnColors.length)], life: 1 });
           }
-          if (activeFX.includes('stars')) particles.push({ type: 'star', x: Math.random()*w, y: Math.random()*h, vy: speed*0.8+2, vx: -(speed*0.8+2), length: Math.random()*30+15, color: '#ffffff', life: 1, decay: 0.03 });
+          if (activeFX.includes('stars')) {
+            particles.push({ type: 'star', x: Math.random()*w, y: Math.random()*h, size: Math.random()*8+4, color: sparkColor, life: 0, fadeIn: true, points: Math.random() > 0.5 ? 4 : 8 });
+          }
         }
 
         for (let i = particles.length - 1; i >= 0; i--) {
@@ -973,9 +1020,10 @@
           } else if (p.type === 'leaf') {
             p.y += p.vy; p.x += p.vx; drawLeaf(ctx, p.x, p.y, p.size, p.color); if (p.y > h) p.life = 0;
           } else if (p.type === 'star') {
-            p.x += p.vx; p.y += p.vy; p.life -= p.decay; ctx.strokeStyle = p.color; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x-p.vx*2, p.y-p.vy*2); ctx.stroke();
+            if (p.fadeIn) { p.life += 0.04; if (p.life >= 1) { p.life = 1; p.fadeIn = false; } } else { p.life -= 0.02; }
+            drawStarShape(ctx, p.x, p.y, p.size, p.color, p.life, p.points);
           }
-          if (p.life <= 0) particles.splice(i, 1);
+          if (p.life <= 0 && !p.fadeIn) particles.splice(i, 1);
         }
         requestAnimationFrame(loop);
       }
