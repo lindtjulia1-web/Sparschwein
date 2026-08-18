@@ -2,995 +2,209 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Multi-FX Letter Studio Pro Extended</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Font Gallery & Particles.js</title>
+
+  <!-- Google Fonts (Шрифты со скриншотов) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Manrope:wght@700&family=Montserrat:wght@700&family=Rubik:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Danfo&family=Emblema+One&family=Fascinate+Inline&family=Great+Vibes&family=Inter:wght@400;600&family=Montserrat:ital,wght@0,700;1,700&family=Orbitron:wght@600&family=Oswald:wght@400;600&family=Press+Start+2P&family=UnifrakturMaguntia&family=Yellowtail&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --font-family: 'Comfortaa', cursive;
-      --font-size: 60px;
-      --text-color: #ffffff;
-      --glow-color-1: #00ffff;
-      --glow-color-2: #ff00ff;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
+    /* Базовые сбросы */
+    * {
+      box-sizing: border-box;
       margin: 0;
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #0f111a;
-      color: #e0e6ed;
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    .sidebar {
-      width: 350px;
-      background: #151824;
-      border-right: 1px solid #222638;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      overflow-y: auto;
-    }
-
-    .section-title {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      color: #8fa0b5;
-      margin-top: 8px;
-      margin-bottom: 2px;
-      padding-bottom: 4px;
-      border-bottom: 1px solid #222638;
-    }
-
-    .control-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .control-row label {
-      font-size: 12px;
-      color: #c5d1e0;
-      white-space: nowrap;
-    }
-
-    .control-row input[type="text"],
-    .control-row select {
-      background: #1c2030;
-      border: 1px solid #2d3348;
-      color: #fff;
-      padding: 5px 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      outline: none;
-      width: 150px;
-    }
-
-    .control-row input[type="color"] {
-      -webkit-appearance: none;
-      border: 1px solid #2d3348;
-      width: 32px;
-      height: 24px;
-      border-radius: 4px;
-      cursor: pointer;
-      background: transparent;
       padding: 0;
     }
 
-    .control-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-    .control-row input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
-
-    .control-row input[type="range"] {
-      width: 130px;
-      accent-color: #4d7cff;
-      height: 4px;
-    }
-
-    .checkbox-item {
+    body {
+      font-family: 'Inter', sans-serif;
+      color: #333;
+      min-height: 100vh;
       display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      font-size: 12px;
-      color: #d1dbe8;
-      user-select: none;
-    }
-
-    .checkbox-item input[type="checkbox"] {
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      background: #1c2030;
-      border: 1px solid #3b4460;
-      border-radius: 4px;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .checkbox-item input[type="checkbox"]:checked {
-      background: #4d7cff;
-      border-color: #4d7cff;
-    }
-
-    .checkbox-item input[type="checkbox"]:checked::after {
-      content: '✓';
-      position: absolute;
-      color: #fff;
-      font-size: 11px;
-      top: -2px;
-      left: 3px;
-      font-weight: bold;
-    }
-
-    .fx-checkbox-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      background: #10121c;
-      padding: 8px;
-      border-radius: 8px;
-      border: 1px solid #222638;
-    }
-
-    .lang-group {
-      display: flex;
-      gap: 4px;
-      width: 100%;
-    }
-
-    .lang-btn {
-      flex: 1;
-      background: #1c2030;
-      color: #8fa0b5;
-      border: 1px solid #2d3348;
-      padding: 5px 0;
-      cursor: pointer;
-      border-radius: 4px;
-      font-size: 11px;
-      text-align: center;
-    }
-
-    .lang-btn.active, .lang-btn:hover {
-      background: #4d7cff;
-      color: #fff;
-      border-color: #4d7cff;
-    }
-
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .preview-container {
-      flex: 1;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      background: #08090e;
-      position: relative;
-      overflow: hidden;
+      align-items: center;
+      padding: 40px 20px;
     }
 
-    #fxCanvas {
-      position: absolute;
+    /* Фоновый контейнер Particles.js */
+    #particles-js {
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      pointer-events: none;
-      z-index: 1;
+      z-index: -1;
+      background-color: #f0f4f8; /* Фоновый цвет страницы */
     }
 
-    .text-container {
-      position: relative;
-      z-index: 2;
-      display: inline-block;
+    /* Сетка карточек со шрифтами */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Стиль блока кнопки/тега */
+    .tag {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(4px);
+      border-radius: 12px;
+      padding: 12px 16px;
       text-align: center;
-      font-family: var(--font-family);
-      font-size: var(--font-size);
-      color: var(--text-color);
-      font-weight: bold;
+      font-size: 18px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
       user-select: none;
-      white-space: pre-wrap;
     }
 
-    .char {
-      display: inline-block;
-      position: relative;
-      transition: transform 0.15s ease-out, color 0.3s, filter 0.3s, opacity 0.5s;
-      cursor: pointer;
+    .tag:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    .has-shadow { text-shadow: 3px 5px 10px rgba(0, 0, 0, 0.8); }
-    .has-glow { filter: drop-shadow(0 0 12px var(--glow-color-1)) drop-shadow(0 0 25px var(--glow-color-2)); }
+    /* Классы под стили шрифтов */
+    .business      { font-family: 'Inter', sans-serif; font-weight: 400; }
+    .fancy         { font-family: 'Great Vibes', cursive; font-size: 24px; }
+    .calm          { font-family: 'Inter', sans-serif; font-weight: 300; }
+    .playful       { font-family: 'Montserrat', sans-serif; font-weight: 700; }
+    .cute          { font-family: 'Yellowtail', cursive; }
+    .artistic      { font-family: 'UnifrakturMaguntia', cursive; font-size: 22px; }
+    .vintage       { font-family: 'UnifrakturMaguntia', cursive; }
+    .loud          { font-family: 'Emblema One', cursive; text-transform: uppercase; }
+    .sophisticated { font-family: 'Great Vibes', cursive; font-size: 22px; }
+    .futuristic    { font-family: 'Orbitron', sans-serif; font-weight: 600; }
+    .active        { font-family: 'Montserrat', sans-serif; font-style: italic; font-weight: 700; }
+    .stiff         { font-family: 'Oswald', sans-serif; }
+    .innovative    { font-family: 'Orbitron', sans-serif; font-weight: 900; }
+    .happy         { font-family: 'Montserrat', sans-serif; font-style: italic; font-weight: 700; }
+    .childlike     { font-family: 'Yellowtail', cursive; }
+    .rugged        { font-family: 'Oswald', sans-serif; font-weight: 600; text-transform: uppercase; }
+    .awkward       { font-family: 'Fascinate Inline', cursive; }
+    .excited       { font-family: 'Danfo', cursive; }
 
-    /* Анимации букв */
-    .char.fx-shake:hover { animation: charShake 0.08s infinite alternate; }
-    @keyframes charShake {
-      0% { transform: translate(-3px, -2px) rotate(-4deg); }
-      100% { transform: translate(3px, 2px) rotate(4deg); }
-    }
-
-    .char.fx-flicker {
-      animation: charFlicker 1.8s infinite ease-in-out;
-      animation-delay: calc(var(--char-index) * 0.12s);
-    }
-    @keyframes charFlicker {
-      0%, 100% { opacity: 1; filter: brightness(1); }
-      30% { opacity: 0.3; filter: brightness(0.5); }
-      35% { opacity: 0.9; filter: brightness(1.2); }
-      70% { opacity: 0.4; filter: brightness(0.6); }
-    }
-
-    .char.fx-wave {
-      animation: charWave 1.6s infinite ease-in-out;
-      animation-delay: calc(var(--char-index) * 0.15s);
-    }
-    @keyframes charWave {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.35) translateY(-5px); }
-    }
-
-    .char.fx-melted {
-      transform: translateY(50px) scaleY(0.05) scaleX(2) !important;
-      opacity: 0 !important;
-      filter: blur(8px) brightness(2) !important;
-      pointer-events: none;
-    }
-
-    .code-panel {
-      height: 170px;
-      background: #151824;
-      border-top: 1px solid #222638;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .code-buttons { display: flex; gap: 8px; }
-
-    .btn-action {
-      background: #202536;
-      color: #fff;
-      border: 1px solid #313850;
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    .btn-action:hover {
-      background: #4d7cff;
-      border-color: #4d7cff;
-    }
-
-    textarea {
-      flex: 1;
-      background: #08090e;
-      border: 1px solid #222638;
-      color: #61afef;
-      font-family: monospace;
-      font-size: 11px;
-      padding: 6px;
-      resize: none;
-      border-radius: 4px;
-      outline: none;
-    }
+    /* Шрифты со 2 скриншота */
+    .lunar-new-year { font-family: 'Oswald', sans-serif; }
+    .valentines     { font-family: 'Great Vibes', cursive; font-size: 22px; }
+    .holi           { font-family: 'Press Start 2P', cursive; font-size: 14px; color: #ff007f; text-shadow: 2px 2px 0 #ffeb3b; }
+    .halloween      { font-family: 'Creepster', cursive; font-size: 20px; }
+    .diwali         { font-family: 'Yellowtail', cursive; }
+    .christmas      { font-family: 'UnifrakturMaguntia', cursive; font-size: 20px; }
+    .hanukkah       { font-family: 'Great Vibes', cursive; font-size: 22px; }
+    .kwanzaa        { font-family: 'Montserrat', sans-serif; font-style: italic; font-weight: 700; }
   </style>
 </head>
 <body>
 
-  <div class="sidebar">
-    <div class="section-title">Язык интерфейса</div>
-    <div class="lang-group">
-      <button class="lang-btn active" onclick="setLang('ru', this)">Русский</button>
-      <button class="lang-btn" onclick="setLang('en', this)">English</button>
-      <button class="lang-btn" onclick="setLang('de', this)">Deutsch</button>
-      <button class="lang-btn" onclick="setLang('fr', this)">Français</button>
-    </div>
+  <!-- Фон с частицами -->
+  <div id="particles-js"></div>
 
-    <div class="section-title">Текст и Шрифт</div>
-    <div class="control-row">
-      <label>Текст надписи</label>
-      <input type="text" id="textInput" value="живой текст …">
-    </div>
-    <div class="control-row">
-      <label>Шрифт</label>
-      <select id="fontFamily">
-        <option value="'Comfortaa', cursive">Comfortaa</option>
-        <option value="system-ui, sans-serif">Системный</option>
-        <option value="'Rubik', sans-serif">Rubik</option>
-        <option value="'Manrope', sans-serif">Manrope</option>
-        <option value="'Montserrat', sans-serif">Montserrat</option>
-      </select>
-    </div>
-    <div class="control-row">
-      <label>Размер текста</label>
-      <input type="range" id="fontSize" min="20" max="120" value="60">
-    </div>
+  <!-- Карточки со шрифтами -->
+  <div class="grid">
+    <!-- Скриншот 1 -->
+    <div class="tag business">Business</div>
+    <div class="tag fancy">Fancy</div>
+    <div class="tag calm">Calm</div>
+    <div class="tag playful">Playful</div>
+    <div class="tag cute">Cute</div>
+    <div class="tag artistic">Artistic</div>
+    <div class="tag vintage">Vintage</div>
+    <div class="tag loud">Loud</div>
+    <div class="tag sophisticated">Sophisticated</div>
+    <div class="tag futuristic">Futuristic</div>
+    <div class="tag active">Active</div>
+    <div class="tag stiff">Stiff</div>
+    <div class="tag innovative">Innovative</div>
+    <div class="tag happy">Happy</div>
+    <div class="tag childlike">Childlike</div>
+    <div class="tag rugged">Rugged</div>
+    <div class="tag awkward">Awkward</div>
+    <div class="tag excited">EXCITED</div>
 
-    <div class="section-title">Свечение и Тень</div>
-    <label class="checkbox-item"><input type="checkbox" id="enableGlow" checked> Включить свечение</label>
-    <div class="control-row">
-      <label>Основное свечение</label>
-      <input type="color" id="glowColor1" value="#00ffff">
-    </div>
-    <div class="control-row">
-      <label>Вторичное свечение</label>
-      <input type="color" id="glowColor2" value="#ff00ff">
-    </div>
-    <label class="checkbox-item"><input type="checkbox" id="enableShadow"> Тень под буквами</label>
-
-    <div class="section-title">Интерактив и Эффекты</div>
-    <div class="fx-checkbox-list">
-      <label class="checkbox-item"><input type="checkbox" value="flicker" class="fx-option" checked> Мерцание букв</label>
-      <label class="checkbox-item"><input type="checkbox" value="wave" class="fx-option"> Волнообразная пульсация</label>
-      <label class="checkbox-item"><input type="checkbox" value="scared" class="fx-option"> Трусливые буквы (при курсоре)</label>
-      <label class="checkbox-item"><input type="checkbox" value="shake" class="fx-option"> Дрожание букв</label>
-      <label class="checkbox-item"><input type="checkbox" value="melt" class="fx-option"> Буквы тают (исчезают)</label>
-      <label class="checkbox-item"><input type="checkbox" value="sparks" class="fx-option" checked> Всплеск искр (при курсоре)</label>
-      <label class="checkbox-item"><input type="checkbox" value="fire" class="fx-option" checked> Реалистичный Огонь вокруг</label>
-      <label class="checkbox-item"><input type="checkbox" value="snow" class="fx-option"> Снегопад (снежинки)</label>
-      <label class="checkbox-item"><input type="checkbox" value="rain" class="fx-option"> Постоянный Ливень</label>
-      <label class="checkbox-item"><input type="checkbox" value="leaves" class="fx-option"> Осенний Листопад</label>
-      <label class="checkbox-item"><input type="checkbox" value="ashes" class="fx-option"> Тлеющий Пепел</label>
-      <label class="checkbox-item"><input type="checkbox" value="stars" class="fx-option"> Звездопад</label>
-    </div>
-
-    <div class="section-title">Цвета и Динамика</div>
-    <div class="control-row">
-      <label>Цвет текста</label>
-      <input type="color" id="textColor" value="#ffffff">
-    </div>
-    <div class="control-row">
-      <label>Цвет искр / дождя</label>
-      <input type="color" id="sparkColor" value="#00ffff">
-    </div>
-    <div class="control-row">
-      <label>Интенсивность фона</label>
-      <input type="range" id="sparkCount" min="5" max="100" value="50">
-    </div>
-    <div class="control-row">
-      <label>Скорость частичек</label>
-      <input type="range" id="sparkVelocity" min="1" max="15" value="6">
-    </div>
+    <!-- Скриншот 2 -->
+    <div class="tag lunar-new-year">Lunar New Year</div>
+    <div class="tag valentines">Valentine's</div>
+    <div class="tag holi">Holi</div>
+    <div class="tag halloween">HALLOWEEN</div>
+    <div class="tag diwali">Diwali</div>
+    <div class="tag christmas">Christmas</div>
+    <div class="tag hanukkah">Hanukkah</div>
+    <div class="tag kwanzaa">Kwanzaa</div>
   </div>
 
-  <div class="main-content">
-    <div class="preview-container" id="previewContainer">
-      <canvas id="fxCanvas"></canvas>
-      <div class="text-container" id="textContainer"></div>
-    </div>
+  <!-- Подключение библиотеки Particles.js через CDN -->
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 
-    <div class="code-panel">
-      <div class="code-buttons">
-        <button class="btn-action" onclick="copyCode()">Скопировать HTML-код</button>
-        <button class="btn-action" onclick="copyGeniallyCode()">Код для Genially (iframe srcdoc)</button>
-      </div>
-      <textarea id="codeOutput" readonly></textarea>
-    </div>
-  </div>
-
+  <!-- Инициализация фона с эффектами -->
   <script>
-    const LOCALES = {
-      ru: "живой текст …",
-      en: "living text …",
-      de: "lebender Text …",
-      fr: "texte vivant …"
-    };
-
-    const inputs = {
-      text: document.getElementById('textInput'),
-      fontFamily: document.getElementById('fontFamily'),
-      fontSize: document.getElementById('fontSize'),
-      textColor: document.getElementById('textColor'),
-      glowColor1: document.getElementById('glowColor1'),
-      glowColor2: document.getElementById('glowColor2'),
-      sparkColor: document.getElementById('sparkColor'),
-      sparkCount: document.getElementById('sparkCount'),
-      sparkVelocity: document.getElementById('sparkVelocity'),
-      enableGlow: document.getElementById('enableGlow'),
-      enableShadow: document.getElementById('enableShadow')
-    };
-
-    const textContainer = document.getElementById('textContainer');
-    const previewContainer = document.getElementById('previewContainer');
-    const canvas = document.getElementById('fxCanvas');
-    const ctx = canvas.getContext('2d');
-    const root = document.documentElement;
-    const codeOutput = document.getElementById('codeOutput');
-
-    let particles = [];
-
-    function getSelectedFX() {
-      return Array.from(document.querySelectorAll('.fx-option:checked')).map(cb => cb.value);
-    }
-
-    function resizeCanvas() {
-      canvas.width = previewContainer.offsetWidth;
-      canvas.height = previewContainer.offsetHeight;
-    }
-
-    function renderText() {
-      textContainer.innerHTML = '';
-      const str = inputs.text.value;
-      const activeFX = getSelectedFX();
-
-      let idx = 0;
-      for (let char of str) {
-        const span = document.createElement('span');
-        span.className = 'char';
-        span.textContent = char === ' ' ? '\u00A0' : char;
-        span.style.setProperty('--char-index', idx);
-
-        if (inputs.enableShadow.checked) span.classList.add('has-shadow');
-        if (inputs.enableGlow.checked) span.classList.add('has-glow');
-        if (activeFX.includes('shake')) span.classList.add('fx-shake');
-        if (activeFX.includes('flicker')) span.classList.add('fx-flicker');
-        if (activeFX.includes('wave')) span.classList.add('fx-wave');
-
-        attachCharEvents(span);
-        textContainer.appendChild(span);
-        idx++;
-      }
-    }
-
-    function attachCharEvents(span) {
-      span.addEventListener('mousemove', (e) => {
-        const activeFX = getSelectedFX();
-        const speed = parseFloat(inputs.sparkVelocity.value);
-
-        if (activeFX.includes('scared')) {
-          const rect = span.getBoundingClientRect();
-          const angle = Math.atan2(e.clientY - (rect.top + rect.height / 2), e.clientX - (rect.left + rect.width / 2));
-          span.style.transform = `translate(${ -Math.cos(angle) * speed * 10 }px, ${ -Math.sin(angle) * speed * 10 }px)`;
-        }
-
-        if (activeFX.includes('melt')) span.classList.add('fx-melted');
-
-        if (activeFX.includes('sparks')) {
-          const rect = previewContainer.getBoundingClientRect();
-          spawnSpark(e.clientX - rect.left, e.clientY - rect.top);
-        }
-      });
-
-      span.addEventListener('mouseleave', () => {
-        if (getSelectedFX().includes('scared')) {
-          setTimeout(() => { span.style.transform = 'translate(0, 0)'; }, 300);
-        }
-      });
-    }
-
-    function spawnSpark(x, y) {
-      const color = inputs.sparkColor.value;
-      const speed = parseFloat(inputs.sparkVelocity.value);
-      for (let i = 0; i < 3; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const v = Math.random() * speed + 2;
-        particles.push({
-          type: 'spark',
-          x, y,
-          vx: Math.cos(angle) * v,
-          vy: Math.sin(angle) * v,
-          size: Math.random() * 4 + 2,
-          color,
-          life: 1,
-          decay: Math.random() * 0.04 + 0.02
-        });
-      }
-    }
-
-    function generateAmbientParticles() {
-      const activeFX = getSelectedFX();
-      const intensity = parseInt(inputs.sparkCount.value) / 100;
-      const speed = parseFloat(inputs.sparkVelocity.value);
-      const w = canvas.width;
-      const h = canvas.height;
-
-      const rect = textContainer.getBoundingClientRect();
-      const pRect = previewContainer.getBoundingClientRect();
-      const textArea = {
-        left: rect.left - pRect.left - 20,
-        right: rect.right - pRect.left + 20,
-        top: rect.top - pRect.top - 20,
-        bottom: rect.bottom - pRect.top + 20
-      };
-
-      if (Math.random() > intensity) return;
-
-      if (activeFX.includes('snow')) {
-        particles.push({
-          type: 'snowflake',
-          x: Math.random() * w,
-          y: -10,
-          vy: Math.random() * speed * 0.4 + 1,
-          vx: (Math.random() - 0.5) * 1,
-          size: Math.random() * 4 + 3,
-          color: inputs.sparkColor.value,
-          life: 1
-        });
-      }
-
-      if (activeFX.includes('rain')) {
-        particles.push({
-          type: 'rain',
-          x: Math.random() * w,
-          y: -20,
-          vy: Math.random() * speed * 2 + 8,
-          len: Math.random() * 12 + 10,
-          color: inputs.sparkColor.value,
-          life: 1
-        });
-      }
-
-      if (activeFX.includes('fire')) {
-        particles.push({
-          type: 'flame',
-          x: textArea.left + Math.random() * (textArea.right - textArea.left),
-          y: textArea.bottom + 5,
-          vy: -(Math.random() * speed * 0.7 + 2),
-          vx: (Math.random() - 0.5) * 1.2,
-          size: Math.random() * 12 + 8,
-          life: 1,
-          decay: Math.random() * 0.025 + 0.015
-        });
-      }
-
-      if (activeFX.includes('leaves')) {
-        const autumnColors = ['#d9381e', '#e67300', '#ffb300', '#8b4513', '#cc5500'];
-        particles.push({
-          type: 'leaf',
-          x: Math.random() * w,
-          y: -15,
-          vy: Math.random() * speed * 0.4 + 1,
-          vx: Math.sin(Date.now() / 300) * 1.5,
-          size: Math.random() * 8 + 8,
-          color: autumnColors[Math.floor(Math.random() * autumnColors.length)],
-          life: 1
-        });
-      }
-
-      if (activeFX.includes('ashes')) {
-        particles.push({
-          type: 'ashes',
-          x: Math.random() * w,
-          y: h + 10,
-          vy: -(Math.random() * speed * 0.5 + 1),
-          vx: (Math.random() - 0.5) * 1,
-          size: Math.random() * 3 + 1,
-          life: 1,
-          decay: Math.random() * 0.015 + 0.008
-        });
-      }
-
-      if (activeFX.includes('stars')) {
-        particles.push({
-          type: 'star',
-          x: Math.random() * w,
-          y: Math.random() * h,
-          size: Math.random() * 4 + 2,
-          color: inputs.sparkColor.value,
-          life: 1,
-          decay: Math.random() * 0.04 + 0.01
-        });
-      }
-    }
-
-    function drawSnowflake(ctx, x, y, size, color) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1.2;
-      for (let i = 0; i < 6; i++) {
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(0, size);
-        ctx.moveTo(0, size * 0.5);
-        ctx.lineTo(size * 0.3, size * 0.7);
-        ctx.moveTo(0, size * 0.5);
-        ctx.lineTo(-size * 0.3, size * 0.7);
-        ctx.stroke();
-        ctx.rotate(Math.PI / 3);
-      }
-      ctx.restore();
-    }
-
-    function drawLeaf(ctx, x, y, size, color) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(0, -size);
-      ctx.quadraticCurveTo(size, 0, 0, size);
-      ctx.quadraticCurveTo(-size, 0, 0, -size);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawFlame(ctx, x, y, size, life) {
-      ctx.save();
-      ctx.translate(x, y);
-      const currentSize = Math.max(0, size * life);
-      
-      const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, currentSize);
-      grad.addColorStop(0, 'rgba(255, 255, 200, ' + life + ')');
-      grad.addColorStop(0.3, 'rgba(255, 140, 0, ' + life * 0.8 + ')');
-      grad.addColorStop(0.7, 'rgba(200, 30, 0, ' + life * 0.4 + ')');
-      grad.addColorStop(1, 'rgba(100, 0, 0, 0)');
-
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.moveTo(0, -currentSize * 1.5);
-      ctx.quadraticCurveTo(currentSize, -currentSize * 0.5, currentSize * 0.8, currentSize * 0.5);
-      ctx.quadraticCurveTo(0, currentSize, -currentSize * 0.8, currentSize * 0.5);
-      ctx.quadraticCurveTo(-currentSize, -currentSize * 0.5, 0, -currentSize * 1.5);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function renderLoop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      generateAmbientParticles();
-
-      for (let i = particles.length - 1; i >= 0; i--) {
-        let p = particles[i];
-
-        if (p.type === 'spark') {
-          p.x += p.vx; p.y += p.vy; p.life -= p.decay;
-          ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, Math.max(0, p.size * p.life), 0, Math.PI * 2);
-          ctx.fill();
-        } 
-        else if (p.type === 'snowflake') {
-          p.y += p.vy; p.x += p.vx;
-          drawSnowflake(ctx, p.x, p.y, p.size, p.color);
-          if (p.y > canvas.height) p.life = 0;
-        } 
-        else if (p.type === 'rain') {
-          p.y += p.vy;
-          ctx.strokeStyle = p.color;
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p.x, p.y + p.len);
-          ctx.stroke();
-          if (p.y > canvas.height) p.life = 0;
-        } 
-        else if (p.type === 'flame') {
-          p.y += p.vy; p.x += p.vx + (Math.random() - 0.5) * 0.8; p.life -= p.decay;
-          drawFlame(ctx, p.x, p.y, p.size, p.life);
-        } 
-        else if (p.type === 'leaf') {
-          p.y += p.vy; p.x += p.vx;
-          drawLeaf(ctx, p.x, p.y, p.size, p.color);
-          if (p.y > canvas.height) p.life = 0;
-        } 
-        else if (p.type === 'ashes') {
-          p.y += p.vy; p.x += p.vx; p.life -= p.decay;
-          ctx.fillStyle = `rgba(180, 180, 180, ${Math.max(0, p.life)})`;
-          ctx.fillRect(p.x, p.y, p.size, p.size);
-        } 
-        else if (p.type === 'star') {
-          p.life -= p.decay;
-          ctx.fillStyle = p.color;
-          ctx.globalAlpha = Math.max(0, p.life);
-          ctx.font = `${p.size * 3}px sans-serif`;
-          ctx.fillText('★', p.x, p.y);
-          ctx.globalAlpha = 1.0;
-        }
-
-        if (p.life <= 0) {
-          particles.splice(i, 1);
-        }
-      }
-
-      requestAnimationFrame(renderLoop);
-    }
-
-    function getBaseHTML() {
-      const activeFX = JSON.stringify(getSelectedFX());
-      return `<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Manrope:wght@700&family=Montserrat:wght@700&family=Rubik:wght@700&display=swap" rel="stylesheet">
-<div id="FX_STUDIO_ROOT" style="position:relative; width:100%; height:100%; min-height:250px; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#08090e;">
-  <style>
-    #FX_STUDIO_ROOT {
-      --font-family: ${inputs.fontFamily.value};
-      --font-size: ${inputs.fontSize.value}px;
-      --text-color: ${inputs.textColor.value};
-      --glow-color-1: ${inputs.glowColor1.value};
-      --glow-color-2: ${inputs.glowColor2.value};
-    }
-
-    .text-container {
-      position: relative;
-      z-index: 2;
-      display: inline-block;
-      text-align: center;
-      font-family: var(--font-family);
-      font-size: var(--font-size);
-      color: var(--text-color);
-      font-weight: bold;
-      user-select: none;
-      white-space: pre-wrap;
-    }
-
-    #fxRootCanvas {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .char {
-      display: inline-block;
-      position: relative;
-      transition: transform 0.15s ease-out, color 0.3s, filter 0.3s, opacity 0.5s;
-      cursor: pointer;
-    }
-
-    .has-shadow { text-shadow: 3px 5px 10px rgba(0, 0, 0, 0.8); }
-    .has-glow { filter: drop-shadow(0 0 12px var(--glow-color-1)) drop-shadow(0 0 25px var(--glow-color-2)); }
-
-    .char.fx-shake:hover { animation: charShake 0.08s infinite alternate; }
-    @keyframes charShake {
-      0% { transform: translate(-3px, -2px) rotate(-4deg); }
-      100% { transform: translate(3px, 2px) rotate(4deg); }
-    }
-
-    .char.fx-flicker {
-      animation: charFlicker 1.8s infinite ease-in-out;
-      animation-delay: calc(var(--char-index) * 0.12s);
-    }
-    @keyframes charFlicker {
-      0%, 100% { opacity: 1; filter: brightness(1); }
-      30% { opacity: 0.3; filter: brightness(0.5); }
-      35% { opacity: 0.9; filter: brightness(1.2); }
-      70% { opacity: 0.4; filter: brightness(0.6); }
-    }
-
-    .char.fx-wave {
-      animation: charWave 1.6s infinite ease-in-out;
-      animation-delay: calc(var(--char-index) * 0.15s);
-    }
-    @keyframes charWave {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.35) translateY(-5px); }
-    }
-
-    .char.fx-melted {
-      transform: translateY(50px) scaleY(0.05) scaleX(2) !important;
-      opacity: 0 !important;
-      filter: blur(8px) brightness(2) !important;
-      pointer-events: none;
-    }
-  </style>
-
-  <canvas id="fxRootCanvas"></canvas>
-  <div class="text-container" id="fxRootText"></div>
-
-  <script>
-    (function() {
-      const root = document.getElementById('FX_STUDIO_ROOT');
-      const container = document.getElementById('fxRootText');
-      const canvas = document.getElementById('fxRootCanvas');
-      const ctx = canvas.getContext('2d');
-
-      const text = "${inputs.text.value.replace(/"/g, '\\"').replace(/\n/g, '')}";
-      const activeFX = ${activeFX};
-      const speed = ${inputs.sparkVelocity.value};
-      const count = ${inputs.sparkCount.value};
-      const sparkColor = "${inputs.sparkColor.value}";
-      const hasShadow = ${inputs.enableShadow.checked};
-      const hasGlow = ${inputs.enableGlow.checked};
-
-      let particles = [];
-
-      function resize() {
-        canvas.width = root.offsetWidth;
-        canvas.height = root.offsetHeight;
-      }
-
-      let idx = 0;
-      for (let char of text) {
-        const span = document.createElement('span');
-        span.className = 'char';
-        span.textContent = char === ' ' ? '\u00A0' : char;
-        span.style.setProperty('--char-index', idx);
-
-        if (hasShadow) span.classList.add('has-shadow');
-        if (hasGlow) span.classList.add('has-glow');
-        if (activeFX.includes('shake')) span.classList.add('fx-shake');
-        if (activeFX.includes('flicker')) span.classList.add('fx-flicker');
-        if (activeFX.includes('wave')) span.classList.add('fx-wave');
-
-        span.addEventListener('mousemove', (e) => {
-          if (activeFX.includes('scared')) {
-            const rect = span.getBoundingClientRect();
-            const angle = Math.atan2(e.clientY - (rect.top + rect.height/2), e.clientX - (rect.left + rect.width/2));
-            span.style.transform = \`translate(\${-Math.cos(angle) * speed * 10}px, \${-Math.sin(angle) * speed * 10}px)\`;
+    particlesJS('particles-js', {
+      "particles": {
+        "number": {
+          "value": 60,
+          "density": {
+            "enable": true,
+            "value_area": 800
           }
-          if (activeFX.includes('melt')) span.classList.add('fx-melted');
-          if (activeFX.includes('sparks')) {
-            const rect = root.getBoundingClientRect();
-            for(let i=0; i<3; i++) {
-              const a = Math.random() * Math.PI * 2, v = Math.random() * speed + 2;
-              particles.push({
-                type: 'spark', x: e.clientX - rect.left, y: e.clientY - rect.top,
-                vx: Math.cos(a)*v, vy: Math.sin(a)*v, size: Math.random()*4+2,
-                color: sparkColor, life: 1, decay: Math.random()*0.04+0.02
-              });
+        },
+        "color": {
+          "value": "#6b7280"
+        },
+        "shape": {
+          "type": "circle"
+        },
+        "opacity": {
+          "value": 0.4,
+          "random": false
+        },
+        "size": {
+          "value": 3,
+          "random": true
+        },
+        "line_linked": {
+          "enable": true,
+          "distance": 140,
+          "color": "#9ca3af",
+          "opacity": 0.4,
+          "width": 1
+        },
+        "move": {
+          "enable": true,
+          "speed": 2,
+          "direction": "none",
+          "random": false,
+          "straight": false,
+          "out_mode": "out",
+          "bounce": false
+        }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": {
+            "enable": true,
+            "mode": "grab"
+          },
+          "onclick": {
+            "enable": true,
+            "mode": "push"
+          },
+          "resize": true
+        },
+        "modes": {
+          "grab": {
+            "distance": 140,
+            "line_linked": {
+              "opacity": 0.8
             }
           }
-        });
-
-        if (activeFX.includes('scared')) {
-          span.addEventListener('mouseleave', () => {
-            setTimeout(() => { span.style.transform = 'translate(0, 0)'; }, 300);
-          });
         }
-
-        container.appendChild(span);
-        idx++;
-      }
-
-      resize();
-      window.addEventListener('resize', resize);
-
-      function drawSnowflake(ctx, x, y, size, color) {
-        ctx.save(); ctx.translate(x, y); ctx.strokeStyle = color; ctx.lineWidth = 1.2;
-        for (let i = 0; i < 6; i++) {
-          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, size);
-          ctx.moveTo(0, size * 0.5); ctx.lineTo(size * 0.3, size * 0.7);
-          ctx.moveTo(0, size * 0.5); ctx.lineTo(-size * 0.3, size * 0.7);
-          ctx.stroke(); ctx.rotate(Math.PI / 3);
-        }
-        ctx.restore();
-      }
-
-      function drawLeaf(ctx, x, y, size, color) {
-        ctx.save(); ctx.translate(x, y); ctx.fillStyle = color; ctx.beginPath();
-        ctx.moveTo(0, -size); ctx.quadraticCurveTo(size, 0, 0, size);
-        ctx.quadraticCurveTo(-size, 0, 0, -size); ctx.fill(); ctx.restore();
-      }
-
-      function drawFlame(ctx, x, y, size, life) {
-        ctx.save(); ctx.translate(x, y); const cs = Math.max(0, size * life);
-        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, cs);
-        grad.addColorStop(0, 'rgba(255, 255, 200, ' + life + ')');
-        grad.addColorStop(0.3, 'rgba(255, 140, 0, ' + life * 0.8 + ')');
-        grad.addColorStop(0.7, 'rgba(200, 30, 0, ' + life * 0.4 + ')');
-        grad.addColorStop(1, 'rgba(100, 0, 0, 0)');
-        ctx.fillStyle = grad; ctx.beginPath();
-        ctx.moveTo(0, -cs * 1.5); ctx.quadraticCurveTo(cs, -cs * 0.5, cs * 0.8, cs * 0.5);
-        ctx.quadraticCurveTo(0, cs, -cs * 0.8, cs * 0.5); ctx.quadraticCurveTo(-cs, -cs * 0.5, 0, -cs * 1.5);
-        ctx.fill(); ctx.restore();
-      }
-
-      function loop() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const intensity = count / 100;
-        const w = canvas.width, h = canvas.height;
-
-        const rect = container.getBoundingClientRect();
-        const rRect = root.getBoundingClientRect();
-        const textArea = {
-          left: rect.left - rRect.left - 20,
-          right: rect.right - rRect.left + 20,
-          top: rect.top - rRect.top - 20,
-          bottom: rect.bottom - rRect.top + 20
-        };
-
-        if (Math.random() < intensity) {
-          if (activeFX.includes('snow')) particles.push({ type: 'snowflake', x: Math.random()*w, y: -10, vy: Math.random()*speed*0.4+1, vx: (Math.random()-0.5), size: Math.random()*4+3, color: sparkColor, life: 1 });
-          if (activeFX.includes('rain')) particles.push({ type: 'rain', x: Math.random()*w, y: -20, vy: Math.random()*speed*2+8, len: Math.random()*12+10, color: sparkColor, life: 1 });
-          if (activeFX.includes('fire')) particles.push({ type: 'flame', x: textArea.left + Math.random()*(textArea.right - textArea.left), y: textArea.bottom+5, vy: -(Math.random()*speed*0.7+2), vx: (Math.random()-0.5)*1.2, size: Math.random()*12+8, life: 1, decay: Math.random()*0.025+0.015 });
-          if (activeFX.includes('leaves')) {
-            const autumnColors = ['#d9381e', '#e67300', '#ffb300', '#8b4513', '#cc5500'];
-            particles.push({ type: 'leaf', x: Math.random()*w, y: -15, vy: Math.random()*speed*0.4+1, vx: Math.sin(Date.now()/300)*1.5, size: Math.random()*8+8, color: autumnColors[Math.floor(Math.random()*autumnColors.length)], life: 1 });
-          }
-          if (activeFX.includes('ashes')) particles.push({ type: 'ashes', x: Math.random()*w, y: h+10, vy: -(Math.random()*speed*0.5+1), vx: (Math.random()-0.5), size: Math.random()*3+1, life: 1, decay: Math.random()*0.015+0.008 });
-          if (activeFX.includes('stars')) particles.push({ type: 'star', x: Math.random()*w, y: Math.random()*h, size: Math.random()*4+2, color: sparkColor, life: 1, decay: Math.random()*0.04+0.01 });
-        }
-
-        for (let i = particles.length - 1; i >= 0; i--) {
-          let p = particles[i];
-          if (p.type === 'spark') {
-            p.x += p.vx; p.y += p.vy; p.life -= p.decay;
-            ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0, p.size*p.life), 0, Math.PI*2); ctx.fill();
-          } else if (p.type === 'snowflake') {
-            p.y += p.vy; p.x += p.vx; drawSnowflake(ctx, p.x, p.y, p.size, p.color);
-            if (p.y > h) p.life = 0;
-          } else if (p.type === 'rain') {
-            p.y += p.vy; ctx.strokeStyle = p.color; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x, p.y+p.len); ctx.stroke();
-            if (p.y > h) p.life = 0;
-          } else if (p.type === 'flame') {
-            p.y += p.vy; p.x += p.vx + (Math.random() - 0.5) * 0.8; p.life -= p.decay;
-            drawFlame(ctx, p.x, p.y, p.size, p.life);
-          } else if (p.type === 'leaf') {
-            p.y += p.vy; p.x += p.vx; drawLeaf(ctx, p.x, p.y, p.size, p.color);
-            if (p.y > h) p.life = 0;
-          } else if (p.type === 'ashes') {
-            p.y += p.vy; p.x += p.vx; p.life -= p.decay; ctx.fillStyle = \`rgba(180, 180, 180, \${Math.max(0, p.life)})\`; ctx.fillRect(p.x, p.y, p.size, p.size);
-          } else if (p.type === 'star') {
-            p.life -= p.decay; ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, p.life); ctx.font = \`\${p.size*3}px sans-serif\`; ctx.fillText('★', p.x, p.y); ctx.globalAlpha = 1.0;
-          }
-          if (p.life <= 0) particles.splice(i, 1);
-        }
-        requestAnimationFrame(loop);
-      }
-      loop();
-    })();
-  <\/script>
-</div>`;
-    }
-
-    function updateFX() {
-      root.style.setProperty('--font-family', inputs.fontFamily.value);
-      root.style.setProperty('--font-size', inputs.fontSize.value + 'px');
-      root.style.setProperty('--text-color', inputs.textColor.value);
-      root.style.setProperty('--glow-color-1', inputs.glowColor1.value);
-      root.style.setProperty('--glow-color-2', inputs.glowColor2.value);
-
-      renderText();
-      codeOutput.value = getBaseHTML();
-    }
-
-    Object.values(inputs).forEach(input => input.addEventListener('input', updateFX));
-    document.querySelectorAll('.fx-option').forEach(cb => cb.addEventListener('change', updateFX));
-
-    function setLang(lang, btn) {
-      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      if (LOCALES[lang]) {
-        inputs.text.value = LOCALES[lang];
-        updateFX();
-      }
-    }
-
-    function copyCode() {
-      codeOutput.value = getBaseHTML();
-      codeOutput.select();
-      document.execCommand('copy');
-      alert('HTML-код скопирован!');
-    }
-
-    function copyGeniallyCode() {
-      const rawHTML = getBaseHTML();
-      const escapedHTML = rawHTML
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-
-      const geniallyIframe = `<iframe width="100%" height="350" frameborder="0" scrolling="no" srcdoc="${escapedHTML}"></iframe>`;
-      codeOutput.value = geniallyIframe;
-      codeOutput.select();
-      document.execCommand('copy');
-      alert('Код для Genially скопирован!');
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-    
-    resizeCanvas();
-    updateFX();
-    renderLoop();
+      },
+      "retina_detect": true
+    });
   </script>
 </body>
 </html>
