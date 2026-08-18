@@ -2,10 +2,11 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Multi-FX Letter Studio Pro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Creepster&family=Danfo&family=Emblema+One&family=Fascinate+Inline&family=Great+Vibes&family=Inter:wght@400;700&family=Manrope:wght@700&family=Montserrat:ital,wght@0,700;1,700&family=Orbitron:wght@600;900&family=Oswald:wght@400;600&family=Press+Start+2P&family=Rubik:wght@700&family=UnifrakturMaguntia&family=Yellowtail&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Creepster&family=Danfo&family=Emblema+One&family=Fascinate+Inline&family=Great+Vibes&family=Inter:wght@400;700&family=Manrope:wght@700&family=Montserrat:wght@700&family=Orbitron:wght@600;900&family=Oswald:wght@400;600&family=Press+Start+2P&family=Rubik:wght@700&family=UnifrakturMaguntia&family=Yellowtail&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -34,7 +35,8 @@
     }
 
     .sidebar {
-      width: 350px;
+      width: 340px;
+      min-width: 340px;
       background: #151824;
       border-right: 1px solid #222638;
       padding: 16px;
@@ -78,7 +80,7 @@
       border-radius: 6px;
       font-size: 12px;
       outline: none;
-      width: 150px;
+      width: 160px;
     }
 
     .control-row input[type="color"] {
@@ -252,7 +254,7 @@
     }
 
     .code-panel {
-      height: 160px;
+      height: 180px;
       background: #151824;
       border-top: 1px solid #222638;
       padding: 10px;
@@ -267,7 +269,7 @@
       background: #202536;
       color: #fff;
       border: 1px solid #313850;
-      padding: 5px 10px;
+      padding: 6px 12px;
       border-radius: 4px;
       cursor: pointer;
       font-size: 11px;
@@ -352,35 +354,4 @@
       <input type="color" id="glowColor1" value="#ff6600">
     </div>
     <div class="control-row">
-      <label>Вторичное свечение</label>
-      <input type="color" id="glowColor2" value="#ff0000">
-    </div>
-    <label class="checkbox-item"><input type="checkbox" id="enableShadow"> Тень под буквами</label>
-
-    <div class="section-title">Интерактив и Эффекты</div>
-    <div class="fx-checkbox-list">
-      <label class="checkbox-item"><input type="checkbox" value="flicker" class="fx-option" checked> Мерцание букв</label>
-      <label class="checkbox-item"><input type="checkbox" value="wave" class="fx-option" checked> Волнообразная пульсация</label>
-      <label class="checkbox-item"><input type="checkbox" value="scared" class="fx-option"> Трусливые буквы (при курсоре)</label>
-      <label class="checkbox-item"><input type="checkbox" value="shake" class="fx-option"> Дрожание букв</label>
-      <label class="checkbox-item"><input type="checkbox" value="melt" class="fx-option"> Буквы тают (исчезают)</label>
-      <label class="checkbox-item"><input type="checkbox" value="sparks" class="fx-option"> Всплеск искр (при курсоре)</label>
-      <label class="checkbox-item"><input type="checkbox" value="fire" class="fx-option"> Реалистичный Огонь вокруг</label>
-      <label class="checkbox-item"><input type="checkbox" value="snow" class="fx-option"> Снегопад (снежинки)</label>
-      <label class="checkbox-item"><input type="checkbox" value="rain" class="fx-option"> Постоянный Ливень</label>
-      <label class="checkbox-item"><input type="checkbox" value="leaves" class="fx-option"> Осенний Листопад</label>
-      <label class="checkbox-item"><input type="checkbox" value="embers" class="fx-option"> Тлеющий Пепел</label>
-      <label class="checkbox-item"><input type="checkbox" value="stars" class="fx-option" checked> Звездное небо</label>
-    </div>
-
-    <div class="section-title">Динамика</div>
-    <div class="control-row">
-      <label>Цвет текста</label>
-      <input type="color" id="textColor" value="#ffffff">
-    </div>
-    <div class="control-row">
-      <label>Цвет искр / звезд</label>
-      <input type="color" id="sparkColor" value="#ffffff">
-    </div>
-    <div class="control-row">
-      <label>Скорость мерцания
+      <label>Вторичное свечение</
